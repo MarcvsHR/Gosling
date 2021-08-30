@@ -1,4 +1,4 @@
-package prodo.marc.gosling;
+package prodo.marc.gosling.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
