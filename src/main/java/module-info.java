@@ -12,6 +12,7 @@ module prodo.marc.gosling {
     requires java.sql;
     requires java.persistence;
     requires lombok;
+    requires javafx.media;
 
     opens prodo.marc.gosling to javafx.fxml;
     exports prodo.marc.gosling;

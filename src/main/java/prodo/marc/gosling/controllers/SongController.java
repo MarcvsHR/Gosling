@@ -27,13 +27,12 @@ public class SongController {
     }
 
     @FXML
-    protected void addSong2DB() {
-        FileChooser fc = new FileChooser();
-        fc.setInitialDirectory(new File("C:\\"));
-        FileChooser.ExtensionFilter mp3Filter = new FileChooser.ExtensionFilter( "MP3","*.mp3");
-        fc.getExtensionFilters().add(mp3Filter);
-        File file = fc.showOpenDialog(null);
-        System.out.println(file.getAbsoluteFile());
+    protected void addSong2DB() throws IOException {
+        Stage stage = (Stage) addSongButton.getScene().getWindow();
+        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("view/mp3.fxml"));
+        Scene scene = new Scene(fxmlLoader.load());
+        stage.setTitle("mp3");
+        stage.setScene(scene);
     }
 
 }
