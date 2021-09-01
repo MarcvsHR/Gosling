@@ -38,7 +38,7 @@ public class mp3Controller {
     Slider mp3Slider;
 
     private boolean updateCheck = true;
-    int skipIncrement = 10000;
+    final int skipIncrement = 10000;
 
 
     @FXML
@@ -59,36 +59,31 @@ public class mp3Controller {
         File mp3File = fc.showOpenDialog(null);
         //System.out.println(file.getAbsoluteFile());
         mp3Label.setText(mp3File.getName());
-        Media mp3Media = new Media(mp3File.toURI().toString());
-        ObservableMap id3Data = mp3Media.getMetadata();
+        Media mp3Media = new Media(mp3File.toURI().toASCIIString());
+        ObservableMap<String, Object> id3Data = mp3Media.getMetadata();
         mplayer = new MediaPlayer(mp3Media);
         mp3Slider.setMin(0);
         mp3Slider.setValue(0);
         System.out.println(id3Data.get("artist"));
+        System.out.println(mp3Media);
 //        textArtist.setText(id3Data.get("artist").toString());
 //        textTitle.setText(id3Data.get("title").toString());
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while(true) {
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            double currentTime = mplayer.getCurrentTime().toSeconds();
-                            double percentTime = currentTime / mplayer.getStopTime().toSeconds();
-                            if (updateCheck) { mp3Slider.setValue(percentTime * mp3Slider.getMax()); }
-                            int minutes = (int) (currentTime / 60);
-                            double seconds = currentTime - minutes * 60;
-                            mp3Time.setText(String.format("%x m - %.1f s",minutes,seconds));
-                        }
-                    });
-                    //System.out.println(currentTime);
-                    try {
-                        Thread.sleep(90);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+        new Thread(() -> {
+            while(true) {
+                Platform.runLater(() -> {
+                    double currentTime = mplayer.getCurrentTime().toSeconds();
+                    double percentTime = currentTime / mplayer.getStopTime().toSeconds();
+                    if (updateCheck) { mp3Slider.setValue(percentTime * mp3Slider.getMax()); }
+                    int minutes = (int) (currentTime / 60);
+                    double seconds = currentTime - minutes * 60;
+                    mp3Time.setText(String.format("%x m - %.1f s",minutes,seconds));
+                });
+                //System.out.println(currentTime);
+                try {
+                    Thread.sleep(90);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         }).start();
@@ -109,7 +104,8 @@ public class mp3Controller {
     @FXML
     protected void moveTime() {
         if (mplayer != null) {
-            mplayer.seek(Duration.millis(mp3Slider.getValue()/mp3Slider.getMax()*mplayer.getStopTime().toMillis()));  }
+            mplayer.seek(Duration.millis(mp3Slider.getValue()/mp3Slider.getMax()*mplayer.getStopTime().toMillis()));
+        }
         updateCheck = true;
     }
 

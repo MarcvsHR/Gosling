@@ -4,11 +4,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import prodo.marc.gosling.HelloApplication;
 
-import java.io.File;
 import java.io.IOException;
 
 public class SongController {
