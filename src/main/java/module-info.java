@@ -7,6 +7,8 @@ module prodo.marc.gosling {
     requires java.persistence;
     requires lombok;
     requires javafx.media;
+    requires mp3agic;
+
 
     opens prodo.marc.gosling to javafx.fxml;
     exports prodo.marc.gosling;

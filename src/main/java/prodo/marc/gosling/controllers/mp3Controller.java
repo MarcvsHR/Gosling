@@ -1,5 +1,7 @@
 package prodo.marc.gosling.controllers;
 
+import com.mpatric.mp3agic.ID3v2;
+import com.mpatric.mp3agic.Mp3File;
 import javafx.application.Platform;
 import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
@@ -15,7 +17,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import prodo.marc.gosling.HelloApplication;
-
 
 import java.io.File;
 import java.io.IOException;
@@ -53,7 +54,7 @@ public class mp3Controller {
     }
 
     @FXML
-    protected void openMP3() {
+    protected void openMP3(){
         FileChooser fc = new FileChooser();
         fc.setInitialDirectory(new File("C:\\intel"));
         FileChooser.ExtensionFilter mp3Filter = new FileChooser.ExtensionFilter( "MP3","*.mp3");
@@ -63,8 +64,27 @@ public class mp3Controller {
         String mp3Path = mp3File.toURI().toASCIIString();
         Media mp3Media = new Media(mp3Path);
         mplayer = new MediaPlayer(mp3Media);
+        try {
+            Mp3File song = new Mp3File(mp3File);
 
-        ObservableMap<String, Object> id3Data = mplayer.getMedia().getMetadata();
+        ID3v2 tag= song.getId3v2Tag();
+
+            System.out.println("tag: "+tag.getAlbumArtist());
+            System.out.println("tag: "+tag.getAlbum());
+            System.out.println("tag: "+tag.getComposer());
+
+
+
+
+            System.out.println("tag2: "+song.getId3v1Tag()  );
+
+        }catch (Exception ignored){
+            System.out.println(ignored);
+        }
+
+
+
+        ObservableMap<String, Object> id3Data =  mp3Media.getMetadata();
         System.out.println(id3Data.size());
 //        textArtist.setText(id3Data.get("artist").toString());
 //        textTitle.setText(id3Data.get("title").toString());
