@@ -40,13 +40,37 @@
          <Button fx:id="buttonPlay" mnemonicParsing="false" onAction="#playMP3" text="Play" />
          <Button fx:id="buttonPause" mnemonicParsing="false" onAction="#pauseMP3" text="Pause" />
       </HBox>
-      <HBox alignment="TOP_CENTER" prefHeight="13.0" prefWidth="401.0" spacing="5.0">
-         <Label alignment="TOP_CENTER" text="Artist" />
-         <TextField fx:id="textArtist" text="Artist" />
+      <HBox alignment="TOP_CENTER" prefHeight="9.0" prefWidth="401.0" spacing="5.0">
+         <Label text="Artist" />
+         <TextField fx:id="textArtist" />
       </HBox>
-      <HBox alignment="TOP_CENTER" prefHeight="6.0" prefWidth="401.0" spacing="5.0">
+      <HBox alignment="TOP_CENTER" prefHeight="9.0" prefWidth="401.0" spacing="5.0">
          <Label text="Title" />
-         <TextField fx:id="textTitle" text="Title" />
+         <TextField fx:id="textTitle" />
+      </HBox>
+      <HBox alignment="TOP_CENTER" prefHeight="9.0" prefWidth="401.0" spacing="5.0">
+         <Label text="Album" />
+         <TextField fx:id="textAlbum" />
+      </HBox>
+      <HBox alignment="TOP_CENTER" prefHeight="9.0" prefWidth="401.0" spacing="5.0">
+         <Label text="Publisher" />
+         <TextField fx:id="textPublisher" />
+      </HBox>
+      <HBox alignment="TOP_CENTER" prefHeight="9.0" prefWidth="401.0" spacing="5.0">
+         <Label text="Composer" />
+         <TextField fx:id="textComposer" />
+      </HBox>
+      <HBox alignment="TOP_CENTER" prefHeight="9.0" prefWidth="401.0" spacing="5.0">
+         <Label text="Year" />
+         <TextField fx:id="textYear" />
+      </HBox>
+      <HBox alignment="TOP_CENTER" prefHeight="9.0" prefWidth="401.0" spacing="5.0">
+         <Label text="Genre" />
+         <TextField fx:id="textGenre"/>
+      </HBox>
+      <HBox alignment="TOP_CENTER" prefHeight="9.0" prefWidth="401.0" spacing="5.0">
+         <Label text="ISRC" />
+         <TextField fx:id="textISRC"/>
       </HBox>
       <HBox alignment="TOP_CENTER" prefHeight="3.0" prefWidth="343.0">
          <Button fx:id="backSongs" mnemonicParsing="false" onAction="#showSongWindow" text="Done">

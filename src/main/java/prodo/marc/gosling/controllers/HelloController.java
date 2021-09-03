@@ -22,6 +22,7 @@ public class HelloController {
     }
 
     @FXML
+    //switch to database window
     protected void showSongWindow() throws IOException  {
         Stage stage = (Stage) songViewButton.getScene().getWindow();
         FXMLLoader fxmlLoader = new FXMLLoader(this.getClass().getResource("view/song-view.fxml"));

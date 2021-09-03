@@ -16,18 +16,20 @@ public class SongController {
 
 
     @FXML
+    //goes back to the main window
     protected void backToMain() throws IOException {
         Stage stage = (Stage) songBackButton.getScene().getWindow();
-        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("view/hello-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(this.getClass().getResource("view/hello-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 320, 240);
         stage.setTitle("Songs");
         stage.setScene(scene);
     }
 
     @FXML
+    //goes to the mp3 edit window
     protected void addSong2DB() throws IOException {
         Stage stage = (Stage) addSongButton.getScene().getWindow();
-        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("view/mp3.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(this.getClass().getResource("view/mp3.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("mp3");
         stage.setScene(scene);
