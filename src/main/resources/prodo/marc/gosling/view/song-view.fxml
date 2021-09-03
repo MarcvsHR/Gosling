@@ -8,17 +8,24 @@
 <?import javafx.scene.layout.HBox?>
 
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="prodo.marc.gosling.controllers.SongController">
-    <TableView layoutX="1.0" layoutY="61.0" prefHeight="338.0" prefWidth="598.0">
+    <TableView fx:id="songDatabaseTable" layoutX="1.0" layoutY="61.0" prefHeight="338.0" prefWidth="1410.0">
       <columns>
-          <TableColumn prefWidth="75.0" text="C1" />
-          <TableColumn prefWidth="75.0" text="C2" />
+          <TableColumn fx:id="tableArtist" prefWidth="200.0" text="Artist" />
+          <TableColumn fx:id="tableTitle" prefWidth="200.0" text="Title" />
+          <TableColumn fx:id="tableAlbum" prefWidth="100.0" text="Album" />
+          <TableColumn fx:id="tablePublisher" prefWidth="150.0" text="Publisher" />
+          <TableColumn fx:id="tableComposer" prefWidth="300.0" text="Composer" />
+          <TableColumn fx:id="tableYear" prefWidth="60.0" text="Year" />
+          <TableColumn fx:id="tableGenre" prefWidth="100.0" text="Genre" />
+          <TableColumn fx:id="tableISRC" prefWidth="100.0" text="ISRC" />
+          <TableColumn prefWidth="200.0" text="File Location" />
       </columns>
     </TableView>
     <HBox layoutX="1.0" layoutY="8.0" prefHeight="50.0" spacing="20.0">
         <padding>
-            <Insets left="10.0" top="10.0"/>
+            <Insets left="10.0" top="10.0" />
         </padding>
-        <Button fx:id="songBackButton" mnemonicParsing="false" onAction="#backToMain" text="Back to main window"/>
-        <Button fx:id="addSongButton" mnemonicParsing="false" onAction="#addSong2DB" text="Add new song"/>
+        <Button fx:id="songBackButton" mnemonicParsing="false" onAction="#backToMain" text="Back to main window" />
+        <Button fx:id="addSongButton" mnemonicParsing="false" onAction="#addSong2DB" text="Add new song" />
     </HBox>
 </AnchorPane>

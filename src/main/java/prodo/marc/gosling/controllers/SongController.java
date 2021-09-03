@@ -4,15 +4,22 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.stage.Stage;
 import prodo.marc.gosling.HelloApplication;
+import prodo.marc.gosling.dao.Song;
+import java.sql.Connection;
+
 
 import java.io.IOException;
+import java.sql.DriverManager;
 
 public class SongController {
 
-    @FXML
-    Button songBackButton, addSongButton;
+    public TableColumn tableArtist, tableTitle, tableAlbum, tablePublisher, tableComposer, tableYear, tableGenre, tableISRC;
+    public Button songBackButton, addSongButton;
+    public TableView<Song> songDatabaseTable;
 
 
     @FXML
@@ -29,10 +36,23 @@ public class SongController {
     //goes to the mp3 edit window
     protected void addSong2DB() throws IOException {
         Stage stage = (Stage) addSongButton.getScene().getWindow();
-        FXMLLoader fxmlLoader = new FXMLLoader(this.getClass().getResource("view/mp3.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("view/mp3.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("mp3");
         stage.setScene(scene);
+    }
+
+    public Connection getConnection() {
+        Connection connection;
+        String username = "bla";
+        String password = "bla";
+        try {
+            connection = DriverManager.getConnection("jdbc:h2:file:/SongDatabase",username,password);
+            return connection;
+        } catch(Exception exception) {
+            exception.printStackTrace();
+            return null;
+        }
     }
 
 }

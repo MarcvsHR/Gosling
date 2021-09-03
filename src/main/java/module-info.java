@@ -8,6 +8,7 @@ module prodo.marc.gosling {
     requires lombok;
     requires javafx.media;
     requires mp3agic;
+    requires java.sql;
 
 
     opens prodo.marc.gosling to javafx.fxml;

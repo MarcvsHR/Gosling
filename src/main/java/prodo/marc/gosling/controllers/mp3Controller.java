@@ -46,8 +46,8 @@ public class mp3Controller {
     //switch back to song database window
     protected void showSongWindow() throws IOException {
         Stage stage = (Stage) backSongs.getScene().getWindow();
-        FXMLLoader fxmlLoader = new FXMLLoader(this.getClass().getResource("view/song-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 600, 400);
+        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("view/song-view.fxml"));
+        Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("Songs");
         stage.setScene(scene);
     }
