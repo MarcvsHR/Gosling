@@ -9,6 +9,7 @@ module prodo.marc.gosling {
     requires javafx.media;
     requires mp3agic;
     requires java.sql;
+    requires log4j;
 
 
     opens prodo.marc.gosling to javafx.fxml;

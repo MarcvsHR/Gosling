@@ -7,6 +7,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.stage.Stage;
+import org.apache.log4j.LogManager;
 import prodo.marc.gosling.HelloApplication;
 import prodo.marc.gosling.dao.Song;
 import java.sql.Connection;
@@ -15,12 +16,14 @@ import java.sql.Connection;
 import java.io.IOException;
 import java.sql.DriverManager;
 
+import org.apache.log4j.Logger;
+
 public class SongController {
 
     public TableColumn tableArtist, tableTitle, tableAlbum, tablePublisher, tableComposer, tableYear, tableGenre, tableISRC;
     public Button songBackButton, addSongButton;
     public TableView<Song> songDatabaseTable;
-
+    private static final Logger logger = LogManager.getLogger(SongController.class);
 
     @FXML
     //goes back to the main window

@@ -15,6 +15,8 @@ import javafx.scene.media.MediaPlayer;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import prodo.marc.gosling.HelloApplication;
 
 import java.io.File;
@@ -25,6 +27,10 @@ import java.util.TimerTask;
 public class mp3Controller {
 
     public TextField textAlbum, textArtist, textTitle, textPublisher, textComposer, textYear, textGenre, textISRC;
+
+
+    /**Logger, use this and not system out*/
+    private static final Logger logger = LogManager.getLogger(mp3Controller.class);
 
     @FXML
     MediaPlayer mplayer;
@@ -55,6 +61,9 @@ public class mp3Controller {
     @FXML
     //open mp3 file for playing and reading id3 data
     protected void openMP3(){
+
+        logger.debug("Executing openMP3....");
+
         //pick file
         FileChooser fc = new FileChooser();
         fc.setInitialDirectory(new File("C:\\intel"));
@@ -89,7 +98,8 @@ public class mp3Controller {
             mp3Slider.setMax(song.getLengthInMilliseconds()/100);
 
         }catch (Exception ignored){
-            System.out.println(ignored);
+            logger.error("Error while opening file "+mp3File.getAbsolutePath(),ignored);
+
         }
 
     }
