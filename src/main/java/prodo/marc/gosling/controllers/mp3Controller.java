@@ -18,11 +18,12 @@ import javafx.util.Duration;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import prodo.marc.gosling.HelloApplication;
+import prodo.marc.gosling.dao.Artist;
+import prodo.marc.gosling.hibernate.repository.ArtistRepository;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class mp3Controller {
 
@@ -166,5 +167,26 @@ public class mp3Controller {
     protected void moveTimeBack() {
         if (mplayer != null) {
             mplayer.seek(Duration.millis(mplayer.getCurrentTime().toMillis() - skipIncrement)); }
+    }
+
+
+    @FXML
+    protected  void saveSongToDatabase(){
+        logger.debug("Executing saveSongToDatabase...");
+        ArtistRepository ar=new ArtistRepository();
+        logger.debug("Artists on beginning -> \n: "+Arrays.toString(ar.getArtists().toArray()));
+
+
+
+
+
+        ar.addArtist(Artist.builder().lastName("perica").firstName("perić").build());
+
+        ar.addArtist(Artist.builder().lastName("ivica").firstName("ivic").build());
+
+        ar.addArtist(Artist.builder().lastName("guscic").firstName("nikica ninko").build());
+
+        logger.debug("Artists on end -> \n: "+Arrays.toString(ar.getArtists().toArray()));
+
     }
 }

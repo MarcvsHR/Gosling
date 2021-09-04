@@ -10,11 +10,11 @@ import javafx.stage.Stage;
 import org.apache.log4j.LogManager;
 import prodo.marc.gosling.HelloApplication;
 import prodo.marc.gosling.dao.Song;
-import java.sql.Connection;
+
 
 
 import java.io.IOException;
-import java.sql.DriverManager;
+
 
 import org.apache.log4j.Logger;
 
@@ -45,17 +45,6 @@ public class SongController {
         stage.setScene(scene);
     }
 
-    public Connection getConnection() {
-        Connection connection;
-        String username = "bla";
-        String password = "bla";
-        try {
-            connection = DriverManager.getConnection("jdbc:h2:file:/SongDatabase",username,password);
-            return connection;
-        } catch(Exception exception) {
-            exception.printStackTrace();
-            return null;
-        }
-    }
+
 
 }

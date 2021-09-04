@@ -4,7 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import prodo.marc.gosling.controllers.SongController;
+
 
 import java.io.IOException;
 
@@ -18,7 +18,7 @@ public class HelloApplication extends Application {
         stage.setX(100); stage.setY(50);
         stage.show();
 
-        new SongController().getConnection();
+
     }
 
     public static void main(String[] args) {

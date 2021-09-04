@@ -66,13 +66,14 @@
       </HBox>
       <HBox alignment="TOP_CENTER" prefHeight="9.0" prefWidth="401.0" spacing="5.0">
          <Label text="Genre" />
-         <TextField fx:id="textGenre"/>
+         <TextField fx:id="textGenre" />
       </HBox>
       <HBox alignment="TOP_CENTER" prefHeight="9.0" prefWidth="401.0" spacing="5.0">
          <Label text="ISRC" />
-         <TextField fx:id="textISRC"/>
+         <TextField fx:id="textISRC" />
       </HBox>
       <HBox alignment="TOP_CENTER" prefHeight="3.0" prefWidth="343.0">
+         <Button mnemonicParsing="false" onAction="#saveSongToDatabase" text="Save" />
          <Button fx:id="backSongs" mnemonicParsing="false" onAction="#showSongWindow" text="Done">
             <font>
                <Font name="System Bold" size="14.0" />

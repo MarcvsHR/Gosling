@@ -3,7 +3,6 @@ package prodo.marc.gosling.dao;
 import javax.persistence.*;
 
 @Table(name = "song")
-
 public class Song {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
