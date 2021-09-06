@@ -1,7 +1,15 @@
 package prodo.marc.gosling.dao;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import javax.persistence.*;
 
+@Setter
+@Getter
+@Entity
+@ToString
 @Table(name = "song")
 public class Song {
     @Id
@@ -10,7 +18,7 @@ public class Song {
     private int id;
 
     @Column(name = "artist")
-    private Artist artist;
+    private String artist;
 
     @Column(name = "title")
     private String title;

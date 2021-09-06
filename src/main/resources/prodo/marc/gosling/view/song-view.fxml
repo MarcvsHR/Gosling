@@ -21,11 +21,12 @@
           <TableColumn prefWidth="200.0" text="File Location" />
       </columns>
     </TableView>
-    <HBox layoutX="1.0" layoutY="8.0" prefHeight="50.0" spacing="20.0">
+    <HBox layoutX="1.0" layoutY="8.0" prefHeight="50.0" prefWidth="364.0" spacing="20.0">
         <padding>
             <Insets left="10.0" top="10.0" />
         </padding>
         <Button fx:id="songBackButton" mnemonicParsing="false" onAction="#backToMain" text="Back to main window" />
         <Button fx:id="addSongButton" mnemonicParsing="false" onAction="#addSong2DB" text="Add new song" />
+      <Button fx:id="addFolderButton" mnemonicParsing="false" onAction="#addSongsFromFolder" text="Add folder" />
     </HBox>
 </AnchorPane>

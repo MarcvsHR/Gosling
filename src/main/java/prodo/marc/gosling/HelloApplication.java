@@ -13,12 +13,10 @@ public class HelloApplication extends Application {
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("view/song-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
-        stage.setTitle("mp3");
+        stage.setTitle("main");
         stage.setScene(scene);
         stage.setX(100); stage.setY(50);
         stage.show();
-
-
     }
 
     public static void main(String[] args) {

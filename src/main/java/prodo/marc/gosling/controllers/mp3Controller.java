@@ -19,7 +19,9 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import prodo.marc.gosling.HelloApplication;
 import prodo.marc.gosling.dao.Artist;
+import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.hibernate.repository.ArtistRepository;
+import prodo.marc.gosling.hibernate.repository.SongRepository;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,6 +54,9 @@ public class mp3Controller {
     @FXML
     //switch back to song database window
     protected void showSongWindow() throws IOException {
+
+        saveSongToDatabase();
+
         Stage stage = (Stage) backSongs.getScene().getWindow();
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("view/song-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
@@ -173,20 +178,22 @@ public class mp3Controller {
     @FXML
     protected  void saveSongToDatabase(){
         logger.debug("Executing saveSongToDatabase...");
-        ArtistRepository ar=new ArtistRepository();
-        logger.debug("Artists on beginning -> \n: "+Arrays.toString(ar.getArtists().toArray()));
+        SongRepository songRepo = new SongRepository();
+        logger.debug("Songs on beginning -> \n: "+Arrays.toString(songRepo.getSongs().toArray()));
 
+        Song testSong = new Song();
+        testSong.setArtist(textArtist.getText());
+        testSong.setTitle(textAlbum.getText());
+        testSong.setAlbum(textAlbum.getText());
+        testSong.setPublisher(textPublisher.getText());
+        testSong.setComposer(textComposer.getText());
+        testSong.setYear(Integer.parseInt(textYear.getText()));
+        testSong.setGenre(textGenre.getText());
+        testSong.setISRC(textISRC.getText());
 
+        songRepo.addSong(testSong);
 
-
-
-        ar.addArtist(Artist.builder().lastName("perica").firstName("perić").build());
-
-        ar.addArtist(Artist.builder().lastName("ivica").firstName("ivic").build());
-
-        ar.addArtist(Artist.builder().lastName("guscic").firstName("nikica ninko").build());
-
-        logger.debug("Artists on end -> \n: "+Arrays.toString(ar.getArtists().toArray()));
+        logger.debug("Songs on end -> \n: "+Arrays.toString(songRepo.getSongs().toArray()));
 
     }
 }
