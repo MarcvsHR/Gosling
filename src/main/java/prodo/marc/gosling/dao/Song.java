@@ -1,43 +1,31 @@
 package prodo.marc.gosling.dao;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import javafx.beans.DefaultProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import lombok.*;
 
 import javax.persistence.*;
+import java.nio.file.Path;
 
 @Setter
 @Getter
 @Entity
 @ToString
-@Table(name = "song")
+@NoArgsConstructor
 public class Song {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private int id;
 
-    @Column(name = "artist")
     private String artist;
-
-    @Column(name = "title")
     private String title;
-
-    @Column(name = "album")
     private String album;
-
-    @Column(name = "publisher")
     private String publisher;
-
-    @Column(name = "composer")
     private String composer;
-
-    @Column(name = "year")
-    private int year;
-
-    @Column(name = "genre")
+    private Integer year;
     private String genre;
-
-    @Column(name = "ISRC")
     private String ISRC;
+    private String fileLoc;
+
 }

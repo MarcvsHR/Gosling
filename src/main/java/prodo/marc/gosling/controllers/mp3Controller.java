@@ -3,6 +3,8 @@ package prodo.marc.gosling.controllers;
 import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.Mp3File;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -35,17 +37,10 @@ public class mp3Controller {
     /**Logger, use this and not system out*/
     private static final Logger logger = LogManager.getLogger(mp3Controller.class);
 
-    @FXML
-    MediaPlayer mplayer;
-
-    @FXML
-    Label mp3Label, mp3Time;
-
-    @FXML
-    Button backSongs, pickFile, buttonPlay, buttonPause, skipBack, skipForward;
-
-    @FXML
-    Slider mp3Slider;
+    @FXML MediaPlayer mplayer;
+    @FXML Label mp3Label, mp3Time;
+    @FXML Button backSongs, pickFile, buttonPlay, buttonPause, skipBack, skipForward;
+    @FXML Slider mp3Slider;
 
     private boolean updateCheck = true;
     final int skipIncrement = 10000;
@@ -105,7 +100,6 @@ public class mp3Controller {
 
         }catch (Exception ignored){
             logger.error("Error while opening file "+mp3File.getAbsolutePath(),ignored);
-
         }
 
     }
