@@ -1,6 +1,7 @@
 package prodo.marc.gosling.controllers;
 
 import com.mpatric.mp3agic.ID3v2;
+import com.mpatric.mp3agic.ID3v24Tag;
 import com.mpatric.mp3agic.Mp3File;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -9,6 +10,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableStringValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -57,6 +59,7 @@ public class SongController {
 
     private boolean updateCheck = true;
     final int skipIncrement = 10000;
+    private Integer currentSongID = 0;
 
     public void initialize() {
         tableYear.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getYear()));
@@ -171,6 +174,7 @@ public class SongController {
             try {
                 TableView.TableViewSelectionModel<Song> p = songDatabaseTable.getSelectionModel();
                 openMP3(p.getSelectedItem().getFileLoc());
+                currentSongID = p.getSelectedItem().getId();
             } catch (Exception e) {
                 logger.error("nothing found on double click",e);
             }
@@ -190,7 +194,7 @@ public class SongController {
         }
 
         //show file name
-        mp3Label.setText(mp3File.getName());
+        mp3Label.setText(mp3File.getAbsolutePath());
 
         //load file into media player
         String mp3Path = mp3File.toURI().toASCIIString();
@@ -285,4 +289,48 @@ public class SongController {
             mplayer.seek(Duration.millis(mplayer.getCurrentTime().toMillis() - skipIncrement)); }
     }
 
+    public void updateMP3(ActionEvent actionEvent) {
+        Song song = new Song();
+        File mp3File = new File(mp3Label.getText());
+
+        song.setId(currentSongID);
+        song.setArtist(textArtist.getText());
+        song.setTitle(textTitle.getText());
+        song.setAlbum(textAlbum.getText());
+        song.setPublisher(textPublisher.getText());
+        song.setComposer(textComposer.getText());
+        song.setYear(Integer.valueOf(textYear.getText()));
+        song.setGenre(textGenre.getText());
+        song.setISRC(textISRC.getText());
+        song.setFileLoc(mp3Label.getText());
+
+        try {
+            Mp3File mp3 = new Mp3File(mp3File);
+            ID3v24Tag id3Data = new ID3v24Tag();
+            mp3.setId3v2Tag(id3Data);
+
+            id3Data.setArtist(song.getArtist());
+            id3Data.setTitle(song.getTitle());
+            id3Data.setAlbum(song.getAlbum());
+            id3Data.setPublisher(song.getPublisher());
+            id3Data.setComposer(song.getComposer());
+            id3Data.setYear(Integer.toString(song.getYear()));
+            id3Data.setGenreDescription(song.getGenre());
+            //id3Data.setISRC(song.getISRC());
+
+            mp3.save(mp3Label.getText()+".mp3");
+            boolean info = mp3File.delete();
+            logger.debug("delete results are "+ info);
+            File mp3FileNew = new File(mp3Label.getText()+".mp3");
+            info = mp3FileNew.renameTo(mp3File);
+            logger.debug("rename results are "+ info);
+
+            logger.debug("file data updated");
+
+        }catch (Exception e){
+            logger.error("Error while opening file "+mp3File.getAbsolutePath(),e);
+        }
+    }
+
 }
+
