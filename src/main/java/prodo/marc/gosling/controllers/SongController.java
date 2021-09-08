@@ -17,9 +17,11 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.log4j.LogManager;
+import org.hibernate.engine.jdbc.env.spi.IdentifierHelperBuilder;
 import prodo.marc.gosling.HelloApplication;
 import prodo.marc.gosling.dao.Song;
 
@@ -28,9 +30,11 @@ import prodo.marc.gosling.hibernate.repository.SongRepository;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -43,12 +47,12 @@ public class SongController {
     @FXML MediaPlayer mplayer;
     @FXML Button songBackButton, addSongButton, addFolderButton;
     @FXML Button backSongs, buttonPlay, buttonPause, skipBack, skipForward, skipForwardSmall, skipBackSmall, buttonRevert;
-    @FXML Label mp3Label, mp3Time;
+    @FXML Label mp3Label, mp3Time, labelVolume;
     @FXML TableView<Song> songDatabaseTable;
     @FXML TableColumn<Song, String> tableArtist, tableTitle, tableAlbum, tablePublisher, tableComposer, tableGenre, tableISRC, tableFileLoc;
     @FXML TableColumn<Song, Integer> tableYear, tableID;
     @FXML TextField textAlbum, textArtist, textTitle, textPublisher, textComposer, textYear, textGenre, textISRC;
-    @FXML Slider mp3Slider;
+    @FXML Slider mp3Slider, volumeSlider;
 
     ObservableList<Song> songList = FXCollections.observableArrayList();
 
@@ -71,6 +75,12 @@ public class SongController {
 
         updateTable();
 
+        //set starting volume to 20 so I don't get my ears blown out
+        volumeSlider.setValue(20);
+        changeVolume();
+
+        //adding songs from c:\test so that I don't have to manually load every time I test
+        addSongsFromFolder(new File("c:\\test"));
     }
 
     @FXML
@@ -84,12 +94,19 @@ public class SongController {
     }
 
     @FXML
-    protected void addSongsFromFolder() {
-        SongRepository songRepo = new SongRepository();
-
+    protected File pickFolder() {
         DirectoryChooser dc = new DirectoryChooser();
         dc.setInitialDirectory(new File("C:\\test"));
-        File directory = dc.showDialog(null);
+        return dc.showDialog(null);
+    }
+
+    @FXML
+    protected void clickedFolderButton() {
+        addSongsFromFolder(pickFolder());
+    }
+
+    @FXML
+    protected void addSongsFromFolder(File directory) {
 
         List<Path> mp3List = new ArrayList<>();
 
@@ -104,20 +121,10 @@ public class SongController {
             AtomicInteger i = new AtomicInteger();
             mp3List.forEach(file -> {
                 i.getAndIncrement();
-                Song id3Tag;
                 logger.debug("processing file: "+ file);
                 logger.debug(i+" out of "+mp3List.size());
-                id3Tag = getID(file.toFile());
-                if (songRepo.checkForDupes(id3Tag)) {
-                    logger.debug("---song already exists - "+id3Tag.toString());
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Duplicate file import");
-                    alert.setHeaderText("There is already a song with that name or location in the database");
-                    alert.setContentText(id3Tag.toString());
 
-                    alert.showAndWait();
-                } else {
-                songRepo.addSong(id3Tag); }
+                addMP3(new File(String.valueOf(file)));
             });
             //logger.debug("Songs on end -> \n: "+Arrays.toString(songRepo.getSongs().toArray()));
 
@@ -128,6 +135,22 @@ public class SongController {
             logger.error("couldn't get files from folder",e);
         }
    }
+
+    private void addMP3(File file) {
+        SongRepository songRepo = new SongRepository();
+        Song id3Tag;
+        id3Tag = getID(file);
+        if (songRepo.checkForDupes(id3Tag)) {
+            logger.debug("---song already exists - "+id3Tag.toString());
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Duplicate file import");
+            alert.setHeaderText("There is already a song with that name or location in the database");
+            alert.setContentText("adding file: "+id3Tag.getFileLoc());
+
+            alert.showAndWait();
+        } else {
+            SongRepository.addSong(id3Tag); }
+    }
 
     private void updateTable() {
         //currentSongID = 0;
@@ -321,6 +344,7 @@ public class SongController {
         }
 
         //play file
+        mplayer.setVolume(volumeSlider.getValue()/100);
         mplayer.play();
 
         //timer for updating current position slider
@@ -330,9 +354,15 @@ public class SongController {
                 double currentTime = mplayer.getCurrentTime().toSeconds();
                 int minutes = (int) (currentTime / 60);
                 double seconds = currentTime - minutes * 60;
+                DecimalFormat df = new DecimalFormat("##.#");
+                df.setRoundingMode(RoundingMode.DOWN);
+                String secondsString = df.format(seconds);
+                if (!secondsString.contains(".")) {secondsString += ".0";}
+                if (seconds < 10) {secondsString = "0"+secondsString;}
+                String finalSecondsString = secondsString;
                 Platform.runLater(() -> {
                     //show current time text, needs improving
-                    mp3Time.setText(String.format("%02x m - %03.1f s",minutes,seconds));
+                    mp3Time.setText(String.format("%02xm ",minutes)+ finalSecondsString +"s");
                     //update slider to current time
                     if (updateCheck) { mp3Slider.setValue(mplayer.getCurrentTime().toMillis()/100); }
                 });
@@ -454,10 +484,25 @@ public class SongController {
         mplayer = new MediaPlayer(mp3Media);
     }
 
+    public File openMP3File() {
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Open MP3");
+        fc.setInitialDirectory(new File("C:\\test"));
+        FileChooser.ExtensionFilter extFilter =
+                new FileChooser.ExtensionFilter("MP3 files (*.mp3)", "*.mp3");
+        fc.getExtensionFilters().add(extFilter);
+        return fc.showOpenDialog(null);
+    }
+
     public void addSong2DB(ActionEvent actionEvent) {
         //select file
+        File mp3 = openMP3File();
 
         //add file to DB
+        addMP3(mp3);
+
+        //preview changes
+        updateTable();
     }
 
     public void checkArtistField(KeyEvent inputMethodEvent) {
@@ -478,6 +523,13 @@ public class SongController {
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == ButtonType.OK){
             updateTextFields(mp3Label.getText());
+        }
+    }
+
+    public void changeVolume() {
+        labelVolume.setText("Volume: "+ String.format("%.0f",volumeSlider.getValue())+"%");
+        if (mplayer != null) {
+            mplayer.setVolume(volumeSlider.getValue()/100);
         }
     }
 }

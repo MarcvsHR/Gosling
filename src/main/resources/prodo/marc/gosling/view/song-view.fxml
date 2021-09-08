@@ -34,10 +34,13 @@
             <HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
                 <Button fx:id="skipBack" mnemonicParsing="false" onAction="#moveTimeBack" text="-10s" />
                 <Button fx:id="skipBackSmall" mnemonicParsing="false" onAction="#moveTimeBackLittle" text="-0.1s" />
-                <Label fx:id="mp3Time" alignment="CENTER" contentDisplay="CENTER" text="0 m - 0.0 s" textAlignment="CENTER">
+                <Label fx:id="mp3Time" alignment="CENTER" contentDisplay="CENTER" text="00m 00.0s" textAlignment="CENTER">
                     <padding>
                         <Insets left="10.0" top="5.0" />
                     </padding>
+                    <font>
+                        <Font name="System Bold" />
+                    </font>
                 </Label>
                 <Button fx:id="skipForwardSmall" mnemonicParsing="false" onAction="#moveTimeForwardLittle" text="+0.1s" />
                 <Button fx:id="skipForward" mnemonicParsing="false" onAction="#moveTimeForward" text="+10s" />
@@ -98,7 +101,9 @@
                 </padding>
                 <Button fx:id="songBackButton" mnemonicParsing="false" onAction="#backToMain" text="Back to main window" />
                 <Button fx:id="addSongButton" mnemonicParsing="false" onAction="#addSong2DB" text="Add new song" />
-              <Button fx:id="addFolderButton" mnemonicParsing="false" onAction="#addSongsFromFolder" text="Add folder" />
+              <Button fx:id="addFolderButton" mnemonicParsing="false" onAction="#clickedFolderButton" text="Add folder" />
+            <Slider fx:id="volumeSlider" blockIncrement="1.0" onKeyReleased="#changeVolume" onMouseClicked="#changeVolume" onMouseDragged="#changeVolume" prefWidth="200.0" value="100.0" />
+            <Label fx:id="labelVolume" text="Volume: 100%" />
             </HBox>
             <TableView fx:id="songDatabaseTable" onMouseClicked="#doubleClickTable">
               <columns>
