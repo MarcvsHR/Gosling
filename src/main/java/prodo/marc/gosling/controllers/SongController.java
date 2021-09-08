@@ -5,9 +5,6 @@ import com.mpatric.mp3agic.ID3v24Tag;
 import com.mpatric.mp3agic.Mp3File;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableStringValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -15,12 +12,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.log4j.LogManager;
@@ -30,7 +26,6 @@ import prodo.marc.gosling.dao.Song;
 import org.apache.log4j.Logger;
 import prodo.marc.gosling.hibernate.repository.SongRepository;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -47,7 +42,7 @@ public class SongController {
 
     @FXML MediaPlayer mplayer;
     @FXML Button songBackButton, addSongButton, addFolderButton;
-    @FXML Button backSongs, buttonPlay, buttonPause, skipBack, skipForward;
+    @FXML Button backSongs, buttonPlay, buttonPause, skipBack, skipForward, skipForwardSmall, skipBackSmall, buttonRevert;
     @FXML Label mp3Label, mp3Time;
     @FXML TableView<Song> songDatabaseTable;
     @FXML TableColumn<Song, String> tableArtist, tableTitle, tableAlbum, tablePublisher, tableComposer, tableGenre, tableISRC, tableFileLoc;
@@ -60,6 +55,7 @@ public class SongController {
     private boolean updateCheck = true;
     final int skipIncrement = 10000;
     private Integer currentSongID = 0;
+    private Integer previousSongID = 0;
 
     public void initialize() {
         tableYear.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getYear()));
@@ -112,9 +108,18 @@ public class SongController {
                 logger.debug("processing file: "+ file);
                 logger.debug(i+" out of "+mp3List.size());
                 id3Tag = getID(file.toFile());
-                songRepo.addSong(id3Tag);
+                if (songRepo.checkForDupes(id3Tag)) {
+                    logger.debug("---song already exists - "+id3Tag.toString());
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Duplicate file import");
+                    alert.setHeaderText("There is already a song with that name or location in the database");
+                    alert.setContentText(id3Tag.toString());
+
+                    alert.showAndWait();
+                } else {
+                songRepo.addSong(id3Tag); }
             });
-            logger.debug("Songs on end -> \n: "+Arrays.toString(songRepo.getSongs().toArray()));
+            //logger.debug("Songs on end -> \n: "+Arrays.toString(songRepo.getSongs().toArray()));
 
             updateTable();
             logger.debug(Arrays.toString(songDatabaseTable.getItems().toArray()));
@@ -125,10 +130,32 @@ public class SongController {
    }
 
     private void updateTable() {
+        //currentSongID = 0;
         SongRepository songRepo = new SongRepository();
         songList.clear();
         songList.addAll(songRepo.getSongs());
         songDatabaseTable.setItems(songList);
+        songDatabaseTable.getSelectionModel().select(currentSongID);
+        if (songDatabaseTable.getItems().size()>0) {
+        openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc()); }
+        colorizeTable();
+    }
+
+    private void colorizeTable() {
+//        songDatabaseTable.setRowFactory(tv -> new TableRow<Song>() {
+//            @Override
+//            public void updateItem(Song item, boolean empty) {
+//                super.updateItem(item, empty) ;
+//                if (item == null) {
+//                    setStyle("");
+//                } else if (item.getGenre().isEmpty()) {
+//                    setStyle("-fx-background-color: tomato;");
+//                } else {
+//                    setStyle("");
+//                }
+//            }
+//        });
+
     }
 
     public Song getID(File file) {
@@ -136,8 +163,7 @@ public class SongController {
        Song testSong = new Song();
 
         try {
-            Mp3File mp3 = new Mp3File(file);
-            ID3v2 id3Data = mp3.getId3v2Tag();
+            ID3v2 id3Data = getID3(file.getAbsolutePath());
 
             testSong.setArtist(id3Data.getArtist());
             testSong.setTitle(id3Data.getTitle());
@@ -172,6 +198,7 @@ public class SongController {
             try {
                 TableView.TableViewSelectionModel<Song> p = songDatabaseTable.getSelectionModel();
                 openMP3(p.getSelectedItem().getFileLoc());
+                previousSongID = currentSongID;
                 currentSongID = p.getSelectedItem().getId();
             } catch (Exception e) {
                 logger.error("nothing found on double click",e);
@@ -181,18 +208,61 @@ public class SongController {
 
     @FXML
     //open mp3 file for playing and reading id3 data
-    protected void openMP3(String fileLoc){
+    protected void openMP3(String fileLoc) {
 
         logger.debug("Executing openMP3....");
 
-        //pick file and close old mp3
-        File mp3File = new File(fileLoc);
+        boolean confirmed = true;
+        boolean sameFile = true;
+        if (fileLoc != mp3Label.getText() & !mp3Label.getText().isEmpty()) {
+            try {
+                ID3v2 id3Data = getID3(mp3Label.getText());
+
+                if (sameFile) {sameFile = compareTag(textArtist.getText(), id3Data.getArtist());}
+                if (sameFile) {sameFile = compareTag(textTitle.getText(), id3Data.getTitle());}
+                if (sameFile) {sameFile = compareTag(textAlbum.getText(), id3Data.getAlbum());}
+                if (sameFile) {sameFile = compareTag(textPublisher.getText(), id3Data.getPublisher());}
+                if (sameFile) {sameFile = compareTag(textComposer.getText(), id3Data.getComposer());}
+                if (sameFile) {sameFile = compareTag(textYear.getText(), id3Data.getYear());}
+                if (sameFile) {sameFile = compareTag(textGenre.getText(), id3Data.getGenreDescription());}
+                //if (sameFile) {sameFile = compareTag(textISRC.getText(), id3Data.getISRC());}
+
+            } catch (Exception ignored) {
+                logger.error("Error while opening file " + mp3Label.getText(), ignored);
+            }
+        }
+
+        if (!sameFile) {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Unsaved changes");
+            alert.setHeaderText("You are switching to another file with possible unsaved changes");
+            alert.setContentText("Do you want to save the ID3 changes you have made?");
+
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.get() != ButtonType.OK){
+                confirmed = false;
+            }
+        }
+
+        if (confirmed) {
+
+            updateTextFields(fileLoc);
+
+        } else {
+            currentSongID = previousSongID;
+            songDatabaseTable.getSelectionModel().select(currentSongID);
+        }
+    }
+
+    private void updateTextFields(String fileLoc) {
+        //close old mp3
         if (mplayer != null) {
             mplayer.stop();
+            mplayer.dispose();
         }
 
         //show file name
-        mp3Label.setText(mp3File.getAbsolutePath());
+        mp3Label.setText(fileLoc);
 
         //load file into media player
         openMediaFile(fileLoc);
@@ -201,9 +271,9 @@ public class SongController {
         //should prolly throw a message if empty
         //still needs ISRC function
         try {
-            Mp3File song = new Mp3File(mp3File);
-            ID3v2 id3Data= song.getId3v2Tag();
+            ID3v2 id3Data = getID3(fileLoc);
             textArtist.setText(id3Data.getArtist());
+            textArtist.setStyle("-fx-background-color: #FFFFFF");
             textTitle.setText(id3Data.getTitle());
             textAlbum.setText(id3Data.getAlbum());
             textPublisher.setText(id3Data.getPublisher());
@@ -213,11 +283,33 @@ public class SongController {
             //textISRC.setText(id3Data.getISRC());
 
             //set slider to tick = 0.1s precision
-            mp3Slider.setMax(song.getLengthInMilliseconds()/100);
+            mp3Slider.setMax(new Mp3File(new File(fileLoc)).getLengthInMilliseconds() / 100);
 
-        }catch (Exception ignored){
-            logger.error("Error while opening file "+mp3File.getAbsolutePath(),ignored);
+        } catch (Exception ignored) {
+            logger.error("Error while opening file " + fileLoc, ignored);
         }
+    }
+
+    private ID3v2 getID3(String fileLoc) {
+        File mp3File = new File(fileLoc);
+        try {
+            Mp3File song = new Mp3File(mp3File);
+            return song.getId3v2Tag();
+        } catch (Exception ignored) {
+            logger.error("can't fetch ID3 data from file",ignored);
+            return new ID3v24Tag();
+        }
+    }
+
+    private boolean compareTag(String text1, String text2) {
+        if (text1 == null || text1.isEmpty()) {
+            if (text2 == null) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return text1.equals(text2);
     }
 
     @FXML
@@ -285,7 +377,21 @@ public class SongController {
             mplayer.seek(Duration.millis(mplayer.getCurrentTime().toMillis() - skipIncrement)); }
     }
 
-    public void updateMP3(ActionEvent actionEvent) {
+    @FXML
+    //move forward X seconds button
+    protected void moveTimeForwardLittle() {
+        if (mplayer != null) {
+            mplayer.seek(Duration.millis(mplayer.getCurrentTime().toMillis() + 100)); }
+    }
+
+    @FXML
+    //move back X seconds button
+    protected void moveTimeBackLittle() {
+        if (mplayer != null) {
+            mplayer.seek(Duration.millis(mplayer.getCurrentTime().toMillis() - 100)); }
+    }
+
+    public void updateMP3() {
         Song song = new Song();
         File mp3File = new File(mp3Label.getText());
 
@@ -352,6 +458,27 @@ public class SongController {
         //select file
 
         //add file to DB
+    }
+
+    public void checkArtistField(KeyEvent inputMethodEvent) {
+        ID3v2 id3Data = getID3(mp3Label.getText());
+        if (!compareTag(id3Data.getArtist(), textArtist.getText())) {
+            textArtist.setStyle("-fx-background-color: #FFCCBB");
+        } else {
+            textArtist.setStyle("-fx-background-color: #FFFFFF");
+        }
+    }
+
+    public void revertID3(ActionEvent actionEvent) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Unsaved changes");
+        alert.setHeaderText("You are resetting the ID3 changes you made for this MP3");
+        alert.setContentText("Do you want to load the old data without saving the changes?");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == ButtonType.OK){
+            updateTextFields(mp3Label.getText());
+        }
     }
 }
 

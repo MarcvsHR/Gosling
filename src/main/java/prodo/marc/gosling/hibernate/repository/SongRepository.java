@@ -1,11 +1,18 @@
 package prodo.marc.gosling.hibernate.repository;
 
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.hibernate.Filter;
 import org.hibernate.Session;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.hibernate.HibernateUtils;
 
+import javax.persistence.Entity;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,6 +38,7 @@ public class SongRepository {
 
 
     }
+
     public List<Song> getSongs(){
         Session session = null;
         try {
@@ -49,6 +57,30 @@ public class SongRepository {
         }
 
         return Collections.emptyList();
+    }
+
+    public Boolean checkForDupes(Song song){
+        Session session = null;
+        try {
+            session = HibernateUtils.openSession();
+            session.getTransaction().begin();
+            String query1 = "from Song S WHERE S.fileLoc = '"+song.getFileLoc()+
+                    "' OR (S.artist = '"+song.getArtist()+
+                    "' AND S.title = '"+song.getTitle()+"')";
+            logger.debug(query1);
+            List<Song> songs = session.createQuery(query1,Song.class).list();
+            session.getTransaction().commit();
+            if (!songs.isEmpty()) return true;
+        }catch (Exception e){
+            logger.error("Error while getting songs "+e);
+
+        }finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+
+        return false;
     }
 
 

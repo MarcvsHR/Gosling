@@ -1,12 +1,8 @@
 package prodo.marc.gosling.dao;
 
-import javafx.beans.DefaultProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import lombok.*;
 
 import javax.persistence.*;
-import java.nio.file.Path;
 
 @Setter
 @Getter
