@@ -73,35 +73,30 @@ public class SongController {
         tableISRC.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getISRC()));
         tableFileLoc.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getFileLoc()));
 
+        updateTable();
+
     }
 
     @FXML
     //goes back to the main window
     protected void backToMain() throws IOException {
         Stage stage = (Stage) songBackButton.getScene().getWindow();
-        FXMLLoader fxmlLoader = new FXMLLoader(this.getClass().getResource("view/hello-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("view/hello-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 320, 240);
         stage.setTitle("Songs");
         stage.setScene(scene);
     }
 
     @FXML
-    //goes to the mp3 edit window
-    protected void addSong2DB() throws IOException {
-        Stage stage = (Stage) addSongButton.getScene().getWindow();
-        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("view/mp3.fxml"));
-        Scene scene = new Scene(fxmlLoader.load());
-        stage.setTitle("mp3");
-        stage.setScene(scene);
-    }
-
-    @FXML
     protected void addSongsFromFolder() {
+        SongRepository songRepo = new SongRepository();
+
         DirectoryChooser dc = new DirectoryChooser();
         dc.setInitialDirectory(new File("C:\\test"));
         File directory = dc.showDialog(null);
-        SongRepository songRepo = new SongRepository();
+
         List<Path> mp3List = new ArrayList<>();
+
         try (Stream<Path> walk = Files.walk(Paths.get(directory.getAbsolutePath()))) {
             walk.filter(Files::isRegularFile).forEach(file -> {
                 if (file.toString().endsWith(".mp3")) {
@@ -121,11 +116,7 @@ public class SongController {
             });
             logger.debug("Songs on end -> \n: "+Arrays.toString(songRepo.getSongs().toArray()));
 
-            songList.clear();
-            //tableYear.setCellValueFactory(new PropertyValueFactory<>("year"));
-            //songList.addAll(songRepo.getSongs());
-            songList.addAll(songRepo.getSongs());
-            songDatabaseTable.setItems(songList);
+            updateTable();
             logger.debug(Arrays.toString(songDatabaseTable.getItems().toArray()));
 
         } catch (IOException e) {
@@ -133,7 +124,14 @@ public class SongController {
         }
    }
 
-   public Song getID(File file) {
+    private void updateTable() {
+        SongRepository songRepo = new SongRepository();
+        songList.clear();
+        songList.addAll(songRepo.getSongs());
+        songDatabaseTable.setItems(songList);
+    }
+
+    public Song getID(File file) {
 
        Song testSong = new Song();
 
@@ -197,9 +195,7 @@ public class SongController {
         mp3Label.setText(mp3File.getAbsolutePath());
 
         //load file into media player
-        String mp3Path = mp3File.toURI().toASCIIString();
-        Media mp3Media = new Media(mp3Path);
-        mplayer = new MediaPlayer(mp3Media);
+        openMediaFile(fileLoc);
 
         //load id3 data into text fields
         //should prolly throw a message if empty
@@ -319,6 +315,9 @@ public class SongController {
             //id3Data.setISRC(song.getISRC());
 
             mp3.save(mp3Label.getText()+".mp3");
+
+            mplayer.dispose();
+
             boolean info = mp3File.delete();
             logger.debug("delete results are "+ info);
             File mp3FileNew = new File(mp3Label.getText()+".mp3");
@@ -327,10 +326,32 @@ public class SongController {
 
             logger.debug("file data updated");
 
+            //load file into media player
+            openMediaFile(mp3Label.getText());
+
+
         }catch (Exception e){
             logger.error("Error while opening file "+mp3File.getAbsolutePath(),e);
         }
+
+        SongRepository songRepo = new SongRepository();
+        songRepo.addSong(song);
+
+        updateTable();
+
     }
 
+    private void openMediaFile(String fileLoc) {
+        File mp3File = new File(fileLoc);
+        String mp3Path = mp3File.toURI().toASCIIString();
+        Media mp3Media = new Media(mp3Path);
+        mplayer = new MediaPlayer(mp3Media);
+    }
+
+    public void addSong2DB(ActionEvent actionEvent) {
+        //select file
+
+        //add file to DB
+    }
 }
 

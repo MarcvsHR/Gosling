@@ -75,7 +75,7 @@
                 <TextField fx:id="textISRC" />
             </HBox>
             <HBox alignment="TOP_CENTER" prefHeight="30.0" prefWidth="70.0">
-                <Button fx:id="backSongs" mnemonicParsing="false" onAction="#updateMP3" text="Done">
+                <Button fx:id="backSongs" mnemonicParsing="false" onAction="#updateMP3" text="Update">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>
