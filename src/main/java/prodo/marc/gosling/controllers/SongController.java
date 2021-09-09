@@ -22,12 +22,12 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.log4j.LogManager;
-import org.hibernate.engine.jdbc.env.spi.IdentifierHelperBuilder;
+import org.apache.log4j.Logger;
 import prodo.marc.gosling.HelloApplication;
 import prodo.marc.gosling.dao.Song;
-
-import org.apache.log4j.Logger;
 import prodo.marc.gosling.hibernate.repository.SongRepository;
+import prodo.marc.gosling.service.ID3v2Utils;
+import prodo.marc.gosling.service.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,6 +62,8 @@ public class SongController {
     private Integer currentSongID = 0;
     ID3v2 copiedID3 = new ID3v24Tag();
     List<String> debugTracker = new ArrayList<String>();
+    /**Initial volume for mp3*/
+    private static final int INITIAL_VOLUME_SO_MY_EARS_DONT_EXPLODE=20;
 
     public void initialize() {
 
@@ -82,7 +84,8 @@ public class SongController {
         updateTable();
 
         //set starting volume to 20 so I don't get my ears blown out
-        volumeSlider.setValue(20);
+        //no magic numbers
+        volumeSlider.setValue(INITIAL_VOLUME_SO_MY_EARS_DONT_EXPLODE);
         changeVolume();
 
         //adding songs from c:\test so that I don't have to manually load every time I test
@@ -245,8 +248,8 @@ public class SongController {
        Song testSong = new Song();
 
         try {
-            ID3v2 id3Data = getID3(file.getAbsolutePath());
-
+            ID3v2 id3Data = ID3v2Utils.getID3(file.getAbsolutePath());
+            
             testSong.setArtist(id3Data.getArtist());
             testSong.setTitle(id3Data.getTitle());
             testSong.setAlbum(id3Data.getAlbum());
@@ -288,6 +291,8 @@ public class SongController {
         }
         else if (event.getButton() == MouseButton.PRIMARY) {
             try {
+
+                //TODO: CHECK IF TABLE IS EMPTY
                 openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
             } catch (Exception e) {
                 logger.error("nothing found on double click",e);
@@ -307,15 +312,15 @@ public class SongController {
         boolean sameFile = true;
         if (!mp3Label.getText().isEmpty()) {
             try {
-                ID3v2 id3Data = getID3(mp3Label.getText());
+                ID3v2 id3Data = ID3v2Utils.getID3(mp3Label.getText());
 
-                if (sameFile) {sameFile = compareTag(textArtist.getText(), id3Data.getArtist());}
-                if (sameFile) {sameFile = compareTag(textTitle.getText(), id3Data.getTitle());}
-                if (sameFile) {sameFile = compareTag(textAlbum.getText(), id3Data.getAlbum());}
-                if (sameFile) {sameFile = compareTag(textPublisher.getText(), id3Data.getPublisher());}
-                if (sameFile) {sameFile = compareTag(textComposer.getText(), id3Data.getComposer());}
-                if (sameFile) {sameFile = compareTag(textYear.getText(), id3Data.getYear());}
-                if (sameFile) {sameFile = compareTag(textGenre.getText(), id3Data.getGenreDescription());}
+                if (sameFile) {sameFile = StringUtils.compareStrings(textArtist.getText(), id3Data.getArtist());}
+                if (sameFile) {sameFile = StringUtils.compareStrings(textTitle.getText(), id3Data.getTitle());}
+                if (sameFile) {sameFile = StringUtils.compareStrings(textAlbum.getText(), id3Data.getAlbum());}
+                if (sameFile) {sameFile = StringUtils.compareStrings(textPublisher.getText(), id3Data.getPublisher());}
+                if (sameFile) {sameFile = StringUtils.compareStrings(textComposer.getText(), id3Data.getComposer());}
+                if (sameFile) {sameFile =StringUtils.compareStrings(textYear.getText(), id3Data.getYear());}
+                if (sameFile) {sameFile = StringUtils.compareStrings(textGenre.getText(), id3Data.getGenreDescription());}
                 //if (sameFile) {sameFile = compareTag(textISRC.getText(), id3Data.getISRC());}
 
             } catch (Exception ignored) {
@@ -366,7 +371,7 @@ public class SongController {
         //should prolly throw a message if empty
         //still needs ISRC function
         try {
-            ID3v2 id3Data = getID3(fileLoc);
+            ID3v2 id3Data = ID3v2Utils.getID3(fileLoc);
             textArtist.setText(id3Data.getArtist());
             textArtist.setStyle("-fx-background-color: #FFFFFF");
             textTitle.setText(id3Data.getTitle());
@@ -390,35 +395,9 @@ public class SongController {
         debugTracker.remove(debugTracker.size()-1);
     }
 
-    private ID3v2 getID3(String fileLoc) {
 
-        debugTracker.add("getID3");
-        logger.debug("----- Executing "+debugTracker);
 
-        File mp3File = new File(fileLoc);
-        try {
-            Mp3File song = new Mp3File(mp3File);
-            logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-            debugTracker.remove(debugTracker.size()-1);
-            return song.getId3v2Tag();
-        } catch (Exception ignored) {
-            logger.error("can't fetch ID3 data from file",ignored);
-            logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-            debugTracker.remove(debugTracker.size()-1);
-            return new ID3v24Tag();
-        }
-    }
 
-    private boolean compareTag(String text1, String text2) {
-        if (text1 == null || text1.isEmpty()) {
-            if (text2 == null) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-        return text1.equals(text2);
-    }
 
     @FXML
     protected void playMP3() {
@@ -546,7 +525,9 @@ public class SongController {
         if (mplayer != null) {mplayer.dispose();}
 
         try {
-            Mp3File mp3 = new Mp3File(new File(fileLoc));
+            File file=new File(fileLoc);
+
+            Mp3File mp3 = new Mp3File(file);
             ID3v24Tag id3Data = new ID3v24Tag();
             mp3.setId3v2Tag(id3Data);
 
@@ -560,10 +541,12 @@ public class SongController {
             //id3Data.setISRC(song.getISRC());
 
             mp3.save(mp3Label.getText() + ".mp3");
+
+
             try {
                 Files.delete(Path.of(fileLoc));
             } catch (IOException e) {
-                logger.debug("can't delete cause of: "+e);
+                logger.error("File cannot be deleted! "+fileLoc,e);
             }
             File mp3FileNew = new File(mp3Label.getText() + ".mp3");
             boolean info = mp3FileNew.renameTo(new File(fileLoc));
@@ -632,8 +615,8 @@ public class SongController {
         debugTracker.add("checkArtistField");
         logger.debug("----- Executing "+debugTracker);
 
-        ID3v2 id3Data = getID3(mp3Label.getText());
-        if (!compareTag(id3Data.getArtist(), textArtist.getText())) {
+        ID3v2 id3Data = ID3v2Utils.getID3(mp3Label.getText());
+        if (!StringUtils.compareStrings(id3Data.getArtist(), textArtist.getText())) {
             textArtist.setStyle("-fx-background-color: #FFCCBB");
         } else {
             textArtist.setStyle("-fx-background-color: #FFFFFF");
@@ -674,7 +657,7 @@ public class SongController {
         debugTracker.add("copyID3");
         logger.debug("----- Executing "+debugTracker);
 
-        copiedID3 = getID3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
+        copiedID3 = ID3v2Utils.getID3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
         logger.debug(copiedID3.getArtist());
         songDatabaseTable.getSelectionModel().select(currentSongID);
 
