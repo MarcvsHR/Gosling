@@ -61,10 +61,12 @@ public class SongController {
     final int skipIncrement = 10000;
     private Integer currentSongID = 0;
     ID3v2 copiedID3 = new ID3v24Tag();
+    List<String> debugTracker = new ArrayList<String>();
 
     public void initialize() {
 
-        logger.debug("Executing initialize....");
+        debugTracker.add("initialize");
+        logger.debug("----- Executing "+debugTracker);
 
         tableYear.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getYear()));
         tableID.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getId()));
@@ -84,45 +86,61 @@ public class SongController {
         changeVolume();
 
         //adding songs from c:\test so that I don't have to manually load every time I test
-        String fileLoc = "C:\\Users\\glazb\\Downloads";
-        //String fileLoc = "c:\\test";
+        //String fileLoc = "C:\\Users\\glazb\\Downloads";
+        String fileLoc = "c:\\test";
         //String fileLoc = "C:\\Users\\glazb\\Music\\Unknown artist";
         File loadFiles = new File(fileLoc);
         addSongsFromFolder(loadFiles);
+
+        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+        debugTracker.remove(debugTracker.size()-1);
     }
 
     @FXML
-    //goes back to the main window
     protected void backToMain() throws IOException {
 
-        logger.debug("Executing backToMain....");
+        debugTracker.add("backToMain");
+        logger.debug("----- Executing "+debugTracker);
 
         Stage stage = (Stage) songBackButton.getScene().getWindow();
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("view/hello-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 320, 240);
         stage.setTitle("Songs");
         stage.setScene(scene);
+
+        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+        debugTracker.remove(debugTracker.size()-1);
     }
 
     @FXML
     protected File pickFolder() {
 
-        logger.debug("Executing pickFolder....");
+        debugTracker.add("pickFolder");
+        logger.debug("----- Executing "+debugTracker);
 
         DirectoryChooser dc = new DirectoryChooser();
         dc.setInitialDirectory(new File("C:\\test"));
+
+        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+        debugTracker.remove(debugTracker.size()-1);
+
         return dc.showDialog(null);
     }
 
     @FXML
     protected void clickedFolderButton() {
+        debugTracker.add("clickedFolderButton");
+        logger.debug("----- Executing "+debugTracker);
         addSongsFromFolder(pickFolder());
+        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+        debugTracker.remove(debugTracker.size()-1);
     }
 
     @FXML
     protected void addSongsFromFolder(File directory) {
 
-        logger.debug("Executing addSongsFromFolder....");
+        debugTracker.add("addSongsFromFolder");
+        logger.debug("----- Executing "+debugTracker);
 
         List<Path> mp3List = new ArrayList<>();
 
@@ -150,11 +168,15 @@ public class SongController {
         } catch (IOException e) {
             logger.error("couldn't get files from folder",e);
         }
+
+        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+        debugTracker.remove(debugTracker.size()-1);
    }
 
     private void addMP3(File file) {
 
-        logger.debug("Executing addMP3....");
+        debugTracker.add("addMP3");
+        logger.debug("----- Executing "+debugTracker);
 
         SongRepository songRepo = new SongRepository();
         Song id3Tag;
@@ -169,11 +191,15 @@ public class SongController {
             alert.showAndWait();
         } else {
             SongRepository.addSong(id3Tag); }
+
+        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+        debugTracker.remove(debugTracker.size()-1);
     }
 
     private void updateTable() {
 
-        logger.debug("Executing updateTable....");
+        debugTracker.add("updateTable");
+        logger.debug("----- Executing "+debugTracker);
 
         SongRepository songRepo = new SongRepository();
         songList.clear();
@@ -183,11 +209,15 @@ public class SongController {
 //        if (songDatabaseTable.getItems().size()>0) {
 //        openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc()); }
 //        colorizeTable();
+
+        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+        debugTracker.remove(debugTracker.size()-1);
     }
 
     private void colorizeTable() {
 
-        logger.debug("Executing colorizeTable....");
+        debugTracker.add("colorizeTable");
+        logger.debug("----- Executing "+debugTracker);
 
 //        songDatabaseTable.setRowFactory(tv -> new TableRow<Song>() {
 //            @Override
@@ -203,11 +233,14 @@ public class SongController {
 //            }
 //        });
 
+        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+        debugTracker.remove(debugTracker.size()-1);
     }
 
     public Song getID(File file) {
 
-        logger.debug("Executing getID....");
+        debugTracker.add("getID");
+        logger.debug("----- Executing "+debugTracker);
 
        Song testSong = new Song();
 
@@ -238,13 +271,17 @@ public class SongController {
             logger.debug("Can't get id3 from file: "+file.getAbsolutePath());
         }
 
+        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+        debugTracker.remove(debugTracker.size()-1);
+
        return testSong;
    }
 
-   @FXML
+    @FXML
     public void clickTable(MouseEvent event) {
 
-       logger.debug("Executing clickTable....");
+        debugTracker.add("clickTable");
+        logger.debug("----- Executing "+debugTracker);
 
         if (event.getButton() == MouseButton.SECONDARY) {
             logger.debug("right click");
@@ -256,13 +293,16 @@ public class SongController {
                 logger.error("nothing found on double click",e);
             }
         }
+
+        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+        debugTracker.remove(debugTracker.size()-1);
     }
 
     @FXML
-    //open mp3 file for playing and reading id3 data
     protected void openMP3(String fileLoc) {
 
-        logger.debug("Executing openMP3....");
+        debugTracker.add("openMP3");
+        logger.debug("----- Executing "+debugTracker);
 
         boolean sameFile = true;
         if (!mp3Label.getText().isEmpty()) {
@@ -301,13 +341,14 @@ public class SongController {
             updateTextFields(fileLoc);
         }
 
-
-
+        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+        debugTracker.remove(debugTracker.size()-1);
     }
 
     private void updateTextFields(String fileLoc) {
 
-        logger.debug("Executing updateTextFields....");
+        debugTracker.add("updateTextFields");
+        logger.debug("----- Executing "+debugTracker);
 
         //close old mp3
         if (mplayer != null) {
@@ -339,23 +380,31 @@ public class SongController {
             //set slider to tick = 0.1s precision
             mp3Slider.setMax(new Mp3File(new File(fileLoc)).getLengthInMilliseconds() / 100);
             currentSongID = songDatabaseTable.getSelectionModel().getSelectedIndex();
-            logger.debug("chance song to: "+currentSongID);
+            logger.debug("change song to: "+currentSongID);
 
         } catch (Exception ignored) {
             logger.error("Error while opening file " + fileLoc, ignored);
         }
+
+        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+        debugTracker.remove(debugTracker.size()-1);
     }
 
     private ID3v2 getID3(String fileLoc) {
 
-        logger.debug("Executing getID3....");
+        debugTracker.add("getID3");
+        logger.debug("----- Executing "+debugTracker);
 
         File mp3File = new File(fileLoc);
         try {
             Mp3File song = new Mp3File(mp3File);
+            logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+            debugTracker.remove(debugTracker.size()-1);
             return song.getId3v2Tag();
         } catch (Exception ignored) {
             logger.error("can't fetch ID3 data from file",ignored);
+            logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+            debugTracker.remove(debugTracker.size()-1);
             return new ID3v24Tag();
         }
     }
@@ -372,7 +421,6 @@ public class SongController {
     }
 
     @FXML
-    //play mp3 file
     protected void playMP3() {
 
         logger.debug("Executing playMP3....");
@@ -412,14 +460,12 @@ public class SongController {
     }
 
     @FXML
-    //pause mp3 if loaded
     protected void pauseMP3() {
         if (mplayer != null) {
             mplayer.pause(); }
     }
 
     @FXML
-    //enables the moving of the slider to the time you want to listen at
     protected void moveTime() {
         if (mplayer != null) {
             mplayer.seek(Duration.millis(mp3Slider.getValue() *100));
@@ -428,34 +474,29 @@ public class SongController {
     }
 
     @FXML
-    //disable slider updates while dragging
     protected void sliderDrag() {
         updateCheck = false;
     }
 
     @FXML
-    //move forward X seconds button
     protected void moveTimeForward() {
         if (mplayer != null) {
             mplayer.seek(Duration.millis(mplayer.getCurrentTime().toMillis() + skipIncrement)); }
     }
 
     @FXML
-    //move back X seconds button
     protected void moveTimeBack() {
         if (mplayer != null) {
             mplayer.seek(Duration.millis(mplayer.getCurrentTime().toMillis() - skipIncrement)); }
     }
 
     @FXML
-    //move forward X seconds button
     protected void moveTimeForwardLittle() {
         if (mplayer != null) {
             mplayer.seek(Duration.millis(mplayer.getCurrentTime().toMillis() + 100)); }
     }
 
     @FXML
-    //move back X seconds button
     protected void moveTimeBackLittle() {
         if (mplayer != null) {
             mplayer.seek(Duration.millis(mplayer.getCurrentTime().toMillis() - 100)); }
@@ -463,7 +504,8 @@ public class SongController {
 
     public void updateMP3() {
 
-        logger.debug("Executing updateMP3....");
+        debugTracker.add("updateMP3");
+        logger.debug("----- Executing "+debugTracker);
 
         Song song = new Song();
         String fileLoc = mp3Label.getText();
@@ -491,11 +533,15 @@ public class SongController {
         //update database and table
         SongRepository.addSong(song);
         updateTable();
+
+        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+        debugTracker.remove(debugTracker.size()-1);
     }
 
     private void writeToMP3(Song song, String fileLoc) {
 
-        logger.debug("Executing writeToMP3....");
+        debugTracker.add("writeToMP3");
+        logger.debug("----- Executing "+debugTracker);
 
         if (mplayer != null) {mplayer.dispose();}
 
@@ -526,21 +572,29 @@ public class SongController {
         } catch (Exception e) {
             logger.error("Error while opening file " + fileLoc, e);
         }
+
+        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+        debugTracker.remove(debugTracker.size()-1);
     }
 
     private void openMediaFile(String fileLoc) {
 
-        logger.debug("Executing openMediaFile....");
+        debugTracker.add("openMediaFile");
+        logger.debug("----- Executing "+debugTracker);
 
         File mp3File = new File(fileLoc);
         String mp3Path = mp3File.toURI().toASCIIString();
         Media mp3Media = new Media(mp3Path);
         mplayer = new MediaPlayer(mp3Media);
+
+        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+        debugTracker.remove(debugTracker.size()-1);
     }
 
     public File openFile() {
 
-        logger.debug("Executing openMP3File....");
+        debugTracker.add("openFile");
+        logger.debug("----- Executing "+debugTracker);
 
         FileChooser fc = new FileChooser();
         fc.setTitle("Open MP3");
@@ -548,12 +602,17 @@ public class SongController {
         FileChooser.ExtensionFilter extFilter =
                 new FileChooser.ExtensionFilter("MP3 files (*.mp3)", "*.mp3");
         fc.getExtensionFilters().add(extFilter);
+
+        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+        debugTracker.remove(debugTracker.size()-1);
+
         return fc.showOpenDialog(null);
     }
 
     public void addSong2DB(ActionEvent actionEvent) {
 
-        logger.debug("Executing addSong2DB....");
+        debugTracker.add("addSong2DB");
+        logger.debug("----- Executing "+debugTracker);
 
         //select file
         File mp3 = openFile();
@@ -563,11 +622,15 @@ public class SongController {
 
         //preview changes
         updateTable();
+
+        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+        debugTracker.remove(debugTracker.size()-1);
     }
 
     public void checkArtistField(KeyEvent inputMethodEvent) {
 
-        logger.debug("Executing checkArtistField....");
+        debugTracker.add("checkArtistField");
+        logger.debug("----- Executing "+debugTracker);
 
         ID3v2 id3Data = getID3(mp3Label.getText());
         if (!compareTag(id3Data.getArtist(), textArtist.getText())) {
@@ -575,11 +638,15 @@ public class SongController {
         } else {
             textArtist.setStyle("-fx-background-color: #FFFFFF");
         }
+
+        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+        debugTracker.remove(debugTracker.size()-1);
     }
 
     public void revertID3(ActionEvent actionEvent) {
 
-        logger.debug("Executing revertID3....");
+        debugTracker.add("revertID3");
+        logger.debug("----- Executing "+debugTracker);
 
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Unsaved changes");
@@ -590,6 +657,9 @@ public class SongController {
         if (result.get() == ButtonType.OK){
             updateTextFields(mp3Label.getText());
         }
+
+        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+        debugTracker.remove(debugTracker.size()-1);
     }
 
     public void changeVolume() {
@@ -601,23 +671,32 @@ public class SongController {
 
     public void copyID3(ActionEvent actionEvent) {
 
-        logger.debug("Executing copyID3....");
+        debugTracker.add("copyID3");
+        logger.debug("----- Executing "+debugTracker);
 
         copiedID3 = getID3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
         logger.debug(copiedID3.getArtist());
         songDatabaseTable.getSelectionModel().select(currentSongID);
+
+        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+        debugTracker.remove(debugTracker.size()-1);
     }
 
     public void pasteID3(ActionEvent actionEvent) {
 
-        logger.debug("Executing pasetID3....");
+        debugTracker.add("pasteID3");
+        logger.debug("----- Executing "+debugTracker);
 
         songDatabaseTable.getSelectionModel().select(currentSongID);
+
+        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+        debugTracker.remove(debugTracker.size()-1);
     }
 
     public void deleteFile(ActionEvent actionEvent) {
 
-        logger.debug("Executing deleteFile....");
+        debugTracker.add("deleteFile");
+        logger.debug("----- Executing "+debugTracker);
 
         String fileLoc = songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc();
         File file = new File(fileLoc);
@@ -645,6 +724,10 @@ public class SongController {
             }
         }
 
+        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
+        debugTracker.remove(debugTracker.size()-1);
     }
+
+
 }
 
