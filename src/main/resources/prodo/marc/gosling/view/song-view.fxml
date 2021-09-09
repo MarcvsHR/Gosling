@@ -2,7 +2,9 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
@@ -105,7 +107,7 @@
             <Slider fx:id="volumeSlider" blockIncrement="1.0" onKeyReleased="#changeVolume" onMouseClicked="#changeVolume" onMouseDragged="#changeVolume" prefWidth="200.0" value="100.0" />
             <Label fx:id="labelVolume" text="Volume: 100%" />
             </HBox>
-            <TableView fx:id="songDatabaseTable" onMouseClicked="#doubleClickTable">
+            <TableView fx:id="songDatabaseTable" onMouseClicked="#clickTable">
               <columns>
                   <TableColumn fx:id="tableID" prefWidth="30.0" text="ID" />
                   <TableColumn fx:id="tableArtist" prefWidth="180.0" text="Artist" />
@@ -118,6 +120,15 @@
                   <TableColumn fx:id="tableISRC" prefWidth="100.0" text="ISRC" />
                   <TableColumn fx:id="tableFileLoc" prefWidth="300.0" text="File Location" />
               </columns>
+            <contextMenu>
+               <ContextMenu>
+                 <items>
+                     <MenuItem mnemonicParsing="false" onAction="#copyID3" text="Copy" />
+                     <MenuItem mnemonicParsing="false" onAction="#pasteID3" text="Paste" />
+                     <MenuItem mnemonicParsing="false" onAction="#deleteFile" text="Delete" />
+                 </items>
+               </ContextMenu>
+            </contextMenu>
             </TableView>
         </VBox>
     </HBox>

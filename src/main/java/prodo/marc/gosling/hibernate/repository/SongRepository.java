@@ -36,7 +36,23 @@ public class SongRepository {
             }
         }
 
+    }
 
+    public static void delete(Song song) {
+        Session session = null;
+        try {
+            session = HibernateUtils.openSession();
+            session.getTransaction().begin();
+            session.delete(song);
+            session.getTransaction().commit();
+        }catch (Exception e){
+            logger.error("Error while adding song "+song,e);
+
+        }finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
     }
 
     public List<Song> getSongs(){

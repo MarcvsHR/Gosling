@@ -13,6 +13,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -59,9 +60,12 @@ public class SongController {
     private boolean updateCheck = true;
     final int skipIncrement = 10000;
     private Integer currentSongID = 0;
-    private Integer previousSongID = 0;
+    ID3v2 copiedID3 = new ID3v24Tag();
 
     public void initialize() {
+
+        logger.debug("Executing initialize....");
+
         tableYear.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getYear()));
         tableID.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getId()));
         tableArtist.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getArtist()));
@@ -80,12 +84,19 @@ public class SongController {
         changeVolume();
 
         //adding songs from c:\test so that I don't have to manually load every time I test
-        addSongsFromFolder(new File("c:\\test"));
+        String fileLoc = "C:\\Users\\glazb\\Downloads";
+        //String fileLoc = "c:\\test";
+        //String fileLoc = "C:\\Users\\glazb\\Music\\Unknown artist";
+        File loadFiles = new File(fileLoc);
+        addSongsFromFolder(loadFiles);
     }
 
     @FXML
     //goes back to the main window
     protected void backToMain() throws IOException {
+
+        logger.debug("Executing backToMain....");
+
         Stage stage = (Stage) songBackButton.getScene().getWindow();
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("view/hello-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 320, 240);
@@ -95,6 +106,9 @@ public class SongController {
 
     @FXML
     protected File pickFolder() {
+
+        logger.debug("Executing pickFolder....");
+
         DirectoryChooser dc = new DirectoryChooser();
         dc.setInitialDirectory(new File("C:\\test"));
         return dc.showDialog(null);
@@ -107,6 +121,8 @@ public class SongController {
 
     @FXML
     protected void addSongsFromFolder(File directory) {
+
+        logger.debug("Executing addSongsFromFolder....");
 
         List<Path> mp3List = new ArrayList<>();
 
@@ -137,6 +153,9 @@ public class SongController {
    }
 
     private void addMP3(File file) {
+
+        logger.debug("Executing addMP3....");
+
         SongRepository songRepo = new SongRepository();
         Song id3Tag;
         id3Tag = getID(file);
@@ -153,18 +172,23 @@ public class SongController {
     }
 
     private void updateTable() {
-        //currentSongID = 0;
+
+        logger.debug("Executing updateTable....");
+
         SongRepository songRepo = new SongRepository();
         songList.clear();
         songList.addAll(songRepo.getSongs());
         songDatabaseTable.setItems(songList);
         songDatabaseTable.getSelectionModel().select(currentSongID);
-        if (songDatabaseTable.getItems().size()>0) {
-        openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc()); }
-        colorizeTable();
+//        if (songDatabaseTable.getItems().size()>0) {
+//        openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc()); }
+//        colorizeTable();
     }
 
     private void colorizeTable() {
+
+        logger.debug("Executing colorizeTable....");
+
 //        songDatabaseTable.setRowFactory(tv -> new TableRow<Song>() {
 //            @Override
 //            public void updateItem(Song item, boolean empty) {
@@ -182,6 +206,8 @@ public class SongController {
     }
 
     public Song getID(File file) {
+
+        logger.debug("Executing getID....");
 
        Song testSong = new Song();
 
@@ -216,13 +242,16 @@ public class SongController {
    }
 
    @FXML
-    public void doubleClickTable(MouseEvent event) {
-        if (event.getClickCount() == 2) {
+    public void clickTable(MouseEvent event) {
+
+       logger.debug("Executing clickTable....");
+
+        if (event.getButton() == MouseButton.SECONDARY) {
+            logger.debug("right click");
+        }
+        else if (event.getButton() == MouseButton.PRIMARY) {
             try {
-                TableView.TableViewSelectionModel<Song> p = songDatabaseTable.getSelectionModel();
-                openMP3(p.getSelectedItem().getFileLoc());
-                previousSongID = currentSongID;
-                currentSongID = p.getSelectedItem().getId();
+                openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
             } catch (Exception e) {
                 logger.error("nothing found on double click",e);
             }
@@ -235,9 +264,8 @@ public class SongController {
 
         logger.debug("Executing openMP3....");
 
-        boolean confirmed = true;
         boolean sameFile = true;
-        if (fileLoc != mp3Label.getText() & !mp3Label.getText().isEmpty()) {
+        if (!mp3Label.getText().isEmpty()) {
             try {
                 ID3v2 id3Data = getID3(mp3Label.getText());
 
@@ -262,22 +290,25 @@ public class SongController {
             alert.setContentText("Do you want to save the ID3 changes you have made?");
 
             Optional<ButtonType> result = alert.showAndWait();
-            if (result.get() != ButtonType.OK){
-                confirmed = false;
+            if (result.get() == ButtonType.OK){
+                //songDatabaseTable.getSelectionModel().select(currentSongID);
+                updateMP3();
+            } else {
+                songDatabaseTable.getSelectionModel().select(currentSongID);
+                logger.debug("i should be selecting number: "+currentSongID);
             }
-        }
-
-        if (confirmed) {
-
-            updateTextFields(fileLoc);
-
         } else {
-            currentSongID = previousSongID;
-            songDatabaseTable.getSelectionModel().select(currentSongID);
+            updateTextFields(fileLoc);
         }
+
+
+
     }
 
     private void updateTextFields(String fileLoc) {
+
+        logger.debug("Executing updateTextFields....");
+
         //close old mp3
         if (mplayer != null) {
             mplayer.stop();
@@ -307,6 +338,8 @@ public class SongController {
 
             //set slider to tick = 0.1s precision
             mp3Slider.setMax(new Mp3File(new File(fileLoc)).getLengthInMilliseconds() / 100);
+            currentSongID = songDatabaseTable.getSelectionModel().getSelectedIndex();
+            logger.debug("chance song to: "+currentSongID);
 
         } catch (Exception ignored) {
             logger.error("Error while opening file " + fileLoc, ignored);
@@ -314,6 +347,9 @@ public class SongController {
     }
 
     private ID3v2 getID3(String fileLoc) {
+
+        logger.debug("Executing getID3....");
+
         File mp3File = new File(fileLoc);
         try {
             Mp3File song = new Mp3File(mp3File);
@@ -338,6 +374,9 @@ public class SongController {
     @FXML
     //play mp3 file
     protected void playMP3() {
+
+        logger.debug("Executing playMP3....");
+
         //none is loaded, load file first
         if (mplayer == null) {
             logger.debug("no file open to play");
@@ -371,6 +410,7 @@ public class SongController {
         sliderUpdateTimer.scheduleAtFixedRate(sliderUpdateTask, 100,100);
 
     }
+
     @FXML
     //pause mp3 if loaded
     protected void pauseMP3() {
@@ -422,22 +462,45 @@ public class SongController {
     }
 
     public void updateMP3() {
-        Song song = new Song();
-        File mp3File = new File(mp3Label.getText());
 
-        song.setId(currentSongID);
+        logger.debug("Executing updateMP3....");
+
+        Song song = new Song();
+        String fileLoc = mp3Label.getText();
+
+        song.setId(currentSongID+1);
         song.setArtist(textArtist.getText());
         song.setTitle(textTitle.getText());
         song.setAlbum(textAlbum.getText());
         song.setPublisher(textPublisher.getText());
         song.setComposer(textComposer.getText());
-        song.setYear(Integer.valueOf(textYear.getText()));
+        if (textYear.getText() != null) {song.setYear(Integer.valueOf(textYear.getText()));}
         song.setGenre(textGenre.getText());
         song.setISRC(textISRC.getText());
         song.setFileLoc(mp3Label.getText());
 
+        //unload song if playing so the file can be saved
+        if (mplayer != null) {mplayer.dispose();}
+
+        //save file
+        writeToMP3(song, fileLoc);
+
+        //load file into media player
+        openMediaFile(fileLoc);
+
+        //update database and table
+        SongRepository.addSong(song);
+        updateTable();
+    }
+
+    private void writeToMP3(Song song, String fileLoc) {
+
+        logger.debug("Executing writeToMP3....");
+
+        if (mplayer != null) {mplayer.dispose();}
+
         try {
-            Mp3File mp3 = new Mp3File(mp3File);
+            Mp3File mp3 = new Mp3File(new File(fileLoc));
             ID3v24Tag id3Data = new ID3v24Tag();
             mp3.setId3v2Tag(id3Data);
 
@@ -446,45 +509,39 @@ public class SongController {
             id3Data.setAlbum(song.getAlbum());
             id3Data.setPublisher(song.getPublisher());
             id3Data.setComposer(song.getComposer());
-            id3Data.setYear(Integer.toString(song.getYear()));
-            id3Data.setGenreDescription(song.getGenre());
+            if (song.getYear() != null ) {id3Data.setYear(Integer.toString(song.getYear()));} else {id3Data.setYear("0");}
+            if (song.getGenre() != null ) {id3Data.setGenreDescription(song.getGenre());} else {id3Data.setGenreDescription("");}
             //id3Data.setISRC(song.getISRC());
 
-            mp3.save(mp3Label.getText()+".mp3");
+            mp3.save(mp3Label.getText() + ".mp3");
+            try {
+                Files.delete(Path.of(fileLoc));
+            } catch (IOException e) {
+                logger.debug("can't delete cause of: "+e);
+            }
+            File mp3FileNew = new File(mp3Label.getText() + ".mp3");
+            boolean info = mp3FileNew.renameTo(new File(fileLoc));
+            logger.debug("rename results are " + info);
 
-            mplayer.dispose();
-
-            boolean info = mp3File.delete();
-            logger.debug("delete results are "+ info);
-            File mp3FileNew = new File(mp3Label.getText()+".mp3");
-            info = mp3FileNew.renameTo(mp3File);
-            logger.debug("rename results are "+ info);
-
-            logger.debug("file data updated");
-
-            //load file into media player
-            openMediaFile(mp3Label.getText());
-
-
-        }catch (Exception e){
-            logger.error("Error while opening file "+mp3File.getAbsolutePath(),e);
+        } catch (Exception e) {
+            logger.error("Error while opening file " + fileLoc, e);
         }
-
-        SongRepository songRepo = new SongRepository();
-        songRepo.addSong(song);
-
-        updateTable();
-
     }
 
     private void openMediaFile(String fileLoc) {
+
+        logger.debug("Executing openMediaFile....");
+
         File mp3File = new File(fileLoc);
         String mp3Path = mp3File.toURI().toASCIIString();
         Media mp3Media = new Media(mp3Path);
         mplayer = new MediaPlayer(mp3Media);
     }
 
-    public File openMP3File() {
+    public File openFile() {
+
+        logger.debug("Executing openMP3File....");
+
         FileChooser fc = new FileChooser();
         fc.setTitle("Open MP3");
         fc.setInitialDirectory(new File("C:\\test"));
@@ -495,8 +552,11 @@ public class SongController {
     }
 
     public void addSong2DB(ActionEvent actionEvent) {
+
+        logger.debug("Executing addSong2DB....");
+
         //select file
-        File mp3 = openMP3File();
+        File mp3 = openFile();
 
         //add file to DB
         addMP3(mp3);
@@ -506,6 +566,9 @@ public class SongController {
     }
 
     public void checkArtistField(KeyEvent inputMethodEvent) {
+
+        logger.debug("Executing checkArtistField....");
+
         ID3v2 id3Data = getID3(mp3Label.getText());
         if (!compareTag(id3Data.getArtist(), textArtist.getText())) {
             textArtist.setStyle("-fx-background-color: #FFCCBB");
@@ -515,6 +578,9 @@ public class SongController {
     }
 
     public void revertID3(ActionEvent actionEvent) {
+
+        logger.debug("Executing revertID3....");
+
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Unsaved changes");
         alert.setHeaderText("You are resetting the ID3 changes you made for this MP3");
@@ -531,6 +597,54 @@ public class SongController {
         if (mplayer != null) {
             mplayer.setVolume(volumeSlider.getValue()/100);
         }
+    }
+
+    public void copyID3(ActionEvent actionEvent) {
+
+        logger.debug("Executing copyID3....");
+
+        copiedID3 = getID3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
+        logger.debug(copiedID3.getArtist());
+        songDatabaseTable.getSelectionModel().select(currentSongID);
+    }
+
+    public void pasteID3(ActionEvent actionEvent) {
+
+        logger.debug("Executing pasetID3....");
+
+        songDatabaseTable.getSelectionModel().select(currentSongID);
+    }
+
+    public void deleteFile(ActionEvent actionEvent) {
+
+        logger.debug("Executing deleteFile....");
+
+        String fileLoc = songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc();
+        File file = new File(fileLoc);
+
+        String[] dialogData = {"Database entry", "ID3 data", "File"};
+
+        ChoiceDialog dialog = new ChoiceDialog(dialogData[2], dialogData);
+        dialog.setTitle("Delete");
+        dialog.setHeaderText("Select what you want to delete");
+
+        Optional result = dialog.showAndWait();
+        if (result.isPresent()) {
+            String picked = result.get().toString();
+            logger.debug(picked);
+            if (picked == "File") {
+                Song song = songDatabaseTable.getSelectionModel().getSelectedItem();
+                SongRepository.delete(song);
+                updateTable();
+                file.delete();
+            }
+            else if (picked == "Database entry") {
+                Song song =  songDatabaseTable.getSelectionModel().getSelectedItem();
+                SongRepository.delete(song);
+                updateTable();
+            }
+        }
+
     }
 }
 

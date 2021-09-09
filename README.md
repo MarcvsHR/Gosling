@@ -10,5 +10,6 @@ ISRC functions
 check why some MP3s don't play
 resize table when you resize window
 filter song database view
+save is broken atm, doesn't delete files
 
 expand SongRepository.checkForDupes with soundex and better result catching including a window to compare and select
