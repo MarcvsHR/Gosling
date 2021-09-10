@@ -17,6 +17,7 @@ module prodo.marc.gosling {
     opens prodo.marc.gosling to javafx.fxml;
     exports prodo.marc.gosling;
     exports prodo.marc.gosling.controllers;
+    exports prodo.marc.gosling.dao;
     opens prodo.marc.gosling.controllers to javafx.fxml;
     opens prodo.marc.gosling.dao to org.hibernate.orm.core;
 

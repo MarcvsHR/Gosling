@@ -17,8 +17,6 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.log4j.LogManager;
@@ -26,19 +24,18 @@ import org.apache.log4j.Logger;
 import prodo.marc.gosling.HelloApplication;
 import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.hibernate.repository.SongRepository;
+import prodo.marc.gosling.service.FileUtils;
 import prodo.marc.gosling.service.ID3v2Utils;
+import prodo.marc.gosling.service.Popups;
 import prodo.marc.gosling.service.StringUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
 
 
 public class SongController {
@@ -61,14 +58,13 @@ public class SongController {
     final int skipIncrement = 10000;
     private Integer currentSongID = 0;
     ID3v2 copiedID3 = new ID3v24Tag();
-    List<String> debugTracker = new ArrayList<String>();
     /**Initial volume for mp3*/
-    private static final int INITIAL_VOLUME_SO_MY_EARS_DONT_EXPLODE=20;
+    private static final Integer INITIAL_VOLUME_SO_MY_EARS_DONT_EXPLODE=20;
+    private String currentFileLoc = "";
 
     public void initialize() {
 
-        debugTracker.add("initialize");
-        logger.debug("----- Executing "+debugTracker);
+        logger.debug("----- Executing initialize");
 
         tableYear.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getYear()));
         tableID.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getId()));
@@ -83,27 +79,22 @@ public class SongController {
 
         updateTable();
 
-        //set starting volume to 20 so I don't get my ears blown out
-        //no magic numbers
-        volumeSlider.setValue(INITIAL_VOLUME_SO_MY_EARS_DONT_EXPLODE);
-        changeVolume();
+        volumeSlider.setValue(INITIAL_VOLUME_SO_MY_EARS_DONT_EXPLODE);  changeVolume();
 
         //adding songs from c:\test so that I don't have to manually load every time I test
         //String fileLoc = "C:\\Users\\glazb\\Downloads";
         String fileLoc = "c:\\test";
         //String fileLoc = "C:\\Users\\glazb\\Music\\Unknown artist";
-        File loadFiles = new File(fileLoc);
-        addSongsFromFolder(loadFiles);
+        try { addSongsFromFolder(new File(fileLoc)); }
+        catch (IOException io) { logger.error("can't open folder",io); }
 
-        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-        debugTracker.remove(debugTracker.size()-1);
+        logger.debug("----- ending initialize");
     }
 
     @FXML
     protected void backToMain() throws IOException {
 
-        debugTracker.add("backToMain");
-        logger.debug("----- Executing "+debugTracker);
+        logger.debug("----- Executing backToMain");
 
         Stage stage = (Stage) songBackButton.getScene().getWindow();
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("view/hello-view.fxml"));
@@ -111,232 +102,134 @@ public class SongController {
         stage.setTitle("Songs");
         stage.setScene(scene);
 
-        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-        debugTracker.remove(debugTracker.size()-1);
-    }
-
-    @FXML
-    protected File pickFolder() {
-
-        debugTracker.add("pickFolder");
-        logger.debug("----- Executing "+debugTracker);
-
-        DirectoryChooser dc = new DirectoryChooser();
-        dc.setInitialDirectory(new File("C:\\test"));
-
-        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-        debugTracker.remove(debugTracker.size()-1);
-
-        return dc.showDialog(null);
+        logger.debug("----- ending backToMain");
     }
 
     @FXML
     protected void clickedFolderButton() {
-        debugTracker.add("clickedFolderButton");
-        logger.debug("----- Executing "+debugTracker);
-        addSongsFromFolder(pickFolder());
-        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-        debugTracker.remove(debugTracker.size()-1);
+        logger.debug("----- Executing clickedFolderButton");
+        File pickedFolder = FileUtils.pickFolder();
+        try {
+        addSongsFromFolder(pickedFolder); }
+        catch (IOException io) {
+            Popups.giveInfoAlert("Error", "Could not open folder", pickedFolder.getAbsolutePath());
+            logger.error("can't open folder",io);
+        }
+        logger.debug("----- ending clickedFolderButton");
     }
 
     @FXML
-    protected void addSongsFromFolder(File directory) {
+    protected void addSongsFromFolder(File directory) throws IOException {
 
-        debugTracker.add("addSongsFromFolder");
-        logger.debug("----- Executing "+debugTracker);
+        logger.debug("----- Executing addSongsFromFolder");
 
-        List<Path> mp3List = new ArrayList<>();
+        List<Path> mp3List = FileUtils.getFileListFromFolder(directory,"mp3");
+        logger.debug("number of files in the list: "+mp3List.size());
 
-        try (Stream<Path> walk = Files.walk(Paths.get(directory.getAbsolutePath()))) {
-            walk.filter(Files::isRegularFile).forEach(file -> {
-                if (file.toString().endsWith(".mp3")) {
-                    mp3List.add(file);
-                }
-            });
-            logger.debug("number of files in the list: "+mp3List.size());
+        putMP3ListIntoDB(mp3List);
+        updateTable();
 
-            AtomicInteger i = new AtomicInteger();
-            mp3List.forEach(file -> {
-                i.getAndIncrement();
-                logger.debug("processing file: "+ file);
-                logger.debug(i+" out of "+mp3List.size());
-
-                addMP3(new File(String.valueOf(file)));
-            });
-            //logger.debug("Songs on end -> \n: "+Arrays.toString(songRepo.getSongs().toArray()));
-
-            updateTable();
-            logger.debug(Arrays.toString(songDatabaseTable.getItems().toArray()));
-
-        } catch (IOException e) {
-            logger.error("couldn't get files from folder",e);
-        }
-
-        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-        debugTracker.remove(debugTracker.size()-1);
+        logger.debug("----- ending addSongsFromFolder");
    }
 
-    private void addMP3(File file) {
+    private void putMP3ListIntoDB(List<Path> mp3List) {
+        AtomicInteger i = new AtomicInteger();
+        mp3List.forEach(file -> {
+            i.getAndIncrement();
+            logger.debug("processing file: "+ file);
+            logger.debug(i+" out of "+mp3List.size());
 
-        debugTracker.add("addMP3");
-        logger.debug("----- Executing "+debugTracker);
+            addMP3(file);
+        });
+    }
+
+    private void addMP3(Path path) {
+
+        logger.debug("----- Executing addMP3");
 
         SongRepository songRepo = new SongRepository();
-        Song id3Tag;
-        id3Tag = getID(file);
-        if (songRepo.checkForDupes(id3Tag)) {
-            logger.debug("---song already exists - "+id3Tag.toString());
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Duplicate file import");
-            alert.setHeaderText("There is already a song with that name or location in the database");
-            alert.setContentText("adding file: "+id3Tag.getFileLoc());
-
-            alert.showAndWait();
+        Song song;
+        song = ID3v2Utils.songDataFromFile(new File(String.valueOf(path)));
+        if (songRepo.checkForDupes(song)) {
+            logger.debug("---song already exists - "+song);
+            Popups.giveInfoAlert("Duplicate file import",
+                    "There is already a song with that name or location in the database",
+                    "adding file: "+song.getFileLoc());
         } else {
-            SongRepository.addSong(id3Tag); }
+            SongRepository.addSong(song); }
 
-        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-        debugTracker.remove(debugTracker.size()-1);
+        logger.debug("----- ending addMP3");
     }
 
     private void updateTable() {
 
-        debugTracker.add("updateTable");
-        logger.debug("----- Executing "+debugTracker);
+        logger.debug("----- Executing updateTable");
 
         SongRepository songRepo = new SongRepository();
         songList.clear();
         songList.addAll(songRepo.getSongs());
         songDatabaseTable.setItems(songList);
         songDatabaseTable.getSelectionModel().select(currentSongID);
-//        if (songDatabaseTable.getItems().size()>0) {
-//        openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc()); }
-//        colorizeTable();
 
-        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-        debugTracker.remove(debugTracker.size()-1);
+        logger.debug("----- ending updateTable");
     }
-
-    private void colorizeTable() {
-
-        debugTracker.add("colorizeTable");
-        logger.debug("----- Executing "+debugTracker);
-
-//        songDatabaseTable.setRowFactory(tv -> new TableRow<Song>() {
-//            @Override
-//            public void updateItem(Song item, boolean empty) {
-//                super.updateItem(item, empty) ;
-//                if (item == null) {
-//                    setStyle("");
-//                } else if (item.getGenre().isEmpty()) {
-//                    setStyle("-fx-background-color: tomato;");
-//                } else {
-//                    setStyle("");
-//                }
-//            }
-//        });
-
-        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-        debugTracker.remove(debugTracker.size()-1);
-    }
-
-    public Song getID(File file) {
-
-        debugTracker.add("getID");
-        logger.debug("----- Executing "+debugTracker);
-
-       Song testSong = new Song();
-
-        try {
-            ID3v2 id3Data = ID3v2Utils.getID3(file.getAbsolutePath());
-            
-            testSong.setArtist(id3Data.getArtist());
-            testSong.setTitle(id3Data.getTitle());
-            testSong.setAlbum(id3Data.getAlbum());
-            testSong.setPublisher(id3Data.getPublisher());
-            testSong.setComposer(id3Data.getComposer());
-            int year = 0;
-            try {
-                year = Integer.parseInt(id3Data.getYear());
-            } catch (NumberFormatException e) {
-                //logger.error(id3Data.getYear() +" in file "+file.getAbsoluteFile()+"is not a number", e);
-                logger.debug("file "+file.getAbsolutePath()+" does not have a year");
-            }
-            testSong.setYear(year);
-            testSong.setGenre(id3Data.getGenreDescription());
-            //testSong.setISRC(id3Data.getISRC());
-            testSong.setISRC("ISRC");
-            //logger.debug(file.getAbsoluteFile());
-            //logger.debug(testSong.toString());
-            testSong.setFileLoc(file.getAbsoluteFile().toString());
-        }catch (Exception ignored){
-            //logger.error("Error while opening file "+file.getAbsolutePath(),ignored);
-            logger.debug("Can't get id3 from file: "+file.getAbsolutePath());
-        }
-
-        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-        debugTracker.remove(debugTracker.size()-1);
-
-       return testSong;
-   }
 
     @FXML
     public void clickTable(MouseEvent event) {
 
-        debugTracker.add("clickTable");
-        logger.debug("----- Executing "+debugTracker);
+        logger.debug("----- Executing clickTable");
 
         if (event.getButton() == MouseButton.SECONDARY) {
             logger.debug("right click");
         }
-        else if (event.getButton() == MouseButton.PRIMARY) {
+        else if (event.getButton() == MouseButton.PRIMARY && !songDatabaseTable.getSelectionModel().isEmpty()) {
             try {
-
-                //TODO: CHECK IF TABLE IS EMPTY
                 openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
             } catch (Exception e) {
-                logger.error("nothing found on double click",e);
+                logger.error("no table entry clicked",e);
             }
         }
 
-        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-        debugTracker.remove(debugTracker.size()-1);
+        logger.debug("----- ending clickTable");
     }
 
     @FXML
     protected void openMP3(String fileLoc) {
 
-        debugTracker.add("openMP3");
-        logger.debug("----- Executing "+debugTracker);
+        logger.debug("----- Executing openMP3");
 
-        boolean sameFile = true;
-        if (!mp3Label.getText().isEmpty()) {
+        int changeCounter = 0;
+        if (!Objects.equals(currentFileLoc, "")) {
             try {
-                ID3v2 id3Data = ID3v2Utils.getID3(mp3Label.getText());
+                ID3v2 id3Data = ID3v2Utils.getID3(new File(currentFileLoc));
 
-                if (sameFile) {sameFile = StringUtils.compareStrings(textArtist.getText(), id3Data.getArtist());}
-                if (sameFile) {sameFile = StringUtils.compareStrings(textTitle.getText(), id3Data.getTitle());}
-                if (sameFile) {sameFile = StringUtils.compareStrings(textAlbum.getText(), id3Data.getAlbum());}
-                if (sameFile) {sameFile = StringUtils.compareStrings(textPublisher.getText(), id3Data.getPublisher());}
-                if (sameFile) {sameFile = StringUtils.compareStrings(textComposer.getText(), id3Data.getComposer());}
-                if (sameFile) {sameFile =StringUtils.compareStrings(textYear.getText(), id3Data.getYear());}
-                if (sameFile) {sameFile = StringUtils.compareStrings(textGenre.getText(), id3Data.getGenreDescription());}
-                //if (sameFile) {sameFile = compareTag(textISRC.getText(), id3Data.getISRC());}
-
-            } catch (Exception ignored) {
-                logger.error("Error while opening file " + mp3Label.getText(), ignored);
+                if (!StringUtils.compareStrings(textArtist.getText(), id3Data.getArtist())) {
+                    changeCounter++;}
+                if (!StringUtils.compareStrings(textTitle.getText(), id3Data.getTitle())) {
+                    changeCounter++;}
+                if (!StringUtils.compareStrings(textAlbum.getText(), id3Data.getAlbum())) {
+                    changeCounter++;}
+                if (!StringUtils.compareStrings(textPublisher.getText(), id3Data.getPublisher())) {
+                    changeCounter++;}
+                if (!StringUtils.compareStrings(textComposer.getText(), id3Data.getComposer())) {
+                    changeCounter++;}
+                if (!StringUtils.compareStrings(textYear.getText(), id3Data.getYear())) {
+                    changeCounter++;}
+                if (!StringUtils.compareStrings(textGenre.getText(), id3Data.getGenreDescription())) {
+                    changeCounter++;}
+//                if (!StringUtils.compareStrings(textISRC.getText(), id3Data.getISRC())) {
+//                    changeCounter++;}
+            } catch (Exception problem) {
+                logger.error("Error while opening file " + currentFileLoc, problem);
             }
         }
 
-        if (!sameFile) {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Unsaved changes");
-            alert.setHeaderText("You are switching to another file with possible unsaved changes");
-            alert.setContentText("Do you want to save the ID3 changes you have made?");
+        if (changeCounter > 0) {
+            boolean result = Popups.giveConfirmAlert("Unsaved changes",
+                    "You are switching to another file with possible unsaved changes",
+                    "Do you want to save the ID3 changes you have made?");
 
-            Optional<ButtonType> result = alert.showAndWait();
-            if (result.get() == ButtonType.OK){
-                //songDatabaseTable.getSelectionModel().select(currentSongID);
+            if (result) {
                 updateMP3();
             } else {
                 songDatabaseTable.getSelectionModel().select(currentSongID);
@@ -346,14 +239,12 @@ public class SongController {
             updateTextFields(fileLoc);
         }
 
-        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-        debugTracker.remove(debugTracker.size()-1);
+        logger.debug("----- ending openMP3");
     }
 
     private void updateTextFields(String fileLoc) {
 
-        debugTracker.add("updateTextFields");
-        logger.debug("----- Executing "+debugTracker);
+        logger.debug("----- Executing updateTextFields");
 
         //close old mp3
         if (mplayer != null) {
@@ -363,15 +254,14 @@ public class SongController {
 
         //show file name
         mp3Label.setText(fileLoc);
+        currentFileLoc = fileLoc;
 
         //load file into media player
         openMediaFile(fileLoc);
 
         //load id3 data into text fields
-        //should prolly throw a message if empty
-        //still needs ISRC function
         try {
-            ID3v2 id3Data = ID3v2Utils.getID3(fileLoc);
+            ID3v2 id3Data = ID3v2Utils.getID3(new File(fileLoc));
             textArtist.setText(id3Data.getArtist());
             textArtist.setStyle("-fx-background-color: #FFFFFF");
             textTitle.setText(id3Data.getTitle());
@@ -383,58 +273,64 @@ public class SongController {
             //textISRC.setText(id3Data.getISRC());
 
             //set slider to tick = 0.1s precision
-            mp3Slider.setMax(new Mp3File(new File(fileLoc)).getLengthInMilliseconds() / 100);
+            double sliderValue = new Mp3File(new File(fileLoc)).getLengthInMilliseconds();
+            mp3Slider.setMax(sliderValue / 100);
+
             currentSongID = songDatabaseTable.getSelectionModel().getSelectedIndex();
             logger.debug("change song to: "+currentSongID);
 
-        } catch (Exception ignored) {
-            logger.error("Error while opening file " + fileLoc, ignored);
+        } catch (Exception report) {
+            logger.error("Error while opening file " + fileLoc, report);
         }
 
-        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-        debugTracker.remove(debugTracker.size()-1);
+        logger.debug("----- ending updateTextFields");
     }
-
-
-
-
 
     @FXML
     protected void playMP3() {
 
-        logger.debug("Executing playMP3....");
+        logger.debug("----- Executing playMP3");
 
         //none is loaded, load file first
         if (mplayer == null) {
             logger.debug("no file open to play");
+        } else {
+
+            //play file
+            mplayer.setVolume(volumeSlider.getValue() / 100);
+            mplayer.play();
+
+            //timer for updating current position slider
+            Timer sliderUpdateTimer = new Timer();
+            TimerTask sliderUpdateTask = new TimerTask() {
+                public void run() {
+                    double currentTime = mplayer.getCurrentTime().toSeconds();
+                    int minutes = (int) (currentTime / 60);
+                    double seconds = currentTime - minutes * 60;
+                    DecimalFormat df = new DecimalFormat("##.#");
+                    df.setRoundingMode(RoundingMode.DOWN);
+                    String secondsString = df.format(seconds);
+                    if (!secondsString.contains(".")) {
+                        secondsString += ".0";
+                    }
+                    if (seconds < 10) {
+                        secondsString = "0" + secondsString;
+                    }
+                    String finalSecondsString = secondsString;
+                    Platform.runLater(() -> {
+                        //show current time text, needs improving
+                        mp3Time.setText(String.format("%02xm ", minutes) + finalSecondsString + "s");
+                        //update slider to current time
+                        if (updateCheck) {
+                            mp3Slider.setValue(mplayer.getCurrentTime().toMillis() / 100);
+                        }
+                    });
+                }
+            };
+            sliderUpdateTimer.scheduleAtFixedRate(sliderUpdateTask, 100, 100);
         }
 
-        //play file
-        mplayer.setVolume(volumeSlider.getValue()/100);
-        mplayer.play();
-
-        //timer for updating current position slider
-        Timer sliderUpdateTimer =  new Timer();
-        TimerTask sliderUpdateTask =  new TimerTask() {
-            public void run() {
-                double currentTime = mplayer.getCurrentTime().toSeconds();
-                int minutes = (int) (currentTime / 60);
-                double seconds = currentTime - minutes * 60;
-                DecimalFormat df = new DecimalFormat("##.#");
-                df.setRoundingMode(RoundingMode.DOWN);
-                String secondsString = df.format(seconds);
-                if (!secondsString.contains(".")) {secondsString += ".0";}
-                if (seconds < 10) {secondsString = "0"+secondsString;}
-                String finalSecondsString = secondsString;
-                Platform.runLater(() -> {
-                    //show current time text, needs improving
-                    mp3Time.setText(String.format("%02xm ",minutes)+ finalSecondsString +"s");
-                    //update slider to current time
-                    if (updateCheck) { mp3Slider.setValue(mplayer.getCurrentTime().toMillis()/100); }
-                });
-            }
-        };
-        sliderUpdateTimer.scheduleAtFixedRate(sliderUpdateTask, 100,100);
+        logger.debug("----- ending playMP3");
 
     }
 
@@ -483,11 +379,9 @@ public class SongController {
 
     public void updateMP3() {
 
-        debugTracker.add("updateMP3");
-        logger.debug("----- Executing "+debugTracker);
+        logger.debug("----- Executing updateMP3");
 
         Song song = new Song();
-        String fileLoc = mp3Label.getText();
 
         song.setId(currentSongID+1);
         song.setArtist(textArtist.getText());
@@ -498,35 +392,35 @@ public class SongController {
         if (textYear.getText() != null) {song.setYear(Integer.valueOf(textYear.getText()));}
         song.setGenre(textGenre.getText());
         song.setISRC(textISRC.getText());
-        song.setFileLoc(mp3Label.getText());
+        song.setFileLoc(currentFileLoc);
 
         //unload song if playing so the file can be saved
-        if (mplayer != null) {mplayer.dispose();}
+        if (mplayer != null) { mplayer.dispose(); }
 
         //save file
-        writeToMP3(song, fileLoc);
-
-        //load file into media player
-        openMediaFile(fileLoc);
+        writeToMP3(song, currentFileLoc);
 
         //update database and table
         SongRepository.addSong(song);
         updateTable();
+        makeTextFieldsWhite();
 
-        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-        debugTracker.remove(debugTracker.size()-1);
+        logger.debug("----- ending updateMP3");
+    }
+
+    private void makeTextFieldsWhite() {
+        textArtist.setStyle("-fx-background-color: #FFFFFF");
     }
 
     private void writeToMP3(Song song, String fileLoc) {
 
-        debugTracker.add("writeToMP3");
-        logger.debug("----- Executing "+debugTracker);
+        logger.debug("----- Executing writeToMP3");
 
-        if (mplayer != null) {mplayer.dispose();}
+        if (mplayer != null) { mplayer.dispose(); }
 
+        String backupFileLoc = currentFileLoc + ".bak";
         try {
-            File file=new File(fileLoc);
-
+            File file = new File(fileLoc);
             Mp3File mp3 = new Mp3File(file);
             ID3v24Tag id3Data = new ID3v24Tag();
             mp3.setId3v2Tag(id3Data);
@@ -536,113 +430,77 @@ public class SongController {
             id3Data.setAlbum(song.getAlbum());
             id3Data.setPublisher(song.getPublisher());
             id3Data.setComposer(song.getComposer());
-            if (song.getYear() != null ) {id3Data.setYear(Integer.toString(song.getYear()));} else {id3Data.setYear("0");}
-            if (song.getGenre() != null ) {id3Data.setGenreDescription(song.getGenre());} else {id3Data.setGenreDescription("");}
+            if (song.getYear() != null) { id3Data.setYear(Integer.toString(song.getYear()));
+            } else { id3Data.setYear("0"); }
+            if (song.getGenre() != null) { id3Data.setGenreDescription(song.getGenre());
+            } else { id3Data.setGenreDescription(""); }
             //id3Data.setISRC(song.getISRC());
 
-            mp3.save(mp3Label.getText() + ".mp3");
-
-
-            try {
-                Files.delete(Path.of(fileLoc));
-            } catch (IOException e) {
-                logger.error("File cannot be deleted! "+fileLoc,e);
-            }
-            File mp3FileNew = new File(mp3Label.getText() + ".mp3");
-            boolean info = mp3FileNew.renameTo(new File(fileLoc));
-            logger.debug("rename results are " + info);
-
+            mp3.save(backupFileLoc);
         } catch (Exception e) {
             logger.error("Error while opening file " + fileLoc, e);
         }
 
-        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-        debugTracker.remove(debugTracker.size()-1);
+        try { Files.delete(Path.of(fileLoc));
+        } catch (IOException e) { //logger.error("File cannot be deleted! " + fileLoc, e);
+        }
+        File mp3FileNew = new File(backupFileLoc);
+        boolean info = mp3FileNew.renameTo(new File(fileLoc));
+        logger.debug("rename results are " + info);
+
+        logger.debug("----- ending writeToMP3");
     }
 
     private void openMediaFile(String fileLoc) {
-
-        debugTracker.add("openMediaFile");
-        logger.debug("----- Executing "+debugTracker);
+        logger.debug("----- Executing openMediaFile");
 
         File mp3File = new File(fileLoc);
         String mp3Path = mp3File.toURI().toASCIIString();
         Media mp3Media = new Media(mp3Path);
         mplayer = new MediaPlayer(mp3Media);
 
-        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-        debugTracker.remove(debugTracker.size()-1);
-    }
-
-    public File openFile() {
-
-        debugTracker.add("openFile");
-        logger.debug("----- Executing "+debugTracker);
-
-        FileChooser fc = new FileChooser();
-        fc.setTitle("Open MP3");
-        fc.setInitialDirectory(new File("C:\\test"));
-        FileChooser.ExtensionFilter extFilter =
-                new FileChooser.ExtensionFilter("MP3 files (*.mp3)", "*.mp3");
-        fc.getExtensionFilters().add(extFilter);
-
-        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-        debugTracker.remove(debugTracker.size()-1);
-
-        return fc.showOpenDialog(null);
+        logger.debug("----- ending openMediaFile");
     }
 
     public void addSong2DB(ActionEvent actionEvent) {
-
-        debugTracker.add("addSong2DB");
-        logger.debug("----- Executing "+debugTracker);
+        logger.debug("----- Executing addSong2DB");
 
         //select file
-        File mp3 = openFile();
+        File mp3 = FileUtils.openFile("MP3 files (*.mp3)","mp3");
 
         //add file to DB
-        addMP3(mp3);
+        addMP3(mp3.toPath());
 
         //preview changes
         updateTable();
 
-        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-        debugTracker.remove(debugTracker.size()-1);
+        logger.debug("----- ending addSong2DB");
     }
 
     public void checkArtistField(KeyEvent inputMethodEvent) {
+        logger.debug("----- Executing checkArtistField");
 
-        debugTracker.add("checkArtistField");
-        logger.debug("----- Executing "+debugTracker);
-
-        ID3v2 id3Data = ID3v2Utils.getID3(mp3Label.getText());
+        ID3v2 id3Data = ID3v2Utils.getID3(new File(currentFileLoc));
         if (!StringUtils.compareStrings(id3Data.getArtist(), textArtist.getText())) {
             textArtist.setStyle("-fx-background-color: #FFCCBB");
         } else {
             textArtist.setStyle("-fx-background-color: #FFFFFF");
         }
 
-        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-        debugTracker.remove(debugTracker.size()-1);
+        logger.debug("----- ending checkArtistField");
     }
 
     public void revertID3(ActionEvent actionEvent) {
+        logger.debug("----- Executing revertID3");
+        boolean result = Popups.giveConfirmAlert("Unsaved changes",
+                "You are resetting the ID3 changes you made for this MP3",
+                "Do you want to load the old data without saving the changes?");
 
-        debugTracker.add("revertID3");
-        logger.debug("----- Executing "+debugTracker);
-
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Unsaved changes");
-        alert.setHeaderText("You are resetting the ID3 changes you made for this MP3");
-        alert.setContentText("Do you want to load the old data without saving the changes?");
-
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.get() == ButtonType.OK){
-            updateTextFields(mp3Label.getText());
+        if (result){
+            updateTextFields(currentFileLoc);
         }
 
-        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-        debugTracker.remove(debugTracker.size()-1);
+        logger.debug("----- ending revertID3");
     }
 
     public void changeVolume() {
@@ -653,62 +511,56 @@ public class SongController {
     }
 
     public void copyID3(ActionEvent actionEvent) {
+        logger.debug("----- Executing copyID3");
 
-        debugTracker.add("copyID3");
-        logger.debug("----- Executing "+debugTracker);
-
-        copiedID3 = ID3v2Utils.getID3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
+        copiedID3 = ID3v2Utils.getID3(new File(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc()));
         logger.debug(copiedID3.getArtist());
         songDatabaseTable.getSelectionModel().select(currentSongID);
 
-        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-        debugTracker.remove(debugTracker.size()-1);
+        logger.debug("----- ending copyID3");
     }
 
     public void pasteID3(ActionEvent actionEvent) {
-
-        debugTracker.add("pasteID3");
-        logger.debug("----- Executing "+debugTracker);
+        logger.debug("----- Executing pasteID3");
 
         songDatabaseTable.getSelectionModel().select(currentSongID);
 
-        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-        debugTracker.remove(debugTracker.size()-1);
+        logger.debug("----- ending pasteID3");
     }
 
     public void deleteFile(ActionEvent actionEvent) {
-
-        debugTracker.add("deleteFile");
-        logger.debug("----- Executing "+debugTracker);
+        logger.debug("----- Executing deleteFile");
 
         String fileLoc = songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc();
-        File file = new File(fileLoc);
 
         String[] dialogData = {"Database entry", "ID3 data", "File"};
 
-        ChoiceDialog dialog = new ChoiceDialog(dialogData[2], dialogData);
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(dialogData[2], dialogData);
         dialog.setTitle("Delete");
         dialog.setHeaderText("Select what you want to delete");
 
-        Optional result = dialog.showAndWait();
+        Optional<String> result = dialog.showAndWait();
         if (result.isPresent()) {
-            String picked = result.get().toString();
+            String picked = result.get();
             logger.debug(picked);
-            if (picked == "File") {
+            if (Objects.equals(picked, "File")) {
                 Song song = songDatabaseTable.getSelectionModel().getSelectedItem();
                 SongRepository.delete(song);
                 updateTable();
-                file.delete();
+                try { Files.delete(Path.of(fileLoc));
+                } catch (IOException er) {
+                    logger.error("can't delete file: ",er); }
             }
-            else if (picked == "Database entry") {
+            else if (Objects.equals(picked, "Database entry")) {
                 Song song =  songDatabaseTable.getSelectionModel().getSelectedItem();
                 SongRepository.delete(song);
                 updateTable();
+            } else {
+                logger.debug("code to delete id3 tag here");
             }
         }
 
-        logger.debug("----- ending "+debugTracker.get(debugTracker.size()-1));
-        debugTracker.remove(debugTracker.size()-1);
+        logger.debug("----- ending deleteFile");
     }
 
 

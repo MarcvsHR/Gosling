@@ -1,18 +1,11 @@
 package prodo.marc.gosling.hibernate.repository;
 
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.hibernate.Filter;
 import org.hibernate.Session;
-import org.hibernate.annotations.FilterDef;
-import org.hibernate.annotations.ParamDef;
 import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.hibernate.HibernateUtils;
 
-import javax.persistence.Entity;
 import java.util.Collections;
 import java.util.List;
 
