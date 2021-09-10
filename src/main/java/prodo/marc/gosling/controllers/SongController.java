@@ -7,12 +7,10 @@ import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.media.Media;
@@ -456,13 +454,15 @@ public class SongController {
 
         File mp3File = new File(fileLoc);
         String mp3Path = mp3File.toURI().toASCIIString();
+
+        //TODO: check why javafx.scene.media.Media is not releasing files, that is what is causing the save bug
         Media mp3Media = new Media(mp3Path);
         mplayer = new MediaPlayer(mp3Media);
 
         logger.debug("----- ending openMediaFile");
     }
 
-    public void addSong2DB(ActionEvent actionEvent) {
+    public void addSong2DB() {
         logger.debug("----- Executing addSong2DB");
 
         //select file
@@ -477,7 +477,7 @@ public class SongController {
         logger.debug("----- ending addSong2DB");
     }
 
-    public void checkArtistField(KeyEvent inputMethodEvent) {
+    public void checkArtistField() {
         logger.debug("----- Executing checkArtistField");
 
         ID3v2 id3Data = ID3v2Utils.getID3(new File(currentFileLoc));
@@ -490,7 +490,7 @@ public class SongController {
         logger.debug("----- ending checkArtistField");
     }
 
-    public void revertID3(ActionEvent actionEvent) {
+    public void revertID3() {
         logger.debug("----- Executing revertID3");
         boolean result = Popups.giveConfirmAlert("Unsaved changes",
                 "You are resetting the ID3 changes you made for this MP3",
@@ -510,7 +510,7 @@ public class SongController {
         }
     }
 
-    public void copyID3(ActionEvent actionEvent) {
+    public void copyID3() {
         logger.debug("----- Executing copyID3");
 
         copiedID3 = ID3v2Utils.getID3(new File(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc()));
@@ -520,7 +520,7 @@ public class SongController {
         logger.debug("----- ending copyID3");
     }
 
-    public void pasteID3(ActionEvent actionEvent) {
+    public void pasteID3() {
         logger.debug("----- Executing pasteID3");
 
         songDatabaseTable.getSelectionModel().select(currentSongID);
@@ -528,7 +528,7 @@ public class SongController {
         logger.debug("----- ending pasteID3");
     }
 
-    public void deleteFile(ActionEvent actionEvent) {
+    public void deleteFile() {
         logger.debug("----- Executing deleteFile");
 
         String fileLoc = songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc();
