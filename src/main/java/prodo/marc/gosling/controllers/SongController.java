@@ -246,10 +246,7 @@ public class SongController {
         logger.debug("----- Executing updateTextFields");
 
         //close old mp3
-        if (mplayer != null) {
-            mplayer.stop();
-            mplayer.dispose();
-        }
+        closeMediaStream();
 
         //show file name
         mp3Label.setText(fileLoc);
@@ -394,12 +391,13 @@ public class SongController {
         song.setFileLoc(currentFileLoc);
 
         //unload song if playing so the file can be saved
-        if (mplayer != null) { mplayer.dispose(); }
+        closeMediaStream();
 
         //save file
         writeToMP3(song, currentFileLoc);
 
         //update database and table
+        openMediaFile(currentFileLoc);
         SongRepository.addSong(song);
         updateTable();
         makeTextFieldsWhite();
@@ -415,7 +413,8 @@ public class SongController {
 
         logger.debug("----- Executing writeToMP3");
 
-        if (mplayer != null) { mplayer.dispose(); }
+        closeMediaStream();
+        //FileInputStream.class.close
 
         String backupFileLoc = currentFileLoc + ".bak";
         try {
@@ -454,12 +453,20 @@ public class SongController {
 
         File mp3File = new File(fileLoc);
         String mp3Path = mp3File.toURI().toASCIIString();
+        closeMediaStream();
 
         //TODO: check why javafx.scene.media.Media is not releasing files, that is what is causing the save bug
         Media mp3Media = new Media(mp3Path);
         mplayer = new MediaPlayer(mp3Media);
 
         logger.debug("----- ending openMediaFile");
+    }
+
+    private void closeMediaStream() {
+        if (mplayer != null) {
+            mplayer.stop();
+            mplayer.dispose();
+        }
     }
 
     public void addSong2DB() {
