@@ -21,7 +21,7 @@ public class Popups {
     }
 
     public static boolean giveConfirmAlert(String title, String type, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle(title);
         alert.setHeaderText(type);
         alert.setContentText(message);

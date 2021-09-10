@@ -201,7 +201,8 @@ public class SongController {
         int changeCounter = 0;
         if (!Objects.equals(currentFileLoc, "")) {
             try {
-                ID3v2 id3Data = ID3v2Utils.getID3(new File(currentFileLoc));
+                File file = new File(currentFileLoc);
+                ID3v2 id3Data = ID3v2Utils.getID3(file);
 
                 if (!StringUtils.compareStrings(textArtist.getText(), id3Data.getArtist())) {
                     changeCounter++;}
@@ -420,8 +421,7 @@ public class SongController {
 
         String backupFileLoc = currentFileLoc + ".bak";
         try {
-            File file = new File(fileLoc);
-            Mp3File mp3 = new Mp3File(file);
+            Mp3File mp3 = new Mp3File(fileLoc);
             ID3v24Tag id3Data = new ID3v24Tag();
             mp3.setId3v2Tag(id3Data);
 
@@ -442,7 +442,7 @@ public class SongController {
         }
 
         try { Files.delete(Path.of(fileLoc));
-        } catch (IOException e) { //logger.error("File cannot be deleted! " + fileLoc, e);
+        } catch (IOException e) { logger.debug("File cannot be deleted! " + fileLoc);
         }
         File mp3FileNew = new File(backupFileLoc);
         boolean info = mp3FileNew.renameTo(new File(fileLoc));
