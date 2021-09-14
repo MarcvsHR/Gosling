@@ -21,17 +21,19 @@ public class ID3v2Utils {
     /**
      * Extract idv3 tage for given file
      * */
-    public static ID3v2 getID3(File mp3File) {
+    public static ID3v24Tag getID3(File mp3File) {
+
+        ID3v24Tag id3tag = new ID3v24Tag();
 
         try {
             Mp3File song = new Mp3File(mp3File);
 
-            return song.getId3v2Tag();
-        } catch (Exception errpr) {
-            logger.error("can't fetch ID3 data from file",errpr);
-
-            return new ID3v24Tag();
+            id3tag = (ID3v24Tag) song.getId3v2Tag();
+        } catch (Exception error) {
+            logger.error("can't fetch ID3 data from file",error);
         }
+
+        return id3tag;
     }
 
     public static Song songDataFromFile(File file) {
@@ -56,8 +58,10 @@ public class ID3v2Utils {
         testSong.setYear(year);
         testSong.setGenre(id3Data.getGenreDescription());
         //testSong.setISRC(id3Data.getISRC());
-        testSong.setISRC("ISRC");
+        testSong.setISRC(null);
         testSong.setFileLoc(file.getAbsoluteFile().toString());
+        if (id3Data.getKey()==null) {id3Data.setKey(" ");}
+        testSong.setDone(id3Data.getKey().equals("true"));
 
         logger.debug("----- ending id3ToSong");
 

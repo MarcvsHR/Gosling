@@ -48,6 +48,29 @@ public class SongRepository {
         }
     }
 
+    public static Integer getIDofFile(String currentFileLoc) {
+        Session session = null;
+        try {
+            session = HibernateUtils.openSession();
+            session.getTransaction().begin();
+            String query1 = "from Song S WHERE S.fileLoc = '"+currentFileLoc+"'";
+            logger.debug(query1);
+            List<Song> songs = session.createQuery(query1,Song.class).list();
+            session.getTransaction().commit();
+            if (!songs.isEmpty()) {
+                return songs.get(0).getId();
+            }
+        }catch (Exception e){
+            logger.error("Error while getting songs "+e);
+        }finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+
+        return null;
+    }
+
     public List<Song> getSongs(){
         Session session = null;
         try {

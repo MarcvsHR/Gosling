@@ -11,4 +11,20 @@ public class StringUtils {
         return text1.equals(text2);
     }
 
+    public static String replaceCroChars(String text) {
+        text = text.replace("ć","c");
+        text = text.replace("č","c");
+        text = text.replace("š","s");
+        text = text.replace("đ","dj");
+        text = text.replace("ž","z");
+
+        text = text.replace("Ć","C");
+        text = text.replace("Č","C");
+        text = text.replace("Š","S");
+        text = text.replace("Đ","Dj");
+        text = text.replace("Ž","Z");
+
+        return text;
+    }
+
 }
