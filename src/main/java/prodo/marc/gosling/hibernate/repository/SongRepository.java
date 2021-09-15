@@ -96,9 +96,9 @@ public class SongRepository {
         try {
             session = HibernateUtils.openSession();
             session.getTransaction().begin();
-            String query1 = "from Song S WHERE S.fileLoc = '"+song.getFileLoc()+
-                    "' OR (S.artist = '"+song.getArtist()+
-                    "' AND S.title = '"+song.getTitle()+"')";
+            String query1 = "from Song S WHERE S.fileLoc = '"+song.getFileLoc()+"'"; //remove string part later
+//                    "' OR (S.artist = '"+song.getArtist()+
+//                    "' AND S.title = '"+song.getTitle()+"')";
             logger.debug(query1);
             List<Song> songs = session.createQuery(query1,Song.class).list();
             session.getTransaction().commit();

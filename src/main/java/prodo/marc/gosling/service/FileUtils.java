@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 public class FileUtils {
 
     private static final Logger logger = LogManager.getLogger(ID3v2Utils.class);
+    private static final String initialDir = new File("").getAbsolutePath();
 
     //@FXML
     public static File pickFolder() {
@@ -25,7 +26,7 @@ public class FileUtils {
         logger.debug("----- Executing pickFolder");
 
         DirectoryChooser dc = new DirectoryChooser();
-        dc.setInitialDirectory(new File("C:\\test"));
+        dc.setInitialDirectory(new File(initialDir));
 
         logger.debug("----- ending pickFolder");
 
@@ -53,7 +54,7 @@ public class FileUtils {
 
         FileChooser fc = new FileChooser();
         fc.setTitle("Open MP3");
-        fc.setInitialDirectory(new File("C:\\test"));
+        fc.setInitialDirectory(new File(initialDir));
         FileChooser.ExtensionFilter extFilter =
                 new FileChooser.ExtensionFilter(desc, "*."+ext);
         fc.getExtensionFilters().add(extFilter);

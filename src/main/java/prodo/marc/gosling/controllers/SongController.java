@@ -42,10 +42,11 @@ public class SongController {
 
     private static final Logger logger = LogManager.getLogger(SongController.class);
 
+    public ProgressBar progressBar;
     @FXML MediaPlayer mplayer;
     @FXML Button songBackButton, addSongButton, addFolderButton;
     @FXML Button backSongs, buttonPlay, buttonPause, skipBack, skipForward, skipForwardSmall, skipBackSmall, buttonRevert;
-    @FXML Label mp3Label, mp3Time, labelVolume;
+    @FXML Label mp3Label, mp3Time, labelVolume, progressLabel;
     @FXML TableView<Song> songDatabaseTable;
     @FXML TableColumn<Song, String> tableArtist, tableTitle, tableAlbum, tablePublisher, tableComposer, tableGenre, tableISRC, tableFileLoc;
     @FXML TableColumn<Song, Integer> tableYear, tableID;
@@ -83,16 +84,16 @@ public class SongController {
         tableDone.setCellFactory(cellData -> new CheckBoxTableCell<>());
 
 
-        //updateTable();
+        updateTable();
 
         volumeSlider.setValue(INITIAL_VOLUME_SO_MY_EARS_DONT_EXPLODE);  changeVolume();
 
         //adding songs from c:\test so that I don't have to manually load every time I test
-        //String fileLoc = "c:\\test";
-        //String fileLoc = "C:\\Users\\glazb\\Music\\Unknown artist";
-        String fileLoc = "C:\\Users\\glazb\\Downloads";
-        try { addSongsFromFolder(new File(fileLoc)); }
-        catch (IOException io) { logger.error("can't open folder",io); }
+//        String fileLoc = "c:\\test";
+//        String fileLoc = "C:\\Users\\glazb\\Music\\Unknown artist";
+//        String fileLoc = "C:\\Users\\glazb\\Downloads";
+//        try { addSongsFromFolder(new File(fileLoc)); }
+//        catch (IOException io) { logger.error("can't open folder",io); }
 
         if (!songDatabaseTable.getSelectionModel().isEmpty()) {
             updateTextFields(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
@@ -142,18 +143,37 @@ public class SongController {
         logger.debug("----- ending addSongsFromFolder");
    }
 
-    private void putMP3ListIntoDB(List<Path> mp3List) {
+   private void putMP3ListIntoDB(List<Path> mp3List) {
         AtomicInteger i = new AtomicInteger();
-        mp3List.forEach(file -> {
-            i.getAndIncrement();
-            logger.debug("processing file: "+ file);
-            logger.debug(i+" out of "+mp3List.size());
+        int max = mp3List.size();
+        List<String> dupeFiles = new ArrayList<>();
 
-            addMP3(file);
+        progressLabel.setText(i+"/"+max);
+
+        Thread folderImportTask = new Thread(() -> {
+            mp3List.forEach(file -> {
+                i.getAndIncrement();
+                logger.debug("processing file: "+ file);
+                logger.debug(i+" out of "+mp3List.size());
+
+                String getFile = addMP3(file);
+                if (getFile != null) {dupeFiles.add(getFile);}
+                Platform.runLater(() -> updateProgressBar(i+"/"+max,i.doubleValue()/max));
+            });
+            updateTable();
         });
+        folderImportTask.start();
+
     }
 
-    private void addMP3(Path path) {
+    @FXML
+    private void updateProgressBar(String string, Double value) {
+        progressLabel.setText(string);
+        progressBar.setProgress(value);
+    }
+
+    @FXML
+    private String addMP3(Path path) {
 
         logger.debug("----- Executing addMP3");
 
@@ -162,13 +182,14 @@ public class SongController {
         song = ID3v2Utils.songDataFromFile(new File(String.valueOf(path)));
         if (songRepo.checkForDupes(song)) {
             logger.debug("---song already exists - "+song);
-            Popups.giveInfoAlert("Duplicate file import",
-                    "There is already a song with that name or location in the database",
-                    "adding file: "+song.getFileLoc());
+            return song.getFileLoc();
         } else {
-            SongRepository.addSong(song); }
+            SongRepository.addSong(song);
+        }
 
         logger.debug("----- ending addMP3");
+
+        return null;
     }
 
     private void updateTable() {

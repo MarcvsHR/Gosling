@@ -24,11 +24,34 @@ public class ID3v2Utils {
     public static ID3v24Tag getID3(File mp3File) {
 
         ID3v24Tag id3tag = new ID3v24Tag();
+        ID3v2 tempID3;
 
         try {
             Mp3File song = new Mp3File(mp3File);
+            tempID3 = song.getId3v2Tag();
 
-            id3tag = (ID3v24Tag) song.getId3v2Tag();
+            if (tempID3 != null) {
+                id3tag.setArtist(tempID3.getArtist());
+                id3tag.setTitle(tempID3.getTitle());
+                id3tag.setAlbum(tempID3.getAlbum());
+                id3tag.setPublisher(tempID3.getPublisher());
+                id3tag.setComposer(tempID3.getComposer());
+                String genre = tempID3.getGenreDescription();
+                if (genre == null) {
+                    genre = "";
+                }
+                id3tag.setGenreDescription(genre);
+                id3tag.setYear(tempID3.getYear());
+                if (id3tag.getYear() == null) {
+                    id3tag.setYear("");
+                }
+                id3tag.setKey(tempID3.getKey());
+                if (id3tag.getKey() == null) {
+                    id3tag.setKey(" ");
+                }
+                //id3tag.setISRC(tempID3.getISRC());
+            }
+
         } catch (Exception error) {
             logger.error("can't fetch ID3 data from file",error);
         }
@@ -60,7 +83,6 @@ public class ID3v2Utils {
         //testSong.setISRC(id3Data.getISRC());
         testSong.setISRC(null);
         testSong.setFileLoc(file.getAbsoluteFile().toString());
-        if (id3Data.getKey()==null) {id3Data.setKey(" ");}
         testSong.setDone(id3Data.getKey().equals("true"));
 
         logger.debug("----- ending id3ToSong");
