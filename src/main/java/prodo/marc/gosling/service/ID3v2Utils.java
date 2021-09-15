@@ -23,6 +23,8 @@ public class ID3v2Utils {
      * */
     public static ID3v24Tag getID3(File mp3File) {
 
+        logger.debug("----- Executing getID3");
+
         ID3v24Tag id3tag = new ID3v24Tag();
         ID3v2 tempID3;
 
@@ -56,16 +58,16 @@ public class ID3v2Utils {
             logger.error("can't fetch ID3 data from file",error);
         }
 
+        logger.debug("----- ending getID3");
+
         return id3tag;
     }
 
-    public static Song songDataFromFile(File file) {
+    public static Song songDataFromID3(ID3v24Tag id3Data, String path) {
 
         logger.debug("----- Executing id3ToSong");
 
         Song testSong = new Song();
-
-        ID3v2 id3Data = getID3(file);
 
         testSong.setArtist(id3Data.getArtist());
         testSong.setTitle(id3Data.getTitle());
@@ -82,8 +84,10 @@ public class ID3v2Utils {
         testSong.setGenre(id3Data.getGenreDescription());
         //testSong.setISRC(id3Data.getISRC());
         testSong.setISRC(null);
-        testSong.setFileLoc(file.getAbsoluteFile().toString());
-        testSong.setDone(id3Data.getKey().equals("true"));
+        testSong.setFileLoc(path);
+        String key = id3Data.getKey();
+        if (key == null) {key = " ";}
+        testSong.setDone(key.equals("true"));
 
         logger.debug("----- ending id3ToSong");
 

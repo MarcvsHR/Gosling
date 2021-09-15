@@ -125,6 +125,7 @@
                 <Button fx:id="songBackButton" mnemonicParsing="false" onAction="#backToMain" text="Back to main window" />
                 <Button fx:id="addSongButton" mnemonicParsing="false" onAction="#addSong2DB" text="Add new song" />
                 <Button fx:id="addFolderButton" mnemonicParsing="false" onAction="#clickedFolderButton" text="Add folder" />
+                <TextField fx:id="textFilterFolder" onKeyTyped="#filterTable" />
             </HBox>
         </VBox>
             <TableView fx:id="songDatabaseTable" onMouseClicked="#clickTable" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" GridPane.vgrow="ALWAYS">

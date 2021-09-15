@@ -12,6 +12,7 @@ public class StringUtils {
     }
 
     public static String replaceCroChars(String text) {
+        if (text != null) {
         text = text.replace("ć","c");
         text = text.replace("č","c");
         text = text.replace("š","s");
@@ -24,7 +25,10 @@ public class StringUtils {
         text = text.replace("Đ","Dj");
         text = text.replace("Ž","Z");
 
-        return text;
+        return text;}
+        else {
+            return "";
+        }
     }
 
 }

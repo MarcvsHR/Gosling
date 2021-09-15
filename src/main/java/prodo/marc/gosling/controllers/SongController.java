@@ -8,6 +8,8 @@ import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -34,6 +36,7 @@ import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -51,11 +54,16 @@ public class SongController {
     @FXML TableColumn<Song, String> tableArtist, tableTitle, tableAlbum, tablePublisher, tableComposer, tableGenre, tableISRC, tableFileLoc;
     @FXML TableColumn<Song, Integer> tableYear, tableID;
     @FXML TableColumn<Song, Boolean> tableDone;
-    @FXML TextField textAlbum, textArtist, textTitle, textPublisher, textComposer, textYear, textGenre, textISRC;
+    @FXML TextField textAlbum, textArtist, textTitle, textPublisher, textComposer, textYear, textGenre, textISRC, textFilterFolder;
     @FXML Slider mp3Slider, volumeSlider;
     @FXML CheckBox checkDone;
 
     ObservableList<Song> songList = FXCollections.observableArrayList();
+    FilteredList<Song> filteredSongs = new FilteredList<>(songList);
+    SortedList<Song> sortedSongs = new SortedList<>(filteredSongs);
+
+
+
 
     private boolean updateCheck = true;
     final int skipIncrement = 10000;
@@ -82,6 +90,7 @@ public class SongController {
         tableFileLoc.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getFileLoc()));
         tableDone.setCellValueFactory(cellData -> new ReadOnlyBooleanWrapper(cellData.getValue().getDone()));
         tableDone.setCellFactory(cellData -> new CheckBoxTableCell<>());
+        sortedSongs.comparatorProperty().bind(songDatabaseTable.comparatorProperty());
 
 
         updateTable();
@@ -144,6 +153,7 @@ public class SongController {
    }
 
    private void putMP3ListIntoDB(List<Path> mp3List) {
+
         AtomicInteger i = new AtomicInteger();
         int max = mp3List.size();
         List<String> dupeFiles = new ArrayList<>();
@@ -151,6 +161,7 @@ public class SongController {
         progressLabel.setText(i+"/"+max);
 
         Thread folderImportTask = new Thread(() -> {
+            Instant start = Instant.now();
             mp3List.forEach(file -> {
                 i.getAndIncrement();
                 logger.debug("processing file: "+ file);
@@ -161,6 +172,8 @@ public class SongController {
                 Platform.runLater(() -> updateProgressBar(i+"/"+max,i.doubleValue()/max));
             });
             updateTable();
+            Instant stop = Instant.now();
+            logger.debug("Thread finished in: "+ java.time.Duration.between(start, stop).toSeconds());
         });
         folderImportTask.start();
 
@@ -177,9 +190,10 @@ public class SongController {
 
         logger.debug("----- Executing addMP3");
 
-        SongRepository songRepo = new SongRepository();
         Song song;
-        song = ID3v2Utils.songDataFromFile(new File(String.valueOf(path)));
+        ID3v24Tag id3tag = ID3v2Utils.getID3(new File(String.valueOf(path)));
+        song = ID3v2Utils.songDataFromID3(id3tag, String.valueOf(path));
+        SongRepository songRepo = new SongRepository();
         if (songRepo.checkForDupes(song)) {
             logger.debug("---song already exists - "+song);
             return song.getFileLoc();
@@ -199,7 +213,7 @@ public class SongController {
         SongRepository songRepo = new SongRepository();
         songList.clear();
         songList.addAll(songRepo.getSongs());
-        songDatabaseTable.setItems(songList);
+        filterTable();
         songDatabaseTable.getSelectionModel().select(currentSongID);
 
         logger.debug("----- ending updateTable");
@@ -663,5 +677,10 @@ public class SongController {
         songDatabaseTable.getSelectionModel().getSelectedItem().setDone(!songDatabaseTable.getSelectionModel().getSelectedItem().getDone());
         //updateTable();
         songDatabaseTable.getSelectionModel().select(currentSongID);
+    }
+
+    public void filterTable() {
+        filteredSongs.setPredicate(x -> x.getFileLoc().toLowerCase().contains(textFilterFolder.getText().toLowerCase()));
+        songDatabaseTable.setItems(sortedSongs);
     }
 }
