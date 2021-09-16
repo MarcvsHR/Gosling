@@ -35,7 +35,9 @@ public class Song {
         song.setAlbum(id3.getAlbum());
         song.setPublisher(id3.getPublisher());
         song.setComposer(id3.getComposer());
-        song.setYear(Integer.valueOf(id3.getYear()));
+        String year = id3.getYear();
+        if (year == null) {year = "0";}
+        song.setYear(Integer.valueOf(year));
         song.setGenre(id3.getGenreDescription());
         song.setDone(id3.getKey().equals("true"));
         //song.setISRC(id3.getISRC());

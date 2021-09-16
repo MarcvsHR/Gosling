@@ -12,6 +12,7 @@ module prodo.marc.gosling {
     requires log4j;
     requires org.hibernate.orm.core;
     requires java.naming;
+    requires org.apache.commons.lang3;
 
 
     opens prodo.marc.gosling to javafx.fxml;

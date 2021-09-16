@@ -18,10 +18,9 @@ import java.util.stream.Stream;
 public class FileUtils {
 
     private static final Logger logger = LogManager.getLogger(ID3v2Utils.class);
-    private static final String initialDir = new File("").getAbsolutePath();
 
     //@FXML
-    public static File pickFolder() {
+    public static File pickFolder(String initialDir) {
 
         logger.debug("----- Executing pickFolder");
 
@@ -49,7 +48,7 @@ public class FileUtils {
         return mp3List;
     }
 
-    public static File openFile(String desc, String ext) {
+    public static File openFile(String desc, String ext, String initialDir) {
         logger.debug("----- Executing openFile");
 
         FileChooser fc = new FileChooser();

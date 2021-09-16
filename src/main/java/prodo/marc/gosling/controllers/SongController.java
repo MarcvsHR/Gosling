@@ -10,25 +10,20 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.media.MediaPlayer;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import prodo.marc.gosling.HelloApplication;
+import org.hibernate.tool.schema.Action;
 import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.hibernate.repository.SongRepository;
-import prodo.marc.gosling.service.FileUtils;
-import prodo.marc.gosling.service.ID3v2Utils;
-import prodo.marc.gosling.service.Popups;
-import prodo.marc.gosling.service.StringUtils;
+import prodo.marc.gosling.service.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,16 +42,17 @@ public class SongController {
 
     public ProgressBar progressBar;
     @FXML MediaPlayer mplayer;
-    @FXML Button songBackButton, addSongButton, addFolderButton;
+    @FXML Button songBackButton, addSongButton, addFolderButton, parseFilenameButton;
     @FXML Button backSongs, buttonPlay, buttonPause, skipBack, skipForward, skipForwardSmall, skipBackSmall, buttonRevert;
-    @FXML Label mp3Label, mp3Time, labelVolume, progressLabel;
+    @FXML Label mp3Time, labelVolume, progressLabel;
     @FXML TableView<Song> songDatabaseTable;
     @FXML TableColumn<Song, String> tableArtist, tableTitle, tableAlbum, tablePublisher, tableComposer, tableGenre, tableISRC, tableFileLoc;
     @FXML TableColumn<Song, Integer> tableYear, tableID;
     @FXML TableColumn<Song, Boolean> tableDone;
-    @FXML TextField textAlbum, textArtist, textTitle, textPublisher, textComposer, textYear, textGenre, textISRC, textFilterFolder;
+    @FXML TextField textAlbum, textArtist, textTitle, textPublisher, textComposer, textYear, textGenre, textISRC, textFilterFolder, mp3Label;
     @FXML Slider mp3Slider, volumeSlider;
     @FXML CheckBox checkDone;
+    //@FXML Stage stage = new Stage();
 
     ObservableList<Song> songList = FXCollections.observableArrayList();
     FilteredList<Song> filteredSongs = new FilteredList<>(songList);
@@ -70,6 +66,7 @@ public class SongController {
     private Integer currentSongID = 0;
     private String currentFileLoc = "";
     ID3v24Tag copiedID3 = new ID3v24Tag();
+    private String lastUsedFolder = "c:";
     /**Initial volume for mp3*/
     private static final Integer INITIAL_VOLUME_SO_MY_EARS_DONT_EXPLODE=20;
 
@@ -112,23 +109,30 @@ public class SongController {
     }
 
     @FXML
-    protected void backToMain() throws IOException {
+    protected void backToMain(ActionEvent event) throws IOException {
 
         logger.debug("----- Executing backToMain");
 
-        Stage stage = (Stage) songBackButton.getScene().getWindow();
-        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("view/hello-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 320, 240);
-        stage.setTitle("Songs");
-        stage.setScene(scene);
+        SceneController.switchToMain(event);
 
         logger.debug("----- ending backToMain");
     }
 
     @FXML
+    protected void clickedParseButton(ActionEvent event) throws IOException {
+
+        logger.debug("----- Executing clickedParseButton");
+
+        SceneController.openRegexParse(event);
+
+        logger.debug("----- ending clickedParseButton");
+    }
+
+    @FXML
     protected void clickedFolderButton() {
         logger.debug("----- Executing clickedFolderButton");
-        File pickedFolder = FileUtils.pickFolder();
+        File pickedFolder = FileUtils.pickFolder(lastUsedFolder);
+        lastUsedFolder = pickedFolder.getParent();
         try {
         addSongsFromFolder(pickedFolder); }
         catch (IOException io) {
@@ -244,7 +248,7 @@ public class SongController {
         logger.debug("----- Executing openMP3");
 
         int changeCounter = 0;
-        if (!Objects.equals(currentFileLoc, "")) {
+        if (!Objects.equals(currentFileLoc, "") && new File(currentFileLoc).exists()) {
 
             //TODO: this part needs a complete rework
             try {
@@ -301,7 +305,7 @@ public class SongController {
         closeMediaStream();
 
         //show file name
-        mp3Label.setText(new File(fileLoc).getName());
+        mp3Label.setText(new File(fileLoc).getName().replaceAll("(?i).mp3",""));
         currentFileLoc = fileLoc;
 
         //load file into media player
@@ -434,6 +438,10 @@ public class SongController {
 
         ID3v24Tag id3 = ID3v2Utils.getID3(new File(currentFileLoc));
 
+        if (textAlbum.getText().isEmpty() || textAlbum.getText() == null) {
+            textAlbum.setText(textTitle.getText());
+        }
+
         id3.setArtist(textArtist.getText());
         id3.setTitle(textTitle.getText());
         id3.setAlbum(textAlbum.getText());
@@ -528,7 +536,8 @@ public class SongController {
         logger.debug("----- Executing addSong2DB");
 
         //select file
-        File mp3 = FileUtils.openFile("MP3 files (*.mp3)","mp3");
+        File mp3 = FileUtils.openFile("MP3 files (*.mp3)","mp3", lastUsedFolder);
+        lastUsedFolder = mp3.getParent();
 
         //add file to DB
         addMP3(mp3.toPath());
@@ -587,7 +596,7 @@ public class SongController {
 
         String[] dialogData = {"Database entry", "ID3 data", "File"};
 
-        ChoiceDialog<String> dialog = new ChoiceDialog<>(dialogData[2], dialogData);
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(dialogData[0], dialogData);
         dialog.setTitle("Delete");
         dialog.setHeaderText("Select what you want to delete");
 
@@ -622,20 +631,19 @@ public class SongController {
        textComposer.setText(StringUtils.replaceCroChars(textComposer.getText()));
     }
 
+    //TODO: this part needs to check if all the fields are there so it needs to be handled earlier, prolly in updateMP3()
     public void renameFile() {
         logger.debug("----- Executing renameFile");
         File oldFile = new File(currentFileLoc);
         ID3v24Tag id3 = ID3v2Utils.getID3(oldFile);
-        String newFileLoc;
+        String newFileLoc = "\\" + id3.getArtist() + " - " + id3.getTitle() + ".mp3";
         if (!checkDone.isSelected()) {
-            newFileLoc = oldFile.getParent() + "\\" + id3.getArtist() + " - " + id3.getTitle() + ".mp3";
+            newFileLoc = oldFile.getParent() + newFileLoc;
         } else {
-            //TODO: this part needs to check if all the fields are there so it needs to be handled earlier, prolly in updateMP3()
             String genre = id3.getGenreDescription()+"\\";
             if (genre.equalsIgnoreCase("pop\\")) {genre="";}
             String year = id3.getYear()+"\\";
-            String fileName = oldFile.getName();
-            newFileLoc = "Z:\\Songs\\"+genre + year + fileName;
+            newFileLoc = "Z:\\Songs\\"+genre + year + newFileLoc;
         }
         File newFile = new File(newFileLoc);
         if (!oldFile.getAbsolutePath().equals(newFile.getAbsolutePath())) {
@@ -647,7 +655,7 @@ public class SongController {
         }
         //updateSongEntry(id3, songDatabaseTable.getItems().get(currentSongID).getId(), newFile.getAbsolutePath());
         currentFileLoc = newFile.getAbsolutePath();
-        mp3Label.setText(newFile.getName());
+        mp3Label.setText(newFile.getName().replaceAll("(?i).mp3",""));
         logger.debug("----- ending renameFile");
     }
 
@@ -682,5 +690,7 @@ public class SongController {
     public void filterTable() {
         filteredSongs.setPredicate(x -> x.getFileLoc().toLowerCase().contains(textFilterFolder.getText().toLowerCase()));
         songDatabaseTable.setItems(sortedSongs);
+        //TODO: if the current song gets unselected while filtering, everything breaks
+        currentSongID = songDatabaseTable.getSelectionModel().getSelectedIndex();
     }
 }

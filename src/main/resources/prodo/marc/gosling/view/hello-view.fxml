@@ -19,7 +19,7 @@
             <Insets/>
         </VBox.margin>
         <Button fx:id="songViewButton" alignment="TOP_LEFT" mnemonicParsing="false" onAction="#showSongWindow"
-                text="New window"/>
+                text="Open song editing"/>
         <Button alignment="TOP_RIGHT" onAction="#onHelloButtonClick" text="Hello!"/>
     </HBox>
 

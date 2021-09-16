@@ -1,9 +1,12 @@
 package prodo.marc.gosling.service;
 
+
+import org.apache.commons.lang3.text.WordUtils;
+
 public class StringUtils {
     /**
      * Check if two strings are equal
-     * */
+     */
     public static boolean compareStrings(String text1, String text2) {
         if (text1 == null || text1.isEmpty()) {
             return text2 == null;
@@ -11,22 +14,28 @@ public class StringUtils {
         return text1.equals(text2);
     }
 
+    //TODO: this should be an in-app thing where you pick a filter for renaming stuff
     public static String replaceCroChars(String text) {
         if (text != null) {
-        text = text.replace("ć","c");
-        text = text.replace("č","c");
-        text = text.replace("š","s");
-        text = text.replace("đ","dj");
-        text = text.replace("ž","z");
 
-        text = text.replace("Ć","C");
-        text = text.replace("Č","C");
-        text = text.replace("Š","S");
-        text = text.replace("Đ","Dj");
-        text = text.replace("Ž","Z");
+            text = WordUtils.capitalizeFully(text);
 
-        return text;}
-        else {
+            text = text.replace("ć", "c");
+            text = text.replace("č", "c");
+            text = text.replace("š", "s");
+            text = text.replace("đ", "dj");
+            text = text.replace("ž", "z");
+
+            text = text.replace("Ć", "C");
+            text = text.replace("Č", "C");
+            text = text.replace("Š", "S");
+            text = text.replace("Đ", "Dj");
+            text = text.replace("Ž", "Z");
+
+            text = text.replace(" I ", " i ");
+
+            return text;
+        } else {
             return "";
         }
     }
