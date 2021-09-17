@@ -16,7 +16,7 @@ public class HelloApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
 
-        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("view/song-view.fxml")));
+        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("view/songDatabase.fxml")));
         Scene scene = new Scene(root);
         stage.setTitle("main");
         stage.setScene(scene);
@@ -26,6 +26,7 @@ public class HelloApplication extends Application {
     }
 
     public static void main(String[] args) {
+
         launch();
     }
 

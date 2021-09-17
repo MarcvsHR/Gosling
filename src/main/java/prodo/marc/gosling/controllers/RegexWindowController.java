@@ -5,9 +5,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
-import org.hibernate.tool.schema.Action;
 import prodo.marc.gosling.dao.Song;
+import prodo.marc.gosling.service.SongGlobal;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,8 +34,6 @@ public class RegexWindowController {
             song.setArtist(output[1]);
             song.setTitle(output[0]);
             isSet = true;
-        } else {
-            //nothing selected
         }
         if (isSet) {
             artistLabel.setText("Artist: "+song.getArtist());
@@ -48,9 +47,15 @@ public class RegexWindowController {
         regexStuff.add("Title - Artist");
 
         regexList.getItems().addAll(regexStuff);
+
+        String fileLoc = SongGlobal.getCurrentSong().getFileLoc();
+        mp3Filename.setText(new File(fileLoc).getName().replaceAll("(?i).mp3",""));
     }
 
     public void closeAndSave(ActionEvent event) throws IOException {
-        SceneController.closeRegexParse(event);
+
+        //TODO: put data into global song
+
+        SceneController.openScene(event, "view/songDatabase.fxml");
     }
 }

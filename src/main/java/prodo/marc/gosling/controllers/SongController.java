@@ -20,7 +20,6 @@ import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.hibernate.tool.schema.Action;
 import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.hibernate.repository.SongRepository;
 import prodo.marc.gosling.service.*;
@@ -52,7 +51,6 @@ public class SongController {
     @FXML TextField textAlbum, textArtist, textTitle, textPublisher, textComposer, textYear, textGenre, textISRC, textFilterFolder, mp3Label;
     @FXML Slider mp3Slider, volumeSlider;
     @FXML CheckBox checkDone;
-    //@FXML Stage stage = new Stage();
 
     ObservableList<Song> songList = FXCollections.observableArrayList();
     FilteredList<Song> filteredSongs = new FilteredList<>(songList);
@@ -66,10 +64,8 @@ public class SongController {
     private Integer currentSongID = 0;
     private String currentFileLoc = "";
     ID3v24Tag copiedID3 = new ID3v24Tag();
-    private String lastUsedFolder = "c:";
     /**Initial volume for mp3*/
     private static final Integer INITIAL_VOLUME_SO_MY_EARS_DONT_EXPLODE=20;
-
 
     public void initialize() {
 
@@ -105,39 +101,37 @@ public class SongController {
             updateTextFields(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
         }
 
+        //TODO: if global song not null, load into txt fields and select proper song
+
         logger.debug("----- ending initialize");
     }
 
     @FXML
     protected void backToMain(ActionEvent event) throws IOException {
-
         logger.debug("----- Executing backToMain");
-
-        SceneController.switchToMain(event);
-
+        SceneController.openScene(event, "view/hello-view.fxml");
         logger.debug("----- ending backToMain");
     }
 
     @FXML
     protected void clickedParseButton(ActionEvent event) throws IOException {
-
         logger.debug("----- Executing clickedParseButton");
-
-        SceneController.openRegexParse(event);
-
+        SceneController.openScene(event, "view/parseFilename.fxml");
         logger.debug("----- ending clickedParseButton");
     }
 
     @FXML
     protected void clickedFolderButton() {
         logger.debug("----- Executing clickedFolderButton");
-        File pickedFolder = FileUtils.pickFolder(lastUsedFolder);
-        lastUsedFolder = pickedFolder.getParent();
-        try {
-        addSongsFromFolder(pickedFolder); }
-        catch (IOException io) {
-            Popups.giveInfoAlert("Error", "Could not open folder", pickedFolder.getAbsolutePath());
-            logger.error("can't open folder",io);
+        File pickedFolder = FileUtils.pickFolder(SongGlobal.getCurrentFolder());
+        if (pickedFolder != null) {
+            SongGlobal.setCurrentFolder(pickedFolder.toString());
+            try {
+                addSongsFromFolder(pickedFolder); }
+            catch (IOException io) {
+                Popups.giveInfoAlert("Error", "Could not open folder", pickedFolder.getAbsolutePath());
+                logger.error("can't open folder",io);
+            }
         }
         logger.debug("----- ending clickedFolderButton");
     }
@@ -257,22 +251,22 @@ public class SongController {
 
                 if (getFieldChanged(textArtist)) {
                     changeCounter++;}
-                if (!StringUtils.compareStrings(textTitle.getText(), id3Data.getTitle())) {
+                if (StringUtils.compareStrings(textTitle.getText(), id3Data.getTitle())) {
                     changeCounter++;}
-                if (!StringUtils.compareStrings(textAlbum.getText(), id3Data.getAlbum())) {
+                if (StringUtils.compareStrings(textAlbum.getText(), id3Data.getAlbum())) {
                     changeCounter++;}
-                if (!StringUtils.compareStrings(textPublisher.getText(), id3Data.getPublisher())) {
+                if (StringUtils.compareStrings(textPublisher.getText(), id3Data.getPublisher())) {
                     changeCounter++;}
-                if (!StringUtils.compareStrings(textComposer.getText(), id3Data.getComposer())) {
+                if (StringUtils.compareStrings(textComposer.getText(), id3Data.getComposer())) {
                     changeCounter++;}
-                if (!StringUtils.compareStrings(textYear.getText(), id3Data.getYear())) {
+                if (StringUtils.compareStrings(textYear.getText(), id3Data.getYear())) {
                     changeCounter++;}
-                if (!StringUtils.compareStrings(textGenre.getText(), id3Data.getGenreDescription())) {
+                if (StringUtils.compareStrings(textGenre.getText(), id3Data.getGenreDescription())) {
                     changeCounter++;}
                 if (id3Data.getKey() == null) {id3Data.setKey(" ");}
                 if (checkDone.isSelected() != id3Data.getKey().equals("true")) {
                     changeCounter++;}
-//                if (!StringUtils.compareStrings(textISRC.getText(), id3Data.getISRC())) {
+//                if (StringUtils.compareStrings(textISRC.getText(), id3Data.getISRC())) {
 //                    changeCounter++;}
             } catch (Exception problem) {
                 logger.error("Error while opening file " + currentFileLoc, problem);
@@ -314,7 +308,7 @@ public class SongController {
         //load id3 data into text fields
         try {
             File file = new File(fileLoc);
-            ID3v2 id3Data = ID3v2Utils.getID3(file);
+            ID3v24Tag id3Data = ID3v2Utils.getID3(file);
             textArtist.setText(id3Data.getArtist());
             textArtist.setStyle("-fx-background-color: #FFFFFF");
             textTitle.setText(id3Data.getTitle());
@@ -331,6 +325,8 @@ public class SongController {
             mp3Slider.setMax(sliderValue / 100);
 
             currentSongID = songDatabaseTable.getSelectionModel().getSelectedIndex();
+
+            SongGlobal.setCurrentSong(ID3v2Utils.songDataFromID3(id3Data, file.getAbsolutePath()));
 
         } catch (Exception report) {
             logger.error("Error while opening file " + fileLoc, report);
@@ -534,17 +530,12 @@ public class SongController {
 
     public void addSong2DB() {
         logger.debug("----- Executing addSong2DB");
-
-        //select file
-        File mp3 = FileUtils.openFile("MP3 files (*.mp3)","mp3", lastUsedFolder);
-        lastUsedFolder = mp3.getParent();
-
-        //add file to DB
-        addMP3(mp3.toPath());
-
-        //preview changes
-        updateTable();
-
+        File mp3 = FileUtils.openFile("MP3 files (*.mp3)","mp3", SongGlobal.getCurrentFolder());
+        if (mp3 != null) {
+            SongGlobal.setCurrentFolder(mp3.getParent());
+            addMP3(mp3.toPath());
+            updateTable();
+        }
         logger.debug("----- ending addSong2DB");
     }
 
@@ -580,11 +571,16 @@ public class SongController {
     public void pasteID3() {
         logger.debug("----- Executing pasteID3");
 
+        boolean confirm = Popups.giveConfirmAlert("Warning",
+                "You're about to overwrite ID3 data",
+                "Please comfirm your action");
+
+        if(confirm) {
         String fileLoc = songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc();
         writeToMP3(copiedID3, fileLoc);
         updateSongEntry(copiedID3, songDatabaseTable.getItems().get(currentSongID).getId(),fileLoc);
         songDatabaseTable.getSelectionModel().select(currentSongID);
-        updateTextFields(fileLoc);
+        updateTextFields(fileLoc); }
 
         logger.debug("----- ending pasteID3");
     }
@@ -661,7 +657,7 @@ public class SongController {
 
     public void updateSongEntry(ID3v24Tag id3, Integer databaseID, String fileLoc) {
         logger.debug("----- Executing updateSongEntry");
-        Song song = Song.getFromID3(id3,fileLoc);
+        Song song = ID3v2Utils.songDataFromID3(id3,fileLoc);
         song.setId(databaseID);
         SongRepository.addSong(song);
         updateTable();
@@ -670,7 +666,7 @@ public class SongController {
 
     public void checkArtistField() {
         ID3v2 id3Data = ID3v2Utils.getID3(new File(currentFileLoc));
-        if (!StringUtils.compareStrings(id3Data.getArtist(), textArtist.getText())) {
+        if (StringUtils.compareStrings(id3Data.getArtist(), textArtist.getText())) {
             textArtist.setStyle("-fx-background-color: #FFCCBB");
         } else {
             textArtist.setStyle("-fx-background-color: #FFFFFF");
@@ -691,6 +687,6 @@ public class SongController {
         filteredSongs.setPredicate(x -> x.getFileLoc().toLowerCase().contains(textFilterFolder.getText().toLowerCase()));
         songDatabaseTable.setItems(sortedSongs);
         //TODO: if the current song gets unselected while filtering, everything breaks
-        currentSongID = songDatabaseTable.getSelectionModel().getSelectedIndex();
+        //currentSongID = songDatabaseTable.getSelectionModel().getSelectedIndex();
     }
 }

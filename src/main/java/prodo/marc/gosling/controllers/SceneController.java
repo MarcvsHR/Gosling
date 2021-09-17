@@ -19,27 +19,17 @@ public class SceneController {
     private static Stage stage1;
 
 
-    public static void switchToMain(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(Objects.requireNonNull(HelloApplication.class.getResource("view/hello-view.fxml")));
+    public static void openScene(ActionEvent event, String window) throws IOException {
+        root = FXMLLoader.load(Objects.requireNonNull(HelloApplication.class.getResource(window)));
         stage = (Stage) ((Node) event.getTarget()).getScene().getWindow();
         scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
     }
 
-    public static void switchToSong(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(Objects.requireNonNull(HelloApplication.class.getResource("view/song-view.fxml")));
-        stage = (Stage) ((Node) event.getTarget()).getScene().getWindow();
-        scene = new Scene(root);
-        stage.setScene(scene);
-        stage.show();
-    }
-
-    public static void openRegexParse(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("view/parseFilename.fxml"));
-        Parent root = loader.load();
-
-
+    public static void openWindow(ActionEvent event, String window) throws IOException {
+        FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(window));
+        root = loader.load();
 
         stage1 = new Stage();
         scene = new Scene(root);
@@ -47,13 +37,5 @@ public class SceneController {
         stage1.show();
     }
 
-    public static void closeRegexParse(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("view/parseFilename.fxml"));
-        Parent root = loader.load();
-        stage1 = new Stage();
-        scene = new Scene(root);
-        stage1.setScene(scene);
-        stage1.hide();
-    }
 
 }

@@ -79,7 +79,7 @@
                 </HBox>
                 <HBox alignment="TOP_CENTER" spacing="5.0">
                     <Label text="Composer" />
-                    <TextField fx:id="textComposer" />
+                    <TextField fx:id="textComposer" prefHeight="25.0" prefWidth="417.0" />
                 </HBox>
                 <HBox alignment="TOP_CENTER" spacing="5.0">
                     <Label text="Year" />
