@@ -27,4 +27,21 @@ public class Song {
     private String fileLoc;
     private Boolean done;
 
+    @Override
+    //TODO: there's null and everything breaks! panic!
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Song that = (Song) o;
+        return artist.equals(that.artist) &&
+                title.equals(that.title) &&
+                album.equals(that.album) &&
+                publisher.equals(that.publisher) &&
+                composer.equals(that.composer) &&
+                year.equals(that.year) &&
+                genre.equals(that.genre) &&
+                //ISRC.equals(that.ISRC) &&
+                fileLoc.equals(that.fileLoc) &&
+                done.equals(that.done);
+    }
 }

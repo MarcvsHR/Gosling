@@ -18,6 +18,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import prodo.marc.gosling.dao.Song;
@@ -29,6 +30,8 @@ import java.io.IOException;
 import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.DecimalFormat;
 import java.time.Instant;
 import java.util.*;
@@ -64,12 +67,19 @@ public class SongController {
     private Integer currentSongID = 0;
     private String currentFileLoc = "";
     ID3v24Tag copiedID3 = new ID3v24Tag();
+    private Path tempDir;
     /**Initial volume for mp3*/
     private static final Integer INITIAL_VOLUME_SO_MY_EARS_DONT_EXPLODE=20;
 
     public void initialize() {
 
         logger.debug("----- Executing initialize");
+
+        try {
+            tempDir = Files.createTempDirectory("tmp");
+        } catch (IOException ex) {
+            logger.error("Couldn't create temp dir",ex);
+        }
 
         tableYear.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getYear()));
         tableID.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getId()));
@@ -84,7 +94,6 @@ public class SongController {
         tableDone.setCellValueFactory(cellData -> new ReadOnlyBooleanWrapper(cellData.getValue().getDone()));
         tableDone.setCellFactory(cellData -> new CheckBoxTableCell<>());
         sortedSongs.comparatorProperty().bind(songDatabaseTable.comparatorProperty());
-
 
         updateTable();
 
@@ -241,42 +250,29 @@ public class SongController {
 
         logger.debug("----- Executing openMP3");
 
-        int changeCounter = 0;
+        Song currentSong = new Song();
+        Song globalSong = SongGlobal.getCurrentSong();
         if (!Objects.equals(currentFileLoc, "") && new File(currentFileLoc).exists()) {
 
-            //TODO: this part needs a complete rework
-            try {
-                File file = new File(currentFileLoc);
-                ID3v2 id3Data = ID3v2Utils.getID3(file);
-
-                if (getFieldChanged(textArtist)) {
-                    changeCounter++;}
-                if (StringUtils.compareStrings(textTitle.getText(), id3Data.getTitle())) {
-                    changeCounter++;}
-                if (StringUtils.compareStrings(textAlbum.getText(), id3Data.getAlbum())) {
-                    changeCounter++;}
-                if (StringUtils.compareStrings(textPublisher.getText(), id3Data.getPublisher())) {
-                    changeCounter++;}
-                if (StringUtils.compareStrings(textComposer.getText(), id3Data.getComposer())) {
-                    changeCounter++;}
-                if (StringUtils.compareStrings(textYear.getText(), id3Data.getYear())) {
-                    changeCounter++;}
-                if (StringUtils.compareStrings(textGenre.getText(), id3Data.getGenreDescription())) {
-                    changeCounter++;}
-                if (id3Data.getKey() == null) {id3Data.setKey(" ");}
-                if (checkDone.isSelected() != id3Data.getKey().equals("true")) {
-                    changeCounter++;}
-//                if (StringUtils.compareStrings(textISRC.getText(), id3Data.getISRC())) {
-//                    changeCounter++;}
-            } catch (Exception problem) {
-                logger.error("Error while opening file " + currentFileLoc, problem);
-            }
+            //TODO: finally reworked but needs improvement maybe
+            currentSong.setArtist(textArtist.getText());
+            currentSong.setTitle(textTitle.getText());
+            currentSong.setAlbum(textAlbum.getText());
+            currentSong.setPublisher(textPublisher.getText());
+            currentSong.setComposer(textComposer.getText());
+            currentSong.setYear(Integer.valueOf(textYear.getText()));
+            currentSong.setGenre(textGenre.getText());
+            //currentSong.setISRC(textISRC.getText());
+            currentSong.setFileLoc(SongGlobal.getCurrentSong().getFileLoc());
+            currentSong.setDone(checkDone.isSelected());
         }
 
-        if (changeCounter > 0) {
+        //TODO: compare 2 objects
+        if (!currentSong.equals(globalSong)) {
+
             boolean result = Popups.giveConfirmAlert("Unsaved changes",
                     "You are switching to another file with possible unsaved changes",
-                    "Do you want to save the ID3 changes you have made?");
+                    "Do you want to save the ID3 changes you have made?\n"+currentSong+"\n"+SongGlobal.getCurrentSong());
 
             if (result) {
                 updateMP3();
@@ -309,6 +305,7 @@ public class SongController {
         try {
             File file = new File(fileLoc);
             ID3v24Tag id3Data = ID3v2Utils.getID3(file);
+            SongGlobal.setCurrentSong(ID3v2Utils.songDataFromID3(id3Data, fileLoc));
             textArtist.setText(id3Data.getArtist());
             textArtist.setStyle("-fx-background-color: #FFFFFF");
             textTitle.setText(id3Data.getTitle());
@@ -509,6 +506,13 @@ public class SongController {
 
     private void openMediaFile(String fileLoc) {
         logger.debug("----- Executing openMediaFile");
+        String tempMp3 = tempDir + "\\temp.mp3";
+
+        try {
+            Files.copy(Paths.get(fileLoc), Paths.get(tempMp3), StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception ex) {
+            logger.error("could not create temp mp3 file: ", ex);
+        }
 
 //        File mp3File = new File(fileLoc);
 //        String mp3Path = mp3File.toURI().toASCIIString();
