@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.MenuItem?>
@@ -32,9 +33,12 @@
                         <Insets top="5.0" />
                     </opaqueInsets>
                     <TextField fx:id="mp3Label" alignment="TOP_CENTER" prefWidth="328.0" style="-fx-background-color: #cccccc;">
-                  <font>
-                     <Font size="14.0" />
-                  </font></TextField>
+                        <font>
+                            <Font size="14.0" />
+                        </font>
+                    </TextField>
+                    <Button fx:id="googleSongButton" mnemonicParsing="false" onAction="#googleSong" text="check google" />
+
                 </HBox>
                 <HBox alignment="CENTER">
                     <Slider fx:id="mp3Slider" max="5000.0" onMousePressed="#sliderDrag" onMouseReleased="#moveTime">
@@ -83,11 +87,11 @@
                 </HBox>
                 <HBox alignment="TOP_CENTER" spacing="5.0">
                     <Label text="Year" />
-                    <TextField fx:id="textYear" />
+                    <TextField fx:id="textYear" onKeyTyped="#checkYearField" />
                 </HBox>
                 <HBox alignment="TOP_CENTER" spacing="5.0">
                     <Label text="Genre" />
-                    <TextField fx:id="textGenre" />
+               <ComboBox fx:id="dropGenre" prefWidth="150.0" />
                 </HBox>
                 <HBox alignment="TOP_CENTER" spacing="5.0">
                     <Label text="ISRC" />
@@ -134,44 +138,44 @@
                 <TextField fx:id="textFilterFolder" onKeyTyped="#filterTable" />
             </HBox>
         </VBox>
-            <TableView fx:id="songDatabaseTable" onMouseClicked="#clickTable" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" GridPane.vgrow="ALWAYS">
-                <columns>
-                    <TableColumn fx:id="tableID" prefWidth="40.0" text="ID" />
-                    <TableColumn fx:id="tableArtist" prefWidth="180.0" text="Artist" />
-                    <TableColumn fx:id="tableTitle" prefWidth="180.0" text="Title" />
-                    <TableColumn fx:id="tableAlbum" prefWidth="100.0" text="Album" />
-                    <TableColumn fx:id="tablePublisher" prefWidth="120.0" text="Publisher" />
-                    <TableColumn fx:id="tableComposer" prefWidth="300.0" text="Composer" />
-                    <TableColumn fx:id="tableYear" prefWidth="60.0" text="Year" />
-                    <TableColumn fx:id="tableGenre" prefWidth="100.0" text="Genre" />
-                    <TableColumn fx:id="tableISRC" prefWidth="100.0" text="ISRC" />
-                    <TableColumn fx:id="tableDone" prefWidth="75.0" text="Done">
-                        <graphic>
-                            <CheckBox mnemonicParsing="false" />
-                        </graphic>
-                    </TableColumn>
-                    <TableColumn fx:id="tableFileLoc" prefWidth="300.0" text="File Location" />
-                </columns>
-                <contextMenu>
-                    <ContextMenu>
-                        <items>
-                            <MenuItem mnemonicParsing="false" onAction="#copyID3" text="Copy" />
-                            <MenuItem mnemonicParsing="false" onAction="#pasteID3" text="Paste" />
-                            <MenuItem mnemonicParsing="false" onAction="#deleteFile" text="Delete" />
-                            <MenuItem mnemonicParsing="false" onAction="#toggleDone" text="File Done" />
-                        </items>
-                    </ContextMenu>
-                </contextMenu>
-            </TableView>
-      <columnConstraints>
-         <ColumnConstraints />
-      </columnConstraints>
-      <rowConstraints>
-         <RowConstraints />
-         <RowConstraints />
-         <RowConstraints />
-         <RowConstraints />
-      </rowConstraints>
+        <TableView fx:id="songDatabaseTable" onMouseClicked="#clickTable" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" GridPane.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="tableID" prefWidth="40.0" text="ID" />
+                <TableColumn fx:id="tableArtist" prefWidth="180.0" text="Artist" />
+                <TableColumn fx:id="tableTitle" prefWidth="180.0" text="Title" />
+                <TableColumn fx:id="tableAlbum" prefWidth="100.0" text="Album" />
+                <TableColumn fx:id="tablePublisher" prefWidth="120.0" text="Publisher" />
+                <TableColumn fx:id="tableComposer" prefWidth="300.0" text="Composer" />
+                <TableColumn fx:id="tableYear" prefWidth="60.0" text="Year" />
+                <TableColumn fx:id="tableGenre" prefWidth="100.0" text="Genre" />
+                <TableColumn fx:id="tableISRC" prefWidth="100.0" text="ISRC" />
+                <TableColumn fx:id="tableDone" prefWidth="75.0" text="Done">
+                    <graphic>
+                        <CheckBox mnemonicParsing="false" />
+                    </graphic>
+                </TableColumn>
+                <TableColumn fx:id="tableFileLoc" prefWidth="300.0" text="File Location" />
+            </columns>
+            <contextMenu>
+                <ContextMenu>
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#copyID3" text="Copy" />
+                        <MenuItem mnemonicParsing="false" onAction="#pasteID3" text="Paste" />
+                        <MenuItem mnemonicParsing="false" onAction="#deleteFile" text="Delete" />
+                        <MenuItem mnemonicParsing="false" onAction="#toggleDone" text="File Done" />
+                    </items>
+                </ContextMenu>
+            </contextMenu>
+        </TableView>
+        <columnConstraints>
+            <ColumnConstraints />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+        </rowConstraints>
     </GridPane>
 
 </AnchorPane>

@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import prodo.marc.gosling.dao.Song;
 
 import java.io.File;
+import java.time.Year;
 
 public class ID3v2Utils {
 
@@ -74,9 +75,7 @@ public class ID3v2Utils {
         testSong.setAlbum(id3Data.getAlbum());
         testSong.setPublisher(id3Data.getPublisher());
         testSong.setComposer(id3Data.getComposer());
-        String year = id3Data.getYear();
-        if (year == null) {year = "0";}
-        testSong.setYear(Integer.valueOf(year));
+        testSong.setYear(Year.parse(id3Data.getYear()));
         testSong.setGenre(id3Data.getGenreDescription());
         //testSong.setISRC(id3Data.getISRC());
         testSong.setISRC(null);

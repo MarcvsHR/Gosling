@@ -19,7 +19,7 @@ public class RegexWindowController {
     public ListView<String> regexList;
     public Label artistLabel;
     public Label titleLabel;
-    public Song song = new Song();
+    public Song song = SongGlobal.getCurrentSong();
 
     public void changeSelectedRegex(MouseEvent mouseEvent) {
         String selection = regexList.getSelectionModel().getSelectedItem();
@@ -48,14 +48,13 @@ public class RegexWindowController {
 
         regexList.getItems().addAll(regexStuff);
 
-        String fileLoc = SongGlobal.getCurrentSong().getFileLoc();
+        String fileLoc = song.getFileLoc();
         mp3Filename.setText(new File(fileLoc).getName().replaceAll("(?i).mp3",""));
     }
 
     public void closeAndSave(ActionEvent event) throws IOException {
 
-        //TODO: put data into global song
-
+        SongGlobal.setCurrentSong(song);
         SceneController.openScene(event, "view/songDatabase.fxml");
     }
 }

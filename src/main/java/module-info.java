@@ -13,6 +13,8 @@ module prodo.marc.gosling {
     requires org.hibernate.orm.core;
     requires java.naming;
     requires org.apache.commons.lang3;
+    requires java.desktop;
+    requires org.controlsfx.controls;
 
 
     opens prodo.marc.gosling to javafx.fxml;
