@@ -11,12 +11,18 @@ import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -24,9 +30,8 @@ import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.hibernate.repository.SongRepository;
 import prodo.marc.gosling.service.*;
 
+import java.awt.*;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.net.URI;
@@ -37,9 +42,9 @@ import java.nio.file.StandardCopyOption;
 import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.Year;
+import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.awt.Desktop;
 
 
 public class SongController {
@@ -49,7 +54,7 @@ public class SongController {
     public ProgressBar progressBar;
     @FXML ComboBox dropGenre, doneFilter;
     @FXML MediaPlayer mplayer;
-    @FXML Button songBackButton, addSongButton, addFolderButton, parseFilenameButton, googleSongButton;
+    @FXML Button songBackButton, addSongButton, addFolderButton, parseFilenameButton, googleSongButton,openLegacyDataButton;
     @FXML Button backSongs, buttonPlay, buttonPause, skipBack, skipForward, skipForwardSmall, skipBackSmall, buttonRevert;
     @FXML Label mp3Time, labelVolume, progressLabel;
     @FXML TableView<Song> songDatabaseTable;
@@ -758,4 +763,27 @@ public class SongController {
             }
         }
     }
+
+    public void openLegacyData(ActionEvent event) throws IOException {
+        logger.debug("Here we open new window");
+
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader();
+            fxmlLoader.setLocation(getClass().getResource("/prodo/marc/gosling/view/legacyAccessDatabaseViewer.fxml"));
+
+            Scene scene = new Scene(fxmlLoader.load(), 800, 600);
+            Stage stage = new Stage();
+            stage.setTitle("Legacy Access Database Viever");
+
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException  e) {
+
+            logger.error("Error while loading screen! ",e);
+            throw e;
+        }
+
+
+    }
+
 }

@@ -21,7 +21,7 @@ module prodo.marc.gosling {
     exports prodo.marc.gosling;
     exports prodo.marc.gosling.controllers;
     exports prodo.marc.gosling.dao;
-    opens prodo.marc.gosling.controllers to javafx.fxml;
+    opens prodo.marc.gosling.controllers to javafx.fxml,javafx.base;
     opens prodo.marc.gosling.dao to org.hibernate.orm.core;
 
     //ing does not "opens prodo.marc.gosling.dao" to module org.hibernate.orm.core

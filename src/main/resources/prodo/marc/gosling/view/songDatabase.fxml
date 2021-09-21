@@ -38,6 +38,7 @@
                         </font>
                     </TextField>
                     <Button fx:id="googleSongButton" mnemonicParsing="false" onAction="#googleSong" text="check google" />
+               <Button fx:id="openLegacyDataButton" mnemonicParsing="false" onAction="#openLegacyData" text="Grozni Button Sa strane" />
 
                 </HBox>
                 <HBox alignment="CENTER">

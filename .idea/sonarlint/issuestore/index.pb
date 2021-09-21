@@ -7,7 +7,5 @@ n
 >src/main/java/prodo/marc/gosling/hibernate/HibernateUtils.java,a\0\a07b4f71751387c6415dcc7e2a5a41c2fdbc533a
 E
 .jpb/jpb-settings.xml,4\4\44d3869e4ab8f5a6660709b629065ab6e5795b01
-N
-src/main/java/module-info.java,1\c\1c89a5491fbfda3fb050196d6a239f20200296e7
 {
 Ksrc/main/java/prodo/marc/gosling/hibernate/repository/ArtistRepository.java,6\9\6993a464f1df1768e6797978724ca85d47c37577

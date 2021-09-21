@@ -5,11 +5,11 @@
     <session-factory>
         <!-- JDBC Database connection settings -->
         <property name="connection.driver_class">org.h2.Driver</property>
-<!--        <property name="connection.url">jdbc:h2:file:~/data;DB_CLOSE_DELAY=-1</property>-->
-        <property name="connection.url">jdbc:h2:file:z:/databases/data;DB_CLOSE_DELAY=-1</property>
-        <property name="connection.username">sa</property>
-        <property name="connection.password"></property>
-        <!-- JDBC connection pool settings ... using built-in test pool -->
+       <property name="connection.url">jdbc:h2:file:~/data;DB_CLOSE_DELAY=-1</property>
+        <!--        <property name="connection.url">jdbc:h2:file:z:/databases/data;DB_CLOSE_DELAY=-1</property>-->
+               <property name="connection.username">sa</property>
+               <property name="connection.password"></property>
+               <!-- JDBC connection pool settings ... using built-in test pool -->
         <property name="connection.pool_size">1</property>
         <!-- Select our SQL dialect -->
         <property name="dialect">org.hibernate.dialect.H2Dialect</property>
