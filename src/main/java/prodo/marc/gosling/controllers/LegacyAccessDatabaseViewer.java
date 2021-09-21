@@ -103,7 +103,7 @@ public class LegacyAccessDatabaseViewer implements   Initializable {
                     //Iterate Row
                     ObservableList<String> row = FXCollections.observableArrayList();
                     for(int i=1 ; i<=rs.getMetaData().getColumnCount(); i++){
-                        //Iterate Column
+
                         row.add(rs.getObject(i)==null?"":rs.getObject(i).toString());
                     }
 
