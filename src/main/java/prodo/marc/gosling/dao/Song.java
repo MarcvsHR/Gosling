@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import prodo.marc.gosling.service.StringUtils;
 import javax.persistence.*;
 import java.time.Year;
+import java.util.Objects;
 
 @Setter
 @Getter
@@ -39,7 +40,7 @@ public class Song {
                 StringUtils.compareStrings(composer, that.composer) &&
                 StringUtils.compareStrings(genre, that.genre) &&
                 StringUtils.compareStrings(fileLoc, that.fileLoc) &&
-                year.compareTo(that.year) == 0 &&
+                Objects.equals(year, that.year) &&
 
                  done.equals(that.done);
 

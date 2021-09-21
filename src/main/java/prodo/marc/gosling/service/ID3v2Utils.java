@@ -75,7 +75,7 @@ public class ID3v2Utils {
         testSong.setAlbum(id3Data.getAlbum());
         testSong.setPublisher(id3Data.getPublisher());
         testSong.setComposer(id3Data.getComposer());
-        testSong.setYear(Year.parse(id3Data.getYear()));
+        testSong.setYear(StringUtils.parseYear(id3Data.getYear()));
         testSong.setGenre(id3Data.getGenreDescription());
         //testSong.setISRC(id3Data.getISRC());
         testSong.setISRC(null);

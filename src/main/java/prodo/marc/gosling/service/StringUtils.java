@@ -1,6 +1,7 @@
 package prodo.marc.gosling.service;
 
 
+import java.time.Year;
 import java.util.regex.Pattern;
 
 public class StringUtils {
@@ -10,7 +11,7 @@ public class StringUtils {
     public static boolean compareStrings(String text1, String text2) {
         if (text1 == null) {text1 = "";}
         if (text2 == null) {text2 = "";}
-        return text1.equals(text2);
+        return text1.equalsIgnoreCase(text2);
     }
 
     //TODO: this should be an in-app thing where you pick a filter for renaming stuff
@@ -64,4 +65,9 @@ public class StringUtils {
         return returnText.toString();
     }
 
+    public static Year parseYear(String year) {
+        Year yearOut = null;
+        if (year != null) {yearOut = Year.parse(year);}
+        return yearOut;
+    }
 }

@@ -25,6 +25,8 @@ import prodo.marc.gosling.hibernate.repository.SongRepository;
 import prodo.marc.gosling.service.*;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.net.URI;
@@ -45,7 +47,7 @@ public class SongController {
     private static final Logger logger = LogManager.getLogger(SongController.class);
 
     public ProgressBar progressBar;
-    @FXML ComboBox dropGenre;
+    @FXML ComboBox dropGenre, doneFilter;
     @FXML MediaPlayer mplayer;
     @FXML Button songBackButton, addSongButton, addFolderButton, parseFilenameButton, googleSongButton;
     @FXML Button backSongs, buttonPlay, buttonPause, skipBack, skipForward, skipForwardSmall, skipBackSmall, buttonRevert;
@@ -85,6 +87,9 @@ public class SongController {
         }
 
         dropGenre.getItems().addAll(getGenres());
+        doneFilter.getItems().addAll("Either", "Done", "Not Done");
+        doneFilter.getSelectionModel().select(2);
+
 
         tableYear.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getYear()));
         tableID.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getId()));
@@ -116,7 +121,7 @@ public class SongController {
     }
 
     private String[] getGenres() {
-        return new String[]{"", "cro", "cro zabavne", "instrumental", "klape", "kuruza", "pop", "XXX"};
+        return new String[]{"", "cro", "cro zabavne", "instrumental", "klape", "kuruza", "pop", "xxx"};
     }
 
 
@@ -227,7 +232,7 @@ public class SongController {
         songList.clear();
         songList.addAll(songRepo.getSongs());
         filterTable();
-        songDatabaseTable.getSelectionModel().select(currentSongID);
+        //songDatabaseTable.getSelectionModel().select(currentSongID);
 
         logger.debug("----- ending updateTable");
     }
@@ -266,14 +271,14 @@ public class SongController {
             currentSong.setAlbum(textAlbum.getText());
             currentSong.setPublisher(textPublisher.getText());
             currentSong.setComposer(textComposer.getText());
-            currentSong.setYear(Year.parse(textYear.getText()));
+            currentSong.setYear(StringUtils.parseYear(textYear.getText()));
             currentSong.setGenre(dropGenre.getSelectionModel().getSelectedItem().toString());
             //currentSong.setISRC(textISRC.getText());
             currentSong.setFileLoc(SongGlobal.getCurrentSong().getFileLoc());
             currentSong.setDone(checkDone.isSelected());
         }
 
-        if (!currentSong.equals(globalSong)) {
+        if (!currentSong.equals(globalSong) && currentSong.getFileLoc() != null) {
 
             boolean result = Popups.giveConfirmAlert("Unsaved changes",
                     "You are switching to another file with possible unsaved changes",
@@ -313,7 +318,7 @@ public class SongController {
             textComposer.setText(id3Data.getComposer());
             textYear.setText(id3Data.getYear());
             if (id3Data.getKey() != null) {checkDone.setSelected(id3Data.getKey().equals("true"));} else {checkDone.setSelected(false);}
-            dropGenre.getSelectionModel().select(id3Data.getGenreDescription());
+            if (id3Data.getGenreDescription() != null) {dropGenre.getSelectionModel().select(id3Data.getGenreDescription().toLowerCase());}
             if (dropGenre.getSelectionModel().getSelectedItem() == null) {
                 dropGenre.getSelectionModel().select(0);
             }
@@ -452,15 +457,13 @@ public class SongController {
         id3.setGenreDescription(dropGenre.getSelectionModel().getSelectedItem().toString());
         //song.setISRC(textISRC.getText());
 
-        //save file
-        writeToMP3(id3, currentFileLoc);
-        renameFile();
-
-        //update database and table
+        if (renameFile()) {
         updateSongEntry(id3, songDatabaseTable.getItems().get(currentSongID).getId(), currentFileLoc);
         makeTextFieldsWhite();
         SongGlobal.setCurrentSong(ID3v2Utils.songDataFromID3(id3, currentFileLoc));
-
+        writeToMP3(id3, currentFileLoc);
+        currentSongID = -1;
+        }
         logger.debug("----- ending updateMP3");
     }
 
@@ -560,6 +563,7 @@ public class SongController {
 
         if (result){
             updateTextFields(currentFileLoc);
+            makeTextFieldsWhite();
         }
 
         logger.debug("----- ending revertID3");
@@ -641,17 +645,22 @@ public class SongController {
     }
 
     //TODO: this part needs to check if all the fields are there so it needs to be handled earlier, prolly in updateMP3()
-    public void renameFile() {
+    public boolean renameFile() {
         logger.debug("----- Executing renameFile");
+        if (currentSongID == -1) {
+            Popups.giveInfoAlert("file renamed before",
+                    "Selection is all messed up now so you can't save again...",
+                    "till i figure something out");
+            return false;
+        }
         File oldFile = new File(currentFileLoc);
-        ID3v24Tag id3 = ID3v2Utils.getID3(oldFile);
-        String newFileLoc = "\\" + id3.getArtist() + " - " + id3.getTitle() + ".mp3";
+        String newFileLoc = "\\" + textArtist.getText() + " - " + textTitle.getText() + ".mp3";
         if (!checkDone.isSelected()) {
             newFileLoc = oldFile.getParent() + newFileLoc;
         } else {
-            String genre = id3.getGenreDescription()+"\\";
+            String genre = dropGenre.getSelectionModel().getSelectedItem().toString()+"\\";
             if (genre.equalsIgnoreCase("pop\\")) {genre="";}
-            String year = id3.getYear()+"\\";
+            String year = textYear.getText()+"\\";
             newFileLoc = "Z:\\Songs\\"+genre + year + newFileLoc;
         }
         File newFile = new File(newFileLoc);
@@ -659,13 +668,20 @@ public class SongController {
             if (!oldFile.renameTo(newFile)) {
                 Popups.giveInfoAlert("Error",
                         "Your file can not be renamed",
-                        newFile.getAbsolutePath() + " already exists or is in use");
+                        newFile.getAbsolutePath() + " already exists or is in use.\nAdding it to database");
+
+                addMP3(Path.of(newFileLoc));
+                updateTable();
+
+                return false;
             }
         }
         //updateSongEntry(id3, songDatabaseTable.getItems().get(currentSongID).getId(), newFile.getAbsolutePath());
         currentFileLoc = newFile.getAbsolutePath();
         mp3Label.setText(newFile.getName().replaceAll("(?i).mp3",""));
         logger.debug("----- ending renameFile");
+
+        return true;
     }
 
     public void updateSongEntry(ID3v24Tag id3, Integer databaseID, String fileLoc) {
@@ -688,7 +704,7 @@ public class SongController {
     public void checkYearField() {
         int pos = textYear.getCaretPosition();
         int len = textYear.getLength();
-        textYear.setText(textYear.getText().replaceAll("[^\\d]", ""));
+        if (textYear.getText() != null) {textYear.setText(textYear.getText().replaceAll("[^\\d]", ""));}
         pos = textYear.getLength()-len+pos;
         textYear.positionCaret(pos);
         if (StringUtils.compareStrings(String.valueOf(SongGlobal.getCurrentSong().getYear()), textYear.getText())) {
@@ -710,15 +726,27 @@ public class SongController {
 
     public void filterTable() {
         String filter = textFilterFolder.getText().toLowerCase();
-        filteredSongs.setPredicate(x -> x.getFileLoc().toLowerCase().contains(filter));
+        Boolean doneFilterCheck = null;
+        if (doneFilter.getSelectionModel().getSelectedIndex() == 1) {
+            doneFilterCheck = true;
+        } else if (doneFilter.getSelectionModel().getSelectedIndex() == 2) {
+            doneFilterCheck = false;
+        }
+        if (doneFilterCheck == null) {
+            filteredSongs.setPredicate(x -> x.getFileLoc().toLowerCase().contains(filter));
+        } else {
+            Boolean finalDoneFilterCheck = doneFilterCheck;
+            filteredSongs.setPredicate(x -> x.getFileLoc().toLowerCase().contains(filter) && x.getDone().equals(finalDoneFilterCheck));
+        }
         songDatabaseTable.setItems(sortedSongs);
         logger.debug("set filter to: "+filter);
         //TODO: if the current song gets unselected while filtering, everything breaks
         //currentSongID = songDatabaseTable.getSelectionModel().getSelectedIndex();
+
     }
 
     public void googleSong(ActionEvent event) {
-        String uri = SongGlobal.getCurrentSong().getArtist()+" "+SongGlobal.getCurrentSong().getTitle();
+        String uri = textArtist.getText()+" "+textTitle.getText();
         uri = uri.replace(" ","+");
         uri = "https://www.google.com/search?q="+uri;
         Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
