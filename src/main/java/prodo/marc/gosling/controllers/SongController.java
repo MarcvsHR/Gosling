@@ -11,8 +11,6 @@ import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -22,13 +20,13 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.hibernate.repository.SongRepository;
 import prodo.marc.gosling.service.*;
+import prodo.marc.gosling.service.util.TruncatedUtil;
 
 import java.awt.*;
 import java.io.File;
@@ -52,7 +50,7 @@ public class SongController {
     private static final Logger logger = LogManager.getLogger(SongController.class);
 
     public ProgressBar progressBar;
-    @FXML ComboBox dropGenre, doneFilter;
+    @FXML ComboBox dropGenre, doneFilter, truncatedFilter;
     @FXML MediaPlayer mplayer;
     @FXML Button songBackButton, addSongButton, addFolderButton, parseFilenameButton, googleSongButton,openLegacyDataButton;
     @FXML Button backSongs, buttonPlay, buttonPause, skipBack, skipForward, skipForwardSmall, skipBackSmall, buttonRevert;
@@ -80,6 +78,9 @@ public class SongController {
     private Path tempDir;
     /**Initial volume for mp3*/
     private static final Integer INITIAL_VOLUME_SO_MY_EARS_DONT_EXPLODE=20;
+    String defaultBackgroundColor = "000000";
+    String changedBackgroundColor = "aa0000";
+    String defaultTextColor = "FFFFFF";
 
     public void initialize() {
 
@@ -93,7 +94,9 @@ public class SongController {
 
         dropGenre.getItems().addAll(getGenres());
         doneFilter.getItems().addAll("Either", "Done", "Not Done");
-        doneFilter.getSelectionModel().select(2);
+        truncatedFilter.getItems().addAll("Either", "Truncated", "Not Truncated");
+        doneFilter.getSelectionModel().select(0);
+        truncatedFilter.getSelectionModel().select(0);
 
 
         tableYear.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getYear()));
@@ -229,13 +232,31 @@ public class SongController {
         return null;
     }
 
+    @FXML
     private void updateTable() {
 
         logger.debug("----- Executing updateTable");
 
         SongRepository songRepo = new SongRepository();
+        List<Song> songList1 = songRepo.getSongs();
+
+        //TODO: truncated should be handled somewhere else but this works for now
+        if (truncatedFilter.getSelectionModel().getSelectedIndex() != 0) {
+            boolean finalBoolFilter = truncatedFilter.getSelectionModel().getSelectedIndex() == 1;
+            Iterator<Song> i = songList1.iterator();
+            while (i.hasNext()) {
+                Song song = i.next();
+            try {
+                if (TruncatedUtil.isTruncated(song) != finalBoolFilter) {
+                    i.remove();
+                }
+            } catch (IllegalAccessException e) {
+                logger.debug("marko is a popohead: ", e);
+            }
+        }}
+
         songList.clear();
-        songList.addAll(songRepo.getSongs());
+        songList.addAll(songList1);
         filterTable();
         //songDatabaseTable.getSelectionModel().select(currentSongID);
 
@@ -323,8 +344,9 @@ public class SongController {
             textComposer.setText(id3Data.getComposer());
             textYear.setText(id3Data.getYear());
             if (id3Data.getKey() != null) {checkDone.setSelected(id3Data.getKey().equals("true"));} else {checkDone.setSelected(false);}
+            //TODO: ovo ne bi trebalo radit vako...
             if (id3Data.getGenreDescription() != null) {dropGenre.getSelectionModel().select(id3Data.getGenreDescription().toLowerCase());}
-            if (dropGenre.getSelectionModel().getSelectedItem() == null) {
+            if (dropGenre.getSelectionModel().getSelectedItem() == null || id3Data.getGenreDescription() == null) {
                 dropGenre.getSelectionModel().select(0);
             }
             if (dropGenre.getSelectionModel().getSelectedIndex() == -1) {
@@ -333,6 +355,7 @@ public class SongController {
                         "The song has an unknown genre",
                         "Genre: "+id3Data.getGenreDescription());
             }
+            logger.debug("***"+id3Data.getGenreDescription()+"***");
 
             //textISRC.setText(id3Data.getISRC());
 
@@ -400,7 +423,11 @@ public class SongController {
     @FXML
     protected void pauseMP3() {
         if (mplayer != null) {
+            if (mplayer.getStatus() == MediaPlayer.Status.PLAYING) {
             mplayer.pause(); }
+            else {
+                mplayer.play();
+            } }
     }
 
     @FXML
@@ -473,8 +500,8 @@ public class SongController {
     }
 
     private void makeTextFieldsWhite() {
-        textArtist.setStyle("-fx-background-color: #FFFFFF");
-          textYear.setStyle("-fx-background-color: #FFFFFF");
+        textArtist.setStyle("-fx-background-color: #"+defaultBackgroundColor);
+          textYear.setStyle("-fx-background-color: #"+defaultBackgroundColor);
     }
 
     private void writeToMP3(ID3v24Tag song, String fileLoc) {
@@ -625,6 +652,9 @@ public class SongController {
                 Song song = songDatabaseTable.getSelectionModel().getSelectedItem();
                 SongRepository.delete(song);
                 updateTable();
+                if (Objects.equals(song.getFileLoc(), currentFileLoc)) {
+                    currentFileLoc = "";
+                }
                 try { Files.delete(Path.of(fileLoc));
                 } catch (IOException er) {
                     logger.error("can't delete file: ",er); }
@@ -633,6 +663,9 @@ public class SongController {
                 Song song =  songDatabaseTable.getSelectionModel().getSelectedItem();
                 SongRepository.delete(song);
                 updateTable();
+                if (Objects.equals(song.getFileLoc(), currentFileLoc)) {
+                    currentFileLoc = "";
+                }
             } else {
                 logger.debug("code to delete id3 tag here");
             }
@@ -663,10 +696,17 @@ public class SongController {
         if (!checkDone.isSelected()) {
             newFileLoc = oldFile.getParent() + newFileLoc;
         } else {
+            if (dropGenre.getSelectionModel().getSelectedItem().equals("")) {
+                Popups.giveInfoAlert("file rename error",
+                        "no genre selected",
+                        "please select genre and try again");
+                return false;
+            }
             String genre = dropGenre.getSelectionModel().getSelectedItem().toString()+"\\";
             if (genre.equalsIgnoreCase("pop\\")) {genre="";}
             String year = textYear.getText()+"\\";
             newFileLoc = "Z:\\Songs\\"+genre + year + newFileLoc;
+            new File(Paths.get(newFileLoc).getParent().toString()).mkdirs();
         }
         File newFile = new File(newFileLoc);
         if (!oldFile.getAbsolutePath().equals(newFile.getAbsolutePath())) {
@@ -700,9 +740,9 @@ public class SongController {
 
     public void checkArtistField() {
         if (StringUtils.compareStrings(SongGlobal.getCurrentSong().getArtist(), textArtist.getText())) {
-            textArtist.setStyle("-fx-background-color: #FFFFFF");
+            textArtist.setStyle("-fx-background-color: #"+defaultBackgroundColor);
         } else {
-            textArtist.setStyle("-fx-background-color: #FFCCBB");
+            textArtist.setStyle("-fx-background-color: #"+changedBackgroundColor);
         }
     }
 
@@ -713,14 +753,15 @@ public class SongController {
         pos = textYear.getLength()-len+pos;
         textYear.positionCaret(pos);
         if (StringUtils.compareStrings(String.valueOf(SongGlobal.getCurrentSong().getYear()), textYear.getText())) {
-            textYear.setStyle("-fx-background-color: #FFFFFF");
+            textYear.setStyle("-fx-background-color: #"+defaultBackgroundColor);
+            textYear.setStyle("-fx-text-color: #"+defaultTextColor);
         } else {
-            textYear.setStyle("-fx-background-color: #FFCCBB");
+            textYear.setStyle("-fx-background-color: #"+changedBackgroundColor);
         }
     }
 
     private boolean getFieldChanged(TextField field) {
-        return field.getStyle().contains("FFCCBB");
+        return field.getStyle().contains(changedBackgroundColor);
     }
 
     public void toggleDone() {
@@ -744,6 +785,7 @@ public class SongController {
             filteredSongs.setPredicate(x -> x.getFileLoc().toLowerCase().contains(filter) && x.getDone().equals(finalDoneFilterCheck));
         }
         songDatabaseTable.setItems(sortedSongs);
+        logger.debug("Showing "+sortedSongs.size()+" songs");
         logger.debug("set filter to: "+filter);
         //TODO: if the current song gets unselected while filtering, everything breaks
         //currentSongID = songDatabaseTable.getSelectionModel().getSelectedIndex();
@@ -767,22 +809,8 @@ public class SongController {
     public void openLegacyData(ActionEvent event) throws IOException {
         logger.debug("Here we open new window");
 
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader();
-            fxmlLoader.setLocation(getClass().getResource("/prodo/marc/gosling/view/legacyAccessDatabaseViewer.fxml"));
-
-            Scene scene = new Scene(fxmlLoader.load(), 800, 600);
-            Stage stage = new Stage();
-            stage.setTitle("Legacy Access Database Viever");
-
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException  e) {
-
-            logger.error("Error while loading screen! ",e);
-            throw e;
-        }
-
+        String fxmlLocation = "/prodo/marc/gosling/view/legacyAccessDatabaseViewer.fxml";
+        SceneController.openWindow(event, fxmlLocation);
 
     }
 

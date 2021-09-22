@@ -2,10 +2,11 @@ package prodo.marc.gosling.service;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import prodo.marc.gosling.controllers.SongController;
 import prodo.marc.gosling.dao.Song;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Properties;
 
 public class SongGlobal {
@@ -33,6 +34,9 @@ public class SongGlobal {
                 fileFolder = "c:";
                 setCurrentFolder(fileFolder);
                 logger.error("there was a problem loading",error);
+            }
+            if (Files.notExists(Path.of(fileFolder))) {
+                fileFolder = "C:";
             }
         }
         return fileFolder;

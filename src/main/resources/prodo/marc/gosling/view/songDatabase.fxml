@@ -1,135 +1,136 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.ContextMenu?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.ProgressBar?>
-<?import javafx.scene.control.Slider?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
-
-<AnchorPane stylesheets="@css/song.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="prodo.marc.gosling.controllers.SongController">
-    <GridPane alignment="TOP_CENTER" style="-fx-background-color: #aaaaaa;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" GridPane.hgrow="ALWAYS">
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<AnchorPane stylesheets="@css/song.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="prodo.marc.gosling.controllers.SongController">
+    <GridPane alignment="TOP_CENTER" style="-fx-background-color: #555555;" AnchorPane.bottomAnchor="0.0"
+              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
+              GridPane.hgrow="ALWAYS">
 
         <HBox alignment="TOP_CENTER" GridPane.hgrow="NEVER" GridPane.vgrow="NEVER">
             <VBox alignment="CENTER" spacing="5.0" HBox.hgrow="NEVER">
                 <padding>
-                    <Insets left="10.0" top="10.0" />
+                    <Insets left="10.0" top="10.0"/>
                 </padding>
                 <HBox spacing="10.0">
                     <opaqueInsets>
-                        <Insets top="5.0" />
+                        <Insets top="5.0"/>
                     </opaqueInsets>
-                    <TextField fx:id="mp3Label" alignment="TOP_CENTER" prefWidth="328.0" style="-fx-background-color: #dddddd;">
+                    <Button fx:id="openLegacyDataButton" mnemonicParsing="false" onAction="#openLegacyData"
+                            text="Grozni Button Sa strane"/>
+                    <TextField fx:id="mp3Label" alignment="TOP_CENTER" prefWidth="328.0">
                         <font>
-                            <Font size="14.0" />
+                            <Font size="14.0"/>
                         </font>
                     </TextField>
-                    <Button fx:id="googleSongButton" mnemonicParsing="false" onAction="#googleSong" text="check google" />
-               <Button fx:id="openLegacyDataButton" mnemonicParsing="false" onAction="#openLegacyData" text="Grozni Button Sa strane" />
+                    <Button fx:id="googleSongButton" mnemonicParsing="false" onAction="#googleSong"
+                            text="check google"/>
+
 
                 </HBox>
                 <HBox alignment="CENTER">
-                    <Slider fx:id="mp3Slider" max="5000.0" onMousePressed="#sliderDrag" onMouseReleased="#moveTime" prefWidth="250.0">
+                    <Slider fx:id="mp3Slider" max="5000.0" onMousePressed="#sliderDrag" onMouseReleased="#moveTime"
+                            prefWidth="250.0">
                         <padding>
-                            <Insets left="5.0" right="5.0" top="5.0" />
+                            <Insets left="5.0" right="5.0" top="5.0"/>
                         </padding>
                     </Slider>
                 </HBox>
                 <HBox alignment="TOP_CENTER" spacing="10.0">
-                    <Button fx:id="skipBack" mnemonicParsing="false" onAction="#moveTimeBack" text="-10s" />
-                    <Button fx:id="skipBackSmall" mnemonicParsing="false" onAction="#moveTimeBackLittle" text="-0.1s" />
-                    <Label fx:id="mp3Time" alignment="CENTER" contentDisplay="CENTER" text="00m 00.0s" textAlignment="CENTER">
+                    <Button fx:id="skipBack" mnemonicParsing="false" onAction="#moveTimeBack" text="-10s"/>
+                    <Button fx:id="skipBackSmall" mnemonicParsing="false" onAction="#moveTimeBackLittle" text="-0.1s"/>
+                    <Label fx:id="mp3Time" alignment="CENTER" contentDisplay="CENTER" text="00m 00.0s"
+                           textAlignment="CENTER">
                         <padding>
-                            <Insets left="10.0" top="5.0" />
+                            <Insets left="10.0" top="5.0"/>
                         </padding>
                         <font>
-                            <Font name="System Bold" />
+                            <Font name="System Bold"/>
                         </font>
                     </Label>
-                    <Button fx:id="skipForwardSmall" mnemonicParsing="false" onAction="#moveTimeForwardLittle" text="+0.1s" />
-                    <Button fx:id="skipForward" mnemonicParsing="false" onAction="#moveTimeForward" text="+10s" />
+                    <Button fx:id="skipForwardSmall" mnemonicParsing="false" onAction="#moveTimeForwardLittle"
+                            text="+0.1s"/>
+                    <Button fx:id="skipForward" mnemonicParsing="false" onAction="#moveTimeForward" text="+10s"/>
                 </HBox>
                 <HBox alignment="CENTER" spacing="5.0">
-                    <Button fx:id="buttonPlay" mnemonicParsing="false" onAction="#playMP3" text="Play" />
-                    <Button fx:id="buttonPause" mnemonicParsing="false" onAction="#pauseMP3" text="Pause" />
+                    <Button fx:id="buttonPlay" mnemonicParsing="false" onAction="#playMP3" text="Play"/>
+                    <Button fx:id="buttonPause" mnemonicParsing="false" onAction="#pauseMP3" text="Pause"/>
                 </HBox>
                 <HBox alignment="CENTER" spacing="5.0">
                     <Label text="Artist">
-                  <font>
-                     <Font size="14.0" />
-                  </font></Label>
-                    <TextField fx:id="textArtist" onKeyTyped="#checkArtistField" prefWidth="250.0" />
+                        <font>
+                            <Font size="14.0"/>
+                        </font>
+                    </Label>
+                    <TextField fx:id="textArtist" onKeyTyped="#checkArtistField" prefWidth="250.0"/>
                 </HBox>
                 <HBox alignment="CENTER" spacing="5.0">
                     <Label text="Title">
-                  <font>
-                     <Font size="14.0" />
-                  </font></Label>
-                    <TextField fx:id="textTitle" prefWidth="250.0" />
+                        <font>
+                            <Font size="14.0"/>
+                        </font>
+                    </Label>
+                    <TextField fx:id="textTitle" prefWidth="250.0"/>
                 </HBox>
                 <HBox alignment="CENTER" spacing="5.0">
                     <Label text="Album">
-                  <font>
-                     <Font size="14.0" />
-                  </font></Label>
-                    <TextField fx:id="textAlbum" prefWidth="250.0" style="-fx-background-color: #dddddd;" />
+                        <font>
+                            <Font size="14.0"/>
+                        </font>
+                    </Label>
+                    <TextField fx:id="textAlbum" prefWidth="250.0"/>
                 </HBox>
                 <HBox alignment="CENTER" spacing="5.0">
                     <Label text="Composer">
-                  <font>
-                     <Font size="14.0" />
-                  </font></Label>
-                    <TextField fx:id="textComposer" prefWidth="420.0" />
+                        <font>
+                            <Font size="14.0"/>
+                        </font>
+                    </Label>
+                    <TextField fx:id="textComposer" prefWidth="420.0"/>
                 </HBox>
                 <HBox alignment="CENTER" spacing="5.0">
                     <Label text="Year">
-                  <font>
-                     <Font size="14.0" />
-                  </font></Label>
-                    <TextField fx:id="textYear" onKeyTyped="#checkYearField" prefWidth="80.0" />
+                        <font>
+                            <Font size="14.0"/>
+                        </font>
+                    </Label>
+                    <TextField fx:id="textYear" onKeyTyped="#checkYearField" prefWidth="80.0"/>
                     <Label text="Genre">
-                  <font>
-                     <Font size="14.0" />
-                  </font></Label>
-               <ComboBox fx:id="dropGenre" prefWidth="130.0" />
+                        <font>
+                            <Font size="14.0"/>
+                        </font>
+                    </Label>
+                    <ComboBox fx:id="dropGenre" prefWidth="130.0"/>
                     <Label text="Publisher">
-                  <font>
-                     <Font size="14.0" />
-                  </font></Label>
-                    <TextField fx:id="textPublisher" prefWidth="100.0" />
+                        <font>
+                            <Font size="14.0"/>
+                        </font>
+                    </Label>
+                    <TextField fx:id="textPublisher" prefWidth="100.0"/>
                 </HBox>
                 <HBox alignment="TOP_CENTER" spacing="5.0" visible="false">
-                    <Label text="ISRC" />
-                    <TextField fx:id="textISRC" />
+                    <Label text="ISRC"/>
+                    <TextField fx:id="textISRC"/>
                 </HBox>
                 <HBox alignment="TOP_CENTER">
                     <CheckBox fx:id="checkDone" mnemonicParsing="false" text="File is done">
-                  <font>
-                     <Font name="System Bold Italic" size="14.0" />
-                  </font></CheckBox>
+                        <font>
+                            <Font name="System Bold Italic" size="14.0"/>
+                        </font>
+                    </CheckBox>
                 </HBox>
                 <HBox alignment="TOP_CENTER" spacing="10.0">
                     <Button fx:id="buttonRevert" mnemonicParsing="false" onAction="#revertID3" text="Revert">
                         <font>
-                            <Font name="System Italic" size="14.0" />
+                            <Font name="System Italic" size="14.0"/>
                         </font>
                     </Button>
                     <Button fx:id="backSongs" mnemonicParsing="false" onAction="#updateMP3" text="Update">
                         <font>
-                            <Font name="System Bold" size="14.0" />
+                            <Font name="System Bold" size="14.0"/>
                         </font>
                     </Button>
                 </HBox>
@@ -137,63 +138,69 @@
         </HBox>
         <HBox alignment="TOP_CENTER" GridPane.hgrow="NEVER" GridPane.rowIndex="1" GridPane.vgrow="NEVER">
             <opaqueInsets>
-                <Insets />
+                <Insets/>
             </opaqueInsets>
             <padding>
-                <Insets top="20.0" />
+                <Insets top="20.0"/>
             </padding>
-            <Slider fx:id="volumeSlider" blockIncrement="1.0" onKeyReleased="#changeVolume" onMouseClicked="#changeVolume" onMouseDragged="#changeVolume" value="100.0" />
-            <Label fx:id="labelVolume" text="Volume: 100%" />
+            <Slider fx:id="volumeSlider" blockIncrement="1.0" onKeyReleased="#changeVolume"
+                    onMouseClicked="#changeVolume" onMouseDragged="#changeVolume" value="100.0"/>
+            <Label fx:id="labelVolume" text="Volume: 100%"/>
         </HBox>
         <VBox spacing="10.0" GridPane.rowIndex="2" GridPane.vgrow="NEVER">
             <HBox spacing="20.0" VBox.vgrow="NEVER">
                 <padding>
-                    <Insets bottom="10.0" left="10.0" top="10.0" />
+                    <Insets bottom="10.0" left="10.0" top="10.0"/>
                 </padding>
-                <Label fx:id="progressLabel" text="0/0" />
-                <ProgressBar fx:id="progressBar" prefWidth="200.0" progress="0.0" />
-                <Button fx:id="songBackButton" mnemonicParsing="false" onAction="#backToMain" text="Back to main window" />
-                <Button fx:id="addSongButton" mnemonicParsing="false" onAction="#addSong2DB" text="Add new song" />
-                <Button fx:id="addFolderButton" mnemonicParsing="false" onAction="#clickedFolderButton" text="Add folder" />
-                <Button fx:id="parseFilenameButton" mnemonicParsing="false" onAction="#clickedParseButton" text="Parse ID3 from filename" />
-                <TextField fx:id="textFilterFolder" onKeyTyped="#filterTable" />
-            <ComboBox fx:id="doneFilter" onAction="#filterTable" prefWidth="150.0" promptText="Either" />
+                <Label fx:id="progressLabel" text="0/0"/>
+                <ProgressBar fx:id="progressBar" prefWidth="200.0" prefHeight="20.0" progress="0.0"/>
+                <Button fx:id="songBackButton" mnemonicParsing="false" onAction="#backToMain"
+                        text="Back to main window"/>
+                <Button fx:id="addSongButton" mnemonicParsing="false" onAction="#addSong2DB" text="Add new song"/>
+                <Button fx:id="addFolderButton" mnemonicParsing="false" onAction="#clickedFolderButton"
+                        text="Add folder"/>
+                <Button fx:id="parseFilenameButton" mnemonicParsing="false" onAction="#clickedParseButton"
+                        text="Parse ID3 from filename"/>
+                <TextField fx:id="textFilterFolder" onKeyTyped="#filterTable"/>
+                <ComboBox fx:id="doneFilter" onAction="#filterTable" prefWidth="150.0" promptText="Either"/>
+                <ComboBox fx:id="truncatedFilter" onAction="#updateTable" prefWidth="150.0" promptText="Either"/>
             </HBox>
         </VBox>
-        <TableView fx:id="songDatabaseTable" onMouseClicked="#clickTable" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" GridPane.vgrow="ALWAYS">
+        <TableView fx:id="songDatabaseTable" onMouseClicked="#clickTable" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3"
+                   GridPane.vgrow="ALWAYS">
             <columns>
-                <TableColumn fx:id="tableID" prefWidth="40.0" text="ID" />
-                <TableColumn fx:id="tableArtist" prefWidth="240.0" text="Artist" />
-                <TableColumn fx:id="tableTitle" prefWidth="200.0" text="Title" />
-                <TableColumn fx:id="tableAlbum" prefWidth="100.0" text="Album" />
-                <TableColumn fx:id="tablePublisher" prefWidth="100.0" text="Publisher" />
-                <TableColumn fx:id="tableComposer" prefWidth="300.0" text="Composer" />
-                <TableColumn fx:id="tableYear" prefWidth="50.0" text="Year" />
-                <TableColumn fx:id="tableGenre" text="Genre" />
-                <TableColumn fx:id="tableISRC" prefWidth="50.0" text="ISRC" />
+                <TableColumn fx:id="tableID" prefWidth="20.0" text="ID"/>
+                <TableColumn fx:id="tableArtist" prefWidth="240.0" text="Artist"/>
+                <TableColumn fx:id="tableTitle" prefWidth="200.0" text="Title"/>
+                <TableColumn fx:id="tableAlbum" prefWidth="100.0" text="Album"/>
+                <TableColumn fx:id="tablePublisher" prefWidth="100.0" text="Publisher"/>
+                <TableColumn fx:id="tableComposer" prefWidth="300.0" text="Composer"/>
+                <TableColumn fx:id="tableYear" prefWidth="70.0" text="Year"/>
+                <TableColumn fx:id="tableGenre" prefWidth="90.0" text="Genre"/>
+                <TableColumn fx:id="tableISRC" prefWidth="70.0" text="ISRC"/>
                 <TableColumn fx:id="tableDone" prefWidth="70.0" text="Done">
                 </TableColumn>
-                <TableColumn fx:id="tableFileLoc" prefWidth="300.0" text="File Location" />
+                <TableColumn fx:id="tableFileLoc" prefWidth="300.0" text="File Location"/>
             </columns>
             <contextMenu>
                 <ContextMenu>
                     <items>
-                        <MenuItem mnemonicParsing="false" onAction="#copyID3" text="Copy" />
-                        <MenuItem mnemonicParsing="false" onAction="#pasteID3" text="Paste" />
-                        <MenuItem mnemonicParsing="false" onAction="#deleteFile" text="Delete" />
-                        <MenuItem mnemonicParsing="false" onAction="#toggleDone" text="File Done" />
+                        <MenuItem mnemonicParsing="false" onAction="#copyID3" text="Copy"/>
+                        <MenuItem mnemonicParsing="false" onAction="#pasteID3" text="Paste"/>
+                        <MenuItem mnemonicParsing="false" onAction="#deleteFile" text="Delete"/>
+                        <MenuItem mnemonicParsing="false" onAction="#toggleDone" text="File Done"/>
                     </items>
                 </ContextMenu>
             </contextMenu>
         </TableView>
         <columnConstraints>
-            <ColumnConstraints />
+            <ColumnConstraints/>
         </columnConstraints>
         <rowConstraints>
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
+            <RowConstraints/>
+            <RowConstraints/>
+            <RowConstraints/>
+            <RowConstraints/>
         </rowConstraints>
     </GridPane>
 

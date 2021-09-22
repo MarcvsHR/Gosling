@@ -1,6 +1,5 @@
 package prodo.marc.gosling.service;
 
-import javafx.fxml.FXML;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import org.apache.log4j.LogManager;

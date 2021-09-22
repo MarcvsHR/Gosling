@@ -1,7 +1,13 @@
 package prodo.marc.gosling.dao;
-import lombok.*;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.apache.log4j.Logger;
 import prodo.marc.gosling.service.StringUtils;
+import prodo.marc.gosling.service.util.Truncated;
+
 import javax.persistence.*;
 import java.time.Year;
 import java.util.Objects;
@@ -16,16 +22,26 @@ public class Song {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Truncated
     private String artist;
+    @Truncated
     private String title;
+    @Truncated
     private String album;
+    @Truncated
     private String publisher;
+    @Truncated
     private String composer;
+    @Truncated
     private Year year;
+    @Truncated
     private String genre;
+
     private String ISRC;
     private String fileLoc;
     private Boolean done;
+    //private char truncated = 'Y';
+
 
     @Override
     //TODO: there's null and everything breaks! panic!
@@ -42,7 +58,7 @@ public class Song {
                 StringUtils.compareStrings(fileLoc, that.fileLoc) &&
                 Objects.equals(year, that.year) &&
 
-                 done.equals(that.done);
+                done.equals(that.done);
 
         //         StringUtils.compareStrings(ISRC, that.ISRC);
     }
@@ -55,14 +71,14 @@ public class Song {
         @Override
         public Short convertToDatabaseColumn(Year attribute) {
             short year = (short) attribute.getValue();
-            log.info("Convert Year ["+attribute+"] to short ["+year+"]");
+            log.info("Convert Year [" + attribute + "] to short [" + year + "]");
             return year;
         }
 
         @Override
         public Year convertToEntityAttribute(Short dbValue) {
             Year year = Year.of(dbValue);
-            log.info("Convert Short ["+dbValue+"] to Year ["+year+"]");
+            log.info("Convert Short [" + dbValue + "] to Year [" + year + "]");
             return year;
         }
     }
