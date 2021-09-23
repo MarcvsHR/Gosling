@@ -4,9 +4,12 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import prodo.marc.gosling.dao.Song;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Properties;
 
 public class SongGlobal {
@@ -15,10 +18,53 @@ public class SongGlobal {
 
     private static Song currentSong;
     private static String fileFolder;
-    private static String propertiesFile = System.getProperty("user.home")+"\\properties.txt";
+    private static String propertiesFile = System.getProperty("user.home") + "\\properties.txt";
+    private static List<Path> mp3List;
+    private static boolean filenameParsed = false;
+    private static int doneFilter = 0;
+    private static int truncFilter = 0;
+    private static String folderFilter = "";
+
+    public static int getDoneFilter() {
+        return doneFilter;
+    }
+
+    public static void setDoneFilter(int doneFilter) {
+        SongGlobal.doneFilter = doneFilter;
+    }
+
+    public static int getTruncFilter() {
+        return truncFilter;
+    }
+
+    public static void setTruncFilter(int truncFilter) {
+        SongGlobal.truncFilter = truncFilter;
+    }
+
+    public static String getFolderFilter() {
+        return folderFilter;
+    }
+
+    public static void setFolderFilter(String folderFilter) {
+        SongGlobal.folderFilter = folderFilter;
+    }
+
+    public static boolean isFilenameParsed() {
+        return filenameParsed;
+    }
+
+    public static void setFilenameParsed(boolean filenameParsed) {
+        SongGlobal.filenameParsed = filenameParsed;
+    }
+
 
     public static Song getCurrentSong() {
         return currentSong;
+    }
+
+    public static void setCurrentSong(Song song) {
+        currentSong = song;
+        logger.debug(currentSong);
     }
 
     public static String getCurrentFolder() {
@@ -33,7 +79,7 @@ public class SongGlobal {
             } catch (Exception error) {
                 fileFolder = "c:";
                 setCurrentFolder(fileFolder);
-                logger.error("there was a problem loading",error);
+                logger.error("there was a problem loading", error);
             }
             if (Files.notExists(Path.of(fileFolder))) {
                 fileFolder = "C:";
@@ -42,26 +88,29 @@ public class SongGlobal {
         return fileFolder;
     }
 
-
-    public static void setCurrentSong(Song song) {
-        currentSong = song;
-    }
-
-    public static void setCurrentFolder(String string){
+    public static void setCurrentFolder(String string) {
         fileFolder = string;
         Properties prop = new Properties();
-        prop.setProperty("fileFolder",fileFolder);
+        prop.setProperty("fileFolder", fileFolder);
         try {
             //TODO: this needs to be handled differently
-            boolean fileMade =  new File(propertiesFile).createNewFile();
-            logger.debug("file create result: " + fileMade);
+            boolean fileMade = new File(propertiesFile).createNewFile();
+            //logger.debug("file create result: " + fileMade);
             FileWriter out = new FileWriter(propertiesFile);
             prop.store(out, null);
             out.close();
         } catch (Exception error) {
-            logger.error("there was a problem saving",error);
+            logger.error("there was a problem saving", error);
         }
 
+    }
+
+    public static List<Path> getMP3List() {
+        return mp3List;
+    }
+
+    public static void setMP3List(List<Path> inputList) {
+        mp3List = inputList;
     }
 
 }

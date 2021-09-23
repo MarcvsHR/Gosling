@@ -23,6 +23,7 @@ import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.controlsfx.control.textfield.TextFields;
 import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.hibernate.repository.SongRepository;
 import prodo.marc.gosling.service.*;
@@ -38,10 +39,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.DecimalFormat;
-import java.time.Instant;
 import java.time.Year;
 import java.util.List;
 import java.util.*;
+import java.util.Timer;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -49,12 +50,11 @@ public class SongController {
 
     private static final Logger logger = LogManager.getLogger(SongController.class);
 
-    public ProgressBar progressBar;
     @FXML ComboBox dropGenre, doneFilter, truncatedFilter;
     @FXML MediaPlayer mplayer;
     @FXML Button songBackButton, addSongButton, addFolderButton, parseFilenameButton, googleSongButton,openLegacyDataButton;
     @FXML Button backSongs, buttonPlay, buttonPause, skipBack, skipForward, skipForwardSmall, skipBackSmall, buttonRevert;
-    @FXML Label mp3Time, labelVolume, progressLabel;
+    @FXML Label mp3Time, labelVolume, labelSongNumber;
     @FXML TableView<Song> songDatabaseTable;
     @FXML TableColumn<Song, String> tableArtist, tableTitle, tableAlbum, tablePublisher, tableComposer, tableGenre, tableISRC, tableFileLoc;
     @FXML TableColumn<Song, Integer> tableID;
@@ -72,7 +72,6 @@ public class SongController {
 
     private boolean updateCheck = true;
     final int skipIncrement = 10000;
-    private Integer currentSongID = 0;
     private String currentFileLoc = "";
     ID3v24Tag copiedID3 = new ID3v24Tag();
     private Path tempDir;
@@ -81,6 +80,12 @@ public class SongController {
     String defaultBackgroundColor = "000000";
     String changedBackgroundColor = "aa0000";
     String defaultTextColor = "FFFFFF";
+    private final Set<String> publisherList = new HashSet<>();
+
+    private void publisherAutocomplete() {
+        String[] array = {"dallas", "crorec", "aquarius", "RCA"};
+        publisherList.addAll(Arrays.asList(array));
+    }
 
     public void initialize() {
 
@@ -95,8 +100,9 @@ public class SongController {
         dropGenre.getItems().addAll(getGenres());
         doneFilter.getItems().addAll("Either", "Done", "Not Done");
         truncatedFilter.getItems().addAll("Either", "Truncated", "Not Truncated");
-        doneFilter.getSelectionModel().select(0);
-        truncatedFilter.getSelectionModel().select(0);
+        doneFilter.getSelectionModel().select(SongGlobal.getDoneFilter());
+        truncatedFilter.getSelectionModel().select(SongGlobal.getTruncFilter());
+        textFilterFolder.setText(SongGlobal.getFolderFilter());
 
 
         tableYear.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getYear()));
@@ -125,8 +131,15 @@ public class SongController {
             updateTextFields(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
         }
 
+        if (SongGlobal.isFilenameParsed()) {
+            updateTextFields(SongGlobal.getCurrentSong().getFileLoc());
+        }
+
+        publisherAutocomplete();
+
         logger.debug("----- ending initialize");
     }
+
 
     private String[] getGenres() {
         return new String[]{"", "cro", "cro zabavne", "instrumental", "klape", "kuruza", "pop", "xxx"};
@@ -143,7 +156,13 @@ public class SongController {
     @FXML
     protected void clickedParseButton(ActionEvent event) throws IOException {
         logger.debug("----- Executing clickedParseButton");
-        SceneController.openScene(event, "view/parseFilename.fxml");
+        Song song = SongGlobal.getCurrentSong();
+        if (song == null) {
+            Popups.giveInfoAlert("Open parse window error",
+                    "Couldn't open the filename parse window",
+                    "no file selected, file location=null");
+        } else {
+        SceneController.openScene(event, "view/parseFilename.fxml"); }
         logger.debug("----- ending clickedParseButton");
     }
 
@@ -168,69 +187,21 @@ public class SongController {
 
         logger.debug("----- Executing addSongsFromFolder");
 
-        List<Path> mp3List = FileUtils.getFileListFromFolder(directory,"mp3");
-        logger.debug("number of files in the list: "+mp3List.size());
+        SongGlobal.setMP3List(FileUtils.getFileListFromFolder(directory,"mp3"));
+        logger.debug("number of files in the list: "+SongGlobal.getMP3List().size());
 
-        putMP3ListIntoDB(mp3List);
-        updateTable();
+        putMP3ListIntoDB();
 
         logger.debug("----- ending addSongsFromFolder");
    }
 
-   private void putMP3ListIntoDB(List<Path> mp3List) {
+   private void putMP3ListIntoDB() throws IOException {
 
-        AtomicInteger i = new AtomicInteger();
-        int max = mp3List.size();
-        List<String> dupeFiles = new ArrayList<>();
-
-        progressLabel.setText(i+"/"+max);
-
-        Thread folderImportTask = new Thread(() -> {
-            Instant start = Instant.now();
-            mp3List.forEach(file -> {
-                i.getAndIncrement();
-                logger.debug("processing file: "+ file);
-                logger.debug(i+" out of "+mp3List.size());
-
-                String getFile = addMP3(file);
-                if (getFile != null) {dupeFiles.add(getFile);}
-                Platform.runLater(() -> updateProgressBar(i+"/"+max,i.doubleValue()/max));
-            });
-            updateTable();
-            Instant stop = Instant.now();
-            logger.debug("Thread finished in: "+ java.time.Duration.between(start, stop).toSeconds());
-            logger.debug("duplicate files found: "+dupeFiles);
-        });
-        folderImportTask.start();
+       String fxmlLocation = "/prodo/marc/gosling/view/progress.fxml";
+       SceneController.openWindow(null, fxmlLocation);
 
     }
 
-    @FXML
-    private void updateProgressBar(String string, Double value) {
-        progressLabel.setText(string);
-        progressBar.setProgress(value);
-    }
-
-    @FXML
-    private String addMP3(Path path) {
-
-        logger.debug("----- Executing addMP3");
-
-        Song song;
-        ID3v24Tag id3tag = ID3v2Utils.getID3(new File(String.valueOf(path)));
-        song = ID3v2Utils.songDataFromID3(id3tag, String.valueOf(path));
-        SongRepository songRepo = new SongRepository();
-        if (songRepo.checkForDupes(song)) {
-            logger.debug("---song already exists - "+song);
-            return song.getFileLoc();
-        } else {
-            SongRepository.addSong(song);
-        }
-
-        logger.debug("----- ending addMP3");
-
-        return null;
-    }
 
     @FXML
     private void updateTable() {
@@ -258,7 +229,7 @@ public class SongController {
         songList.clear();
         songList.addAll(songList1);
         filterTable();
-        //songDatabaseTable.getSelectionModel().select(currentSongID);
+        selectFileFromTable(currentFileLoc);
 
         logger.debug("----- ending updateTable");
     }
@@ -313,7 +284,7 @@ public class SongController {
             if (result) {
                 updateMP3();
             } else {
-                songDatabaseTable.getSelectionModel().select(currentSongID);
+                selectFileFromTable(currentFileLoc);
             }
         } else {
             updateTextFields(fileLoc);
@@ -327,7 +298,6 @@ public class SongController {
 
         logger.debug("----- Executing updateTextFields");
 
-
         //show file name
         mp3Label.setText(new File(fileLoc).getName().replaceAll("(?i).mp3",""));
         currentFileLoc = fileLoc;
@@ -336,7 +306,6 @@ public class SongController {
         try {
             File file = new File(fileLoc);
             ID3v24Tag id3Data = ID3v2Utils.getID3(file);
-            SongGlobal.setCurrentSong(ID3v2Utils.songDataFromID3(id3Data, fileLoc));
             textArtist.setText(id3Data.getArtist());
             textTitle.setText(id3Data.getTitle());
             textAlbum.setText(id3Data.getAlbum());
@@ -359,15 +328,29 @@ public class SongController {
 
             //textISRC.setText(id3Data.getISRC());
 
-            currentSongID = songDatabaseTable.getSelectionModel().getSelectedIndex();
-
-            SongGlobal.setCurrentSong(ID3v2Utils.songDataFromID3(id3Data, file.getAbsolutePath()));
+            if (SongGlobal.isFilenameParsed()) {
+                textArtist.setText(SongGlobal.getCurrentSong().getArtist());
+                textTitle.setText(SongGlobal.getCurrentSong().getTitle());
+                selectFileFromTable(currentFileLoc);
+                SongGlobal.setFilenameParsed(false);
+            } else {
+            SongGlobal.setCurrentSong(ID3v2Utils.songDataFromID3(id3Data, file.getAbsolutePath())); }
 
         } catch (Exception report) {
             logger.error("Error while opening file " + fileLoc, report);
         }
 
         logger.debug("----- ending updateTextFields");
+    }
+
+    private void selectFileFromTable(String currentFileLoc) {
+        AtomicInteger i = new AtomicInteger();
+        songDatabaseTable.getItems().forEach(song -> {
+            if (song.getFileLoc().equals(currentFileLoc)) {
+                songDatabaseTable.getSelectionModel().select(i.get());
+            }
+            i.getAndIncrement();
+        });
     }
 
     @FXML
@@ -490,11 +473,11 @@ public class SongController {
         //song.setISRC(textISRC.getText());
 
         if (renameFile()) {
-        updateSongEntry(id3, songDatabaseTable.getItems().get(currentSongID).getId(), currentFileLoc);
+        updateSongEntry(id3, SongGlobal.getCurrentSong().getId(), currentFileLoc);
         makeTextFieldsWhite();
         SongGlobal.setCurrentSong(ID3v2Utils.songDataFromID3(id3, currentFileLoc));
         writeToMP3(id3, currentFileLoc);
-        currentSongID = -1;
+        selectFileFromTable(currentFileLoc);
         }
         logger.debug("----- ending updateMP3");
     }
@@ -581,7 +564,7 @@ public class SongController {
         File mp3 = FileUtils.openFile("MP3 files (*.mp3)","mp3", SongGlobal.getCurrentFolder());
         if (mp3 != null) {
             SongGlobal.setCurrentFolder(mp3.getParent());
-            addMP3(mp3.toPath());
+            FileUtils.addMP3(mp3.toPath());
             updateTable();
         }
         logger.debug("----- ending addSong2DB");
@@ -612,7 +595,7 @@ public class SongController {
         logger.debug("----- Executing copyID3");
 
         copiedID3 = ID3v2Utils.getID3(new File(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc()));
-        songDatabaseTable.getSelectionModel().select(currentSongID);
+        selectFileFromTable(currentFileLoc);
 
         logger.debug("----- ending copyID3");
     }
@@ -627,8 +610,8 @@ public class SongController {
         if(confirm) {
         String fileLoc = songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc();
         writeToMP3(copiedID3, fileLoc);
-        updateSongEntry(copiedID3, songDatabaseTable.getItems().get(currentSongID).getId(),fileLoc);
-        songDatabaseTable.getSelectionModel().select(currentSongID);
+        updateSongEntry(copiedID3, SongRepository.getIDofFile(fileLoc), fileLoc);
+        selectFileFromTable(currentFileLoc);
         updateTextFields(fileLoc); }
 
         logger.debug("----- ending pasteID3");
@@ -685,12 +668,6 @@ public class SongController {
     //TODO: this part needs to check if all the fields are there so it needs to be handled earlier, prolly in updateMP3()
     public boolean renameFile() {
         logger.debug("----- Executing renameFile");
-        if (currentSongID == -1) {
-            Popups.giveInfoAlert("file renamed before",
-                    "Selection is all messed up now so you can't save again...",
-                    "till i figure something out");
-            return false;
-        }
         File oldFile = new File(currentFileLoc);
         String newFileLoc = "\\" + textArtist.getText() + " - " + textTitle.getText() + ".mp3";
         if (!checkDone.isSelected()) {
@@ -715,13 +692,12 @@ public class SongController {
                         "Your file can not be renamed",
                         newFile.getAbsolutePath() + " already exists or is in use.\nAdding it to database");
 
-                addMP3(Path.of(newFileLoc));
+                FileUtils.addMP3(Path.of(newFileLoc));
                 updateTable();
 
                 return false;
             }
         }
-        //updateSongEntry(id3, songDatabaseTable.getItems().get(currentSongID).getId(), newFile.getAbsolutePath());
         currentFileLoc = newFile.getAbsolutePath();
         mp3Label.setText(newFile.getName().replaceAll("(?i).mp3",""));
         logger.debug("----- ending renameFile");
@@ -760,16 +736,7 @@ public class SongController {
         }
     }
 
-    private boolean getFieldChanged(TextField field) {
-        return field.getStyle().contains(changedBackgroundColor);
-    }
-
-    public void toggleDone() {
-        songDatabaseTable.getSelectionModel().getSelectedItem().setDone(!songDatabaseTable.getSelectionModel().getSelectedItem().getDone());
-        //updateTable();
-        songDatabaseTable.getSelectionModel().select(currentSongID);
-    }
-
+    @FXML
     public void filterTable() {
         String filter = textFilterFolder.getText().toLowerCase();
         Boolean doneFilterCheck = null;
@@ -785,14 +752,18 @@ public class SongController {
             filteredSongs.setPredicate(x -> x.getFileLoc().toLowerCase().contains(filter) && x.getDone().equals(finalDoneFilterCheck));
         }
         songDatabaseTable.setItems(sortedSongs);
-        logger.debug("Showing "+sortedSongs.size()+" songs");
-        logger.debug("set filter to: "+filter);
+
+        labelSongNumber.setText("showing "+filteredSongs.size()+" out of "+songList.size()+" songs");
+
+        SongGlobal.setDoneFilter(doneFilter.getSelectionModel().getSelectedIndex());
+        SongGlobal.setTruncFilter(truncatedFilter.getSelectionModel().getSelectedIndex());
+        SongGlobal.setFolderFilter(textFilterFolder.getText());
+
         //TODO: if the current song gets unselected while filtering, everything breaks
-        //currentSongID = songDatabaseTable.getSelectionModel().getSelectedIndex();
 
     }
 
-    public void googleSong(ActionEvent event) {
+    public void googleSong() {
         String uri = textArtist.getText()+" "+textTitle.getText();
         uri = uri.replace(" ","+");
         uri = "https://www.google.com/search?q="+uri;
@@ -814,4 +785,9 @@ public class SongController {
 
     }
 
+    @FXML
+    public void publisherTyped() {
+        TextFields.bindAutoCompletion(textPublisher, publisherList);
+        logger.debug("I'm typing!");
+    }
 }

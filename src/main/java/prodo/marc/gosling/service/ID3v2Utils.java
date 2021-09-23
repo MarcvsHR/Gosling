@@ -6,6 +6,7 @@ import com.mpatric.mp3agic.Mp3File;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import prodo.marc.gosling.dao.Song;
+import prodo.marc.gosling.hibernate.repository.SongRepository;
 
 import java.io.File;
 
@@ -15,7 +16,7 @@ public class ID3v2Utils {
 
     /**
      * Extract idv3 tage for given file
-     * */
+     */
     public static ID3v24Tag getID3(File mp3File) {
 
         logger.debug("----- Executing getID3");
@@ -50,7 +51,7 @@ public class ID3v2Utils {
             }
 
         } catch (Exception error) {
-            logger.error("can't fetch ID3 data from file",error);
+            logger.error("can't fetch ID3 data from file", error);
         }
 
         logger.debug("----- ending getID3");
@@ -75,8 +76,15 @@ public class ID3v2Utils {
         testSong.setISRC(null);
         testSong.setFileLoc(path);
         String key = id3Data.getKey();
-        if (key == null) {key = " ";}
+        if (key == null) {
+            key = " ";
+        }
         testSong.setDone(key.equals("true"));
+
+        Integer ID = SongRepository.getIDofFile(path);
+        if (ID != null) {
+            testSong.setId(ID);
+        }
 
         logger.debug("----- ending id3ToSong");
 

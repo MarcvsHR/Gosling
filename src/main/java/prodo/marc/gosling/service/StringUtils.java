@@ -21,11 +21,11 @@ public class StringUtils {
             text = text.trim().replaceAll(" +", " ");
             text = text.replace(" .", ".");
             text = text.toLowerCase();
+            text = text.trim();
             text = capitalizeAfter(" ", text);
             text = capitalizeAfter(".", text);
             text = capitalizeAfter("/", text);
             text = capitalizeAfter("(", text);
-            text = text.trim();
 
 
             text = text.replace("ć", "c");
@@ -52,6 +52,9 @@ public class StringUtils {
     }
 
     private static String capitalizeAfter(String s, String text) {
+        if (text.isBlank()) {
+            return text;
+        }
         String[] array = text.split(Pattern.quote(s));
         StringBuilder returnText = new StringBuilder();
         int length = array.length-1;
@@ -59,9 +62,9 @@ public class StringUtils {
         for (int i = 0; i < length; i++) {
             returnText.append(array[i].substring(0, 1).toUpperCase()).append(array[i].substring(1)).append(s);
         } } else {
-            return text.substring(0, 1).toUpperCase() + text.substring(1)+" ";
+            return text.substring(0, 1).toUpperCase() + text.substring(1);
         }
-        returnText.append(array[length].substring(0, 1).toUpperCase()).append(array[length].substring(1)).append(" ");
+        returnText.append(array[length].substring(0, 1).toUpperCase()).append(array[length].substring(1));
         return returnText.toString();
     }
 

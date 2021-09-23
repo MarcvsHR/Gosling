@@ -1,9 +1,12 @@
 package prodo.marc.gosling.service;
 
+import com.mpatric.mp3agic.ID3v24Tag;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import prodo.marc.gosling.dao.Song;
+import prodo.marc.gosling.hibernate.repository.SongRepository;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,4 +64,25 @@ public class FileUtils {
 
         return fc.showOpenDialog(null);
     }
+
+    public static String addMP3(Path path) {
+
+        logger.debug("----- Executing addMP3");
+
+        Song song;
+        ID3v24Tag id3tag = ID3v2Utils.getID3(new File(String.valueOf(path)));
+        song = ID3v2Utils.songDataFromID3(id3tag, String.valueOf(path));
+        SongRepository songRepo = new SongRepository();
+        if (songRepo.checkForDupes(song)) {
+            logger.debug("---song already exists - "+song);
+            return song.getFileLoc();
+        } else {
+            SongRepository.addSong(song);
+        }
+
+        logger.debug("----- ending addMP3");
+
+        return null;
+    }
+
 }
