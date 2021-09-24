@@ -20,6 +20,17 @@ public class RegexWindowController {
     public Label artistLabel;
     public Label titleLabel;
     public Song song = SongGlobal.getCurrentSong();
+    public Label titlePublisher;
+
+    private List<String> getRegexStuff() {
+        List<String> regexStuff = new ArrayList<>();
+        regexStuff.add("Artist - Title");
+        regexStuff.add("Title - Artist");
+        regexStuff.add("Track_Title_Artist");
+        regexStuff.add("Title-Artist");
+        regexStuff.add("ISRC_Title_Artist_Publisher");
+        return regexStuff;
+    }
 
     public void changeSelectedRegex(MouseEvent mouseEvent) {
         String selection = regexList.getSelectionModel().getSelectedItem();
@@ -46,10 +57,26 @@ public class RegexWindowController {
                 isSet = true;
                 break;
             }
+            case "Title-Artist": {
+                String[] output = mp3Filename.getText().split("-");
+                song.setArtist(output[1]);
+                song.setTitle(output[0]);
+                isSet = true;
+                break;
+            }
+            case "ISRC_Title_Artist_Publisher": {
+                String[] output = mp3Filename.getText().split("_");
+                song.setArtist(output[2]);
+                song.setTitle(output[1]);
+                song.setPublisher(output[3]);
+                isSet = true;
+                break;
+            }
         }
         if (isSet) {
             artistLabel.setText("Artist: " + song.getArtist());
             titleLabel.setText("Title: " + song.getTitle());
+            titlePublisher.setText("Publisher: "+song.getPublisher());
         }
     }
 
@@ -59,14 +86,6 @@ public class RegexWindowController {
 
         String fileLoc = song.getFileLoc();
         mp3Filename.setText(new File(fileLoc).getName().replaceAll("(?i).mp3", ""));
-    }
-
-    private List<String> getRegexStuff() {
-        List<String> regexStuff = new ArrayList<>();
-        regexStuff.add("Artist - Title");
-        regexStuff.add("Title - Artist");
-        regexStuff.add("Track_Title_Artist");
-        return regexStuff;
     }
 
     public void closeAndSave(ActionEvent event) throws IOException {

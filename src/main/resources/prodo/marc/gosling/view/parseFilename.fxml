@@ -44,6 +44,11 @@
                     <Font size="18.0" />
                 </font>
             </Label>
+            <Label fx:id="titlePublisher" text="Publisher: ">
+                <font>
+                    <Font size="18.0" />
+                </font>
+            </Label>
         </VBox>
     </GridPane>
 </AnchorPane>

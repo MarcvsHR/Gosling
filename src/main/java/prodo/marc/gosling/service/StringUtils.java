@@ -18,7 +18,10 @@ public class StringUtils {
     public static String replaceCroChars(String text) {
         if (text != null) {
 
+            text = text.replaceAll("(\\p{Ll})(\\p{Lu})","$1 $2");
+            text = text.replace(",", ", ");
             text = text.trim().replaceAll(" +", " ");
+            text = text.replace("Mc ", "Mc");
             text = text.replace(" .", ".");
             text = text.toLowerCase();
             text = text.trim();
@@ -26,6 +29,7 @@ public class StringUtils {
             text = capitalizeAfter(".", text);
             text = capitalizeAfter("/", text);
             text = capitalizeAfter("(", text);
+            text = capitalizeAfter("-", text);
 
 
             text = text.replace("ć", "c");
@@ -42,6 +46,7 @@ public class StringUtils {
 
             text = text.replace("&", "i");
             text = text.replace(" I ", " i ");
+            text = text.replace(" Of ", " of ");
             text = text.replace("Feat.","ft");
             text = text.replace("Ft","ft");
 
