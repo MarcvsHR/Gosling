@@ -4,3 +4,7 @@
     -fx-border-width: 1px;
 }
 */
+
+.auto-complete-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell {
+    -fx-background-color: #444444;
+}

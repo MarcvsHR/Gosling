@@ -33,7 +33,9 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.math.RoundingMode;
+import java.net.InetAddress;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -70,7 +72,7 @@ public class SongController {
     TableView<Song> songDatabaseTable;
     @FXML
     TableColumn<Song, String> tableArtist, tableTitle, tableAlbum, tablePublisher, tableComposer,
-            tableGenre, tableISRC, tableFileLoc;
+            tableGenre, tableISRC, tableFileLoc, tableEditor;
     @FXML
     TableColumn<Song, Integer> tableID;
     @FXML
@@ -95,10 +97,12 @@ public class SongController {
     private boolean updateCheck = true;
     private String currentFileLoc = "";
     private Path tempDir;
+    private String editorName;
+
 
     private void publisherAutocomplete() {
         String[] array = {"Aquarius", "Black Butter", "Capitol", "Columbia", "Crorec", "Dallas", "Emi",
-                "Epic", "Hit Records", "Insanity Records", "Menart", "Mikrofon Records",
+                "Epic", "Hit Records", "Insanity Records", "Menart", "Mikrofon Records", "Masterworks",
                 "Ministry of Sound Recordings", "Polydor", "Promo", "Rca", "Scardona", "Sony", "Spona"};
         Arrays.sort(array);
         publisherList.addAll(Arrays.asList(array));
@@ -113,6 +117,12 @@ public class SongController {
         } catch (IOException ex) {
             logger.error("Couldn't create temp dir", ex);
         }
+
+        try {
+            editorName = InetAddress.getLocalHost().getHostName();
+            logger.debug("Editor name: "+editorName);
+        } catch (UnknownHostException ex) {
+            logger.error("Unknown host:",ex); }
 
         dropGenre.getItems().addAll(getGenres());
         doneFilter.getItems().addAll("Either", "Done", "Not Done");
@@ -133,6 +143,7 @@ public class SongController {
         tableISRC.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getISRC()));
         tableFileLoc.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getFileLoc()));
         tableDone.setCellValueFactory(cellData -> new ReadOnlyBooleanWrapper(cellData.getValue().getDone()));
+        tableEditor.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper(cellData.getValue().getEditor()));
         tableDone.setCellFactory(cellData -> new CheckBoxTableCell<>());
         sortedSongs.comparatorProperty().bind(songDatabaseTable.comparatorProperty());
 
@@ -167,6 +178,7 @@ public class SongController {
     @FXML
     protected void backToMain(ActionEvent event) throws IOException {
         logger.debug("----- Executing backToMain");
+        closeMediaStream();
         SceneController.openScene(event, "view/hello-view.fxml");
         logger.debug("----- ending backToMain");
     }
@@ -175,6 +187,7 @@ public class SongController {
     protected void clickedParseButton(ActionEvent event) throws IOException {
         logger.debug("----- Executing clickedParseButton");
         Song song = SongGlobal.getCurrentSong();
+        closeMediaStream();
         if (song == null) {
             Popups.giveInfoAlert("Open parse window error",
                     "Couldn't open the filename parse window",
@@ -279,6 +292,12 @@ public class SongController {
 
         Song currentSong = new Song();
         Song globalSong = SongGlobal.getCurrentSong();
+
+        //TODO: this needs to actually do something... also better implementation
+        if (!editorName.equals(songDatabaseTable.getSelectionModel().getSelectedItem().getEditor()) && songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc().contains("C:\\")) {
+            logger.debug("error!!!!!");
+        }
+
         if (!Objects.equals(currentFileLoc, "") && new File(currentFileLoc).exists()) {
 
             //TODO: finally reworked but needs improvement maybe
@@ -292,6 +311,7 @@ public class SongController {
             //currentSong.setISRC(textISRC.getText());
             currentSong.setFileLoc(SongGlobal.getCurrentSong().getFileLoc());
             currentSong.setDone(checkDone.isSelected());
+            currentSong.setEditor(editorName);
         }
 
         if (!currentSong.equals(globalSong) && currentSong.getFileLoc() != null) {
@@ -770,6 +790,7 @@ public class SongController {
         logger.debug("----- Executing updateSongEntry");
         Song song = ID3v2Utils.songDataFromID3(id3, fileLoc);
         song.setId(databaseID);
+        song.setEditor(editorName);
         SongRepository.addSong(song);
         updateTable();
         logger.debug("----- ending updateSongEntry");

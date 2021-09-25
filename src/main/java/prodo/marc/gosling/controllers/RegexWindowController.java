@@ -29,6 +29,7 @@ public class RegexWindowController {
         regexStuff.add("Track_Title_Artist");
         regexStuff.add("Title-Artist");
         regexStuff.add("ISRC_Title_Artist_Publisher");
+        regexStuff.add("Title");
         return regexStuff;
     }
 
@@ -69,6 +70,11 @@ public class RegexWindowController {
                 song.setArtist(output[2]);
                 song.setTitle(output[1]);
                 song.setPublisher(output[3]);
+                isSet = true;
+                break;
+            }
+            case "Title": {
+                song.setTitle(mp3Filename.getText().trim());
                 isSet = true;
                 break;
             }

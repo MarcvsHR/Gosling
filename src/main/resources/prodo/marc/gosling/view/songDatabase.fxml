@@ -79,20 +79,12 @@
                         </font>
                     </Label>
                     <TextField fx:id="textArtist" onKeyTyped="#checkArtistField" prefWidth="250.0" />
-                </HBox>
-                <HBox alignment="CENTER" spacing="5.0">
                     <Label text="Title">
                         <font>
                             <Font size="14.0" />
                         </font>
                     </Label>
                     <TextField fx:id="textTitle" prefWidth="250.0" />
-                    <Label text="Album">
-                        <font>
-                            <Font size="14.0" />
-                        </font>
-                    </Label>
-                    <TextField fx:id="textAlbum" prefWidth="250.0" />
                 </HBox>
                 <HBox alignment="CENTER" spacing="5.0">
                     <Label text="Composer">
@@ -101,6 +93,12 @@
                         </font>
                     </Label>
                     <TextField fx:id="textComposer" prefWidth="460.0" />
+                    <Label text="Album">
+                        <font>
+                            <Font size="14.0" />
+                        </font>
+                    </Label>
+                    <TextField fx:id="textAlbum" prefWidth="250.0" />
                 </HBox>
                 <HBox alignment="CENTER" spacing="5.0">
                     <Label text="Year">
@@ -181,9 +179,9 @@
                 <TableColumn fx:id="tableYear" prefWidth="70.0" text="Year" />
                 <TableColumn fx:id="tableGenre" prefWidth="90.0" text="Genre" />
                 <TableColumn fx:id="tableISRC" prefWidth="70.0" text="ISRC" />
-                <TableColumn fx:id="tableDone" prefWidth="70.0" text="Done">
-                </TableColumn>
+                <TableColumn fx:id="tableDone" prefWidth="70.0" text="Done"/>
                 <TableColumn fx:id="tableFileLoc" prefWidth="300.0" text="File Location" />
+                <TableColumn fx:id="tableEditor" prefWidth="70.0" text="Editor" />
             </columns>
             <contextMenu>
                 <ContextMenu>
