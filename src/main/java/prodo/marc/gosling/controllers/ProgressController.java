@@ -38,7 +38,7 @@ public class ProgressController {
                 logger.debug("processing file: "+ file);
                 logger.debug(i+" out of "+mp3List.size());
 
-                String getFile = FileUtils.addMP3(file);
+                String getFile = FileUtils.addMP3(file, SongGlobal.getCurrentSong().getEditor());
                 if (getFile != null) {dupeFiles.add(getFile);}
                 Platform.runLater(() -> {
                     updateProgressBar(i+"/"+max,i.doubleValue()/max);

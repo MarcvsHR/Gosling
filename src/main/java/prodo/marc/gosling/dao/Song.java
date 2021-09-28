@@ -40,7 +40,7 @@ public class Song {
     private String ISRC;
     private String fileLoc;
     private Boolean done;
-    private String editor = "Glazba";
+    private String editor;
     //private char truncated = 'Y';
 
 

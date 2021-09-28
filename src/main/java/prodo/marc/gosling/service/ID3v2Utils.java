@@ -59,7 +59,7 @@ public class ID3v2Utils {
         return id3tag;
     }
 
-    public static Song songDataFromID3(ID3v24Tag id3Data, String path) {
+    public static Song songDataFromID3(ID3v24Tag id3Data, String path, String editor) {
 
         logger.debug("----- Executing id3ToSong");
 
@@ -75,6 +75,7 @@ public class ID3v2Utils {
         //testSong.setISRC(id3Data.getISRC());
         testSong.setISRC(null);
         testSong.setFileLoc(path);
+        testSong.setEditor(editor);
         String key = id3Data.getKey();
         if (key == null) {
             key = " ";

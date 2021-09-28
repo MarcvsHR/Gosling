@@ -22,28 +22,24 @@
 <AnchorPane minWidth="1400.0" stylesheets="@css/song.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="prodo.marc.gosling.controllers.SongController">
     <GridPane alignment="TOP_CENTER" minWidth="1400.0" style="-fx-background-color: #555555;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" GridPane.hgrow="ALWAYS">
 
-        <HBox alignment="TOP_CENTER" minWidth="1400.0" GridPane.hgrow="NEVER" GridPane.vgrow="NEVER">
-            <VBox alignment="CENTER" minWidth="1400.0" spacing="5.0" HBox.hgrow="NEVER">
-                <padding>
-                    <Insets left="10.0" top="10.0" />
-                </padding>
-                <HBox alignment="CENTER" spacing="5.0" VBox.vgrow="ALWAYS">
+        <HBox alignment="TOP_CENTER" minWidth="1400.0" GridPane.hgrow="ALWAYS" GridPane.vgrow="NEVER">
+            <VBox alignment="CENTER" minWidth="1400.0" spacing="5.0" HBox.hgrow="ALWAYS">
+                <HBox alignment="CENTER" style="-fx-background-color: #777777;" VBox.vgrow="ALWAYS">
                     <padding>
-                        <Insets bottom="10.0" />
+                        <Insets bottom="5.0" top="5.0" />
                     </padding>
                     <HBox alignment="CENTER_LEFT" spacing="10.0" HBox.hgrow="ALWAYS">
                         <opaqueInsets>
                             <Insets top="5.0" />
                         </opaqueInsets>
                         <Button fx:id="googleSongButton" mnemonicParsing="false" onAction="#googleSong" text="check google" />
-                  <Button fx:id="refreshTablebutton" mnemonicParsing="false" onAction="#updateTable" text="R" />
                         <TextField fx:id="mp3Label" alignment="CENTER" prefWidth="350.0">
                             <font>
                                 <Font size="14.0" />
                             </font>
                         </TextField>
                         <padding>
-                            <Insets right="30.0" />
+                            <Insets left="10.0" right="30.0" />
                         </padding>
                     </HBox>
                     <HBox alignment="CENTER" spacing="10.0" HBox.hgrow="ALWAYS">
@@ -63,13 +59,16 @@
                                 <Font name="System Bold" />
                             </font>
                         </Label>
-                        <Button fx:id="buttonPlay" mnemonicParsing="false" onAction="#playMP3" text="Play" />
-                        <Button fx:id="buttonPause" mnemonicParsing="false" onAction="#pauseMP3" text="Pause" />
+                        <Button fx:id="buttonPlay" mnemonicParsing="false" onAction="#playMP3" style="-fx-background-color: #339955;" text="Play" />
+                        <Button fx:id="buttonPause" mnemonicParsing="false" onAction="#pauseMP3" style="-fx-background-color: #aa2222;" text="Pause" />
                       <Slider fx:id="volumeSlider" blockIncrement="1.0" onKeyReleased="#changeVolume" onMouseClicked="#changeVolume" onMouseDragged="#changeVolume" prefWidth="100.0" value="100.0" />
                       <Label fx:id="labelVolume" text="Volume: 100%" />
                         <HBox.margin>
                             <Insets left="30.0" />
                         </HBox.margin>
+                  <padding>
+                     <Insets right="10.0" />
+                  </padding>
                     </HBox>
                 </HBox>
                 <HBox alignment="CENTER" spacing="5.0">
@@ -101,12 +100,6 @@
                     <TextField fx:id="textAlbum" prefWidth="250.0" />
                 </HBox>
                 <HBox alignment="CENTER" spacing="5.0">
-                    <Label text="Year">
-                        <font>
-                            <Font size="14.0" />
-                        </font>
-                    </Label>
-                    <TextField fx:id="textYear" onKeyTyped="#checkYearField" prefWidth="80.0" />
                     <Label text="Genre">
                         <font>
                             <Font size="14.0" />
@@ -119,6 +112,12 @@
                         </font>
                     </Label>
                     <TextField fx:id="textPublisher" onKeyTyped="#publisherTyped" prefWidth="100.0" />
+                    <Label text="Year">
+                        <font>
+                            <Font size="14.0" />
+                        </font>
+                    </Label>
+                    <TextField fx:id="textYear" onKeyTyped="#checkYearField" prefWidth="80.0" />
                 </HBox>
                 <HBox alignment="TOP_CENTER" spacing="5.0" visible="false">
                     <Label text="ISRC" />
@@ -148,13 +147,14 @@
                 <padding>
                     <Insets left="10.0" top="10.0" />
                 </padding>
-                 <Button fx:id="openLegacyDataButton" mnemonicParsing="false" onAction="#openLegacyData" text="Access Stuff" />
-                <Button fx:id="songBackButton" mnemonicParsing="false" onAction="#backToMain" text="Back to main window" />
+            <Button fx:id="refreshTablebutton" defaultButton="true" mnemonicParsing="false" onAction="#updateTable" text="Refresh" />
+                 <Button fx:id="openLegacyDataButton" disable="true" mnemonicParsing="false" onAction="#openLegacyData" text="Access Stuff" />
+                <Button fx:id="songBackButton" disable="true" mnemonicParsing="false" onAction="#backToMain" text="Back to main window" />
                 <Button fx:id="addSongButton" mnemonicParsing="false" onAction="#addSong2DB" text="Add new song" />
                 <Button fx:id="addFolderButton" mnemonicParsing="false" onAction="#clickedFolderButton" text="Add folder" />
                 <Button fx:id="parseFilenameButton" mnemonicParsing="false" onAction="#clickedParseButton" text="Parse ID3 from filename" />
             </HBox>
-            <HBox alignment="CENTER_RIGHT" spacing="10.0">
+            <HBox alignment="CENTER_RIGHT" spacing="10.0" style="-fx-background-color: #444444;">
                 <padding>
                     <Insets bottom="10.0" />
                 </padding>
@@ -179,7 +179,7 @@
                 <TableColumn fx:id="tableYear" prefWidth="70.0" text="Year" />
                 <TableColumn fx:id="tableGenre" prefWidth="90.0" text="Genre" />
                 <TableColumn fx:id="tableISRC" prefWidth="70.0" text="ISRC" />
-                <TableColumn fx:id="tableDone" prefWidth="70.0" text="Done"/>
+                <TableColumn fx:id="tableDone" prefWidth="70.0" text="Done" />
                 <TableColumn fx:id="tableFileLoc" prefWidth="300.0" text="File Location" />
                 <TableColumn fx:id="tableEditor" prefWidth="70.0" text="Editor" />
             </columns>

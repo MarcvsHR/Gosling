@@ -65,13 +65,14 @@ public class FileUtils {
         return fc.showOpenDialog(null);
     }
 
-    public static String addMP3(Path path) {
+    public static String addMP3(Path path, String editor) {
 
         logger.debug("----- Executing addMP3");
 
         Song song;
         ID3v24Tag id3tag = ID3v2Utils.getID3(new File(String.valueOf(path)));
-        song = ID3v2Utils.songDataFromID3(id3tag, String.valueOf(path));
+        song = ID3v2Utils.songDataFromID3(id3tag, String.valueOf(path), editor);
+        song.setEditor(editor);
         SongRepository songRepo = new SongRepository();
         if (songRepo.checkForDupes(song)) {
             logger.debug("---song already exists - "+song);

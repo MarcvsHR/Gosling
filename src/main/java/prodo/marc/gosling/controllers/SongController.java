@@ -90,7 +90,6 @@ public class SongController {
     FilteredList<Song> filteredSongs = new FilteredList<>(songList);
     SortedList<Song> sortedSongs = new SortedList<>(filteredSongs);
     ID3v24Tag copiedID3 = new ID3v24Tag();
-    String defaultBackgroundColor = "000000";
     String changedBackgroundColor = "aa0000";
     String defaultTextColor = "FFFFFF";
     ObservableList<String> publisherList = FXCollections.observableArrayList();
@@ -98,12 +97,14 @@ public class SongController {
     private String currentFileLoc = "";
     private Path tempDir;
     private String editorName;
+    private boolean localFile = true;
 
 
     private void publisherAutocomplete() {
         String[] array = {"Aquarius", "Black Butter", "Capitol", "Columbia", "Crorec", "Dallas", "Emi",
                 "Epic", "Hit Records", "Insanity Records", "Menart", "Mikrofon Records", "Masterworks",
-                "Ministry of Sound Recordings", "Polydor", "Promo", "Rca", "Scardona", "Sony", "Spona"};
+                "Ministry of Sound Recordings", "Polydor", "Promo", "Rca", "Scardona", "Sony", "Spona",
+                "Melody"};
         Arrays.sort(array);
         publisherList.addAll(Arrays.asList(array));
     }
@@ -120,9 +121,10 @@ public class SongController {
 
         try {
             editorName = InetAddress.getLocalHost().getHostName();
-            logger.debug("Editor name: "+editorName);
+            logger.debug("Editor name: " + editorName);
         } catch (UnknownHostException ex) {
-            logger.error("Unknown host:",ex); }
+            logger.error("Unknown host:", ex);
+        }
 
         dropGenre.getItems().addAll(getGenres());
         doneFilter.getItems().addAll("Either", "Done", "Not Done");
@@ -293,9 +295,15 @@ public class SongController {
         Song currentSong = new Song();
         Song globalSong = SongGlobal.getCurrentSong();
 
-        //TODO: this needs to actually do something... also better implementation
-        if (!editorName.equals(songDatabaseTable.getSelectionModel().getSelectedItem().getEditor()) && songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc().contains("C:\\")) {
+        //TODO: this will need to change readmode to database... also needs to be at a different place
+        if (!editorName.equals(songDatabaseTable.getSelectionModel().getSelectedItem().getEditor()) &&
+                !songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc().contains("Z:\\")) {
             logger.debug("error!!!!!");
+            localFile = false;
+            backSongs.setDisable(true);
+        } else {
+            localFile = true;
+            backSongs.setDisable(false);
         }
 
         if (!Objects.equals(currentFileLoc, "") && new File(currentFileLoc).exists()) {
@@ -326,7 +334,7 @@ public class SongController {
                 selectFileFromTable(currentFileLoc);
             }
         } else {
-            updateTextFields(fileLoc);
+            if (localFile) {updateTextFields(fileLoc);}
         }
 
         logger.debug("----- ending openMP3");
@@ -380,7 +388,7 @@ public class SongController {
                 selectFileFromTable(currentFileLoc);
                 SongGlobal.setFilenameParsed(false);
             } else {
-                SongGlobal.setCurrentSong(ID3v2Utils.songDataFromID3(id3Data, file.getAbsolutePath()));
+                SongGlobal.setCurrentSong(ID3v2Utils.songDataFromID3(id3Data, file.getAbsolutePath(), editorName));
             }
 
         } catch (Exception report) {
@@ -537,7 +545,7 @@ public class SongController {
         if (renameFile()) {
             updateSongEntry(id3, SongGlobal.getCurrentSong().getId(), currentFileLoc);
             makeTextFieldsWhite();
-            SongGlobal.setCurrentSong(ID3v2Utils.songDataFromID3(id3, currentFileLoc));
+            SongGlobal.setCurrentSong(ID3v2Utils.songDataFromID3(id3, currentFileLoc, editorName));
             writeToMP3(id3, currentFileLoc);
             selectFileFromTable(currentFileLoc);
         }
@@ -545,8 +553,8 @@ public class SongController {
     }
 
     private void makeTextFieldsWhite() {
-        textArtist.setStyle("-fx-background-color: #" + defaultBackgroundColor);
-        textYear.setStyle("-fx-background-color: #" + defaultBackgroundColor);
+        textArtist.setStyle("-fx-background-color: ");
+        textYear.setStyle("-fx-background-color: ");
     }
 
     private void writeToMP3(ID3v24Tag song, String fileLoc) {
@@ -598,12 +606,12 @@ public class SongController {
 
         try {
             Files.copy(Paths.get(fileLoc), Paths.get(tempMp3 + ".mp3"), StandardCopyOption.REPLACE_EXISTING);
-            tempMp3 = tempMp3+".mp3";
+            tempMp3 = tempMp3 + ".mp3";
         } catch (Exception ex) {
             logger.error("could not create temp mp3 file: ", ex);
             try {
                 Files.copy(Paths.get(fileLoc), Paths.get(tempMp3 + "1.mp3"), StandardCopyOption.REPLACE_EXISTING);
-                tempMp3 = tempMp3+"1.mp3";
+                tempMp3 = tempMp3 + "1.mp3";
             } catch (Exception ex1) {
                 logger.error("could not create secondary temp mp3 file either: ", ex1);
             }
@@ -641,7 +649,7 @@ public class SongController {
         File mp3 = FileUtils.openFile("MP3 files (*.mp3)", "mp3", SongGlobal.getCurrentFolder());
         if (mp3 != null) {
             SongGlobal.setCurrentFolder(mp3.getParent());
-            FileUtils.addMP3(mp3.toPath());
+            FileUtils.addMP3(mp3.toPath(), editorName);
             updateTable();
         }
         logger.debug("----- ending addSong2DB");
@@ -773,7 +781,9 @@ public class SongController {
                         "Your file can not be renamed",
                         newFile.getAbsolutePath() + " already exists or is in use.");
 
-                if (SongRepository.getIDofFile(newFileLoc) == null) {FileUtils.addMP3(Path.of(newFileLoc));}
+                if (SongRepository.getIDofFile(newFileLoc) == null) {
+                    FileUtils.addMP3(Path.of(newFileLoc), editorName);
+                }
                 updateTable();
 
                 return false;
@@ -788,7 +798,7 @@ public class SongController {
 
     public void updateSongEntry(ID3v24Tag id3, Integer databaseID, String fileLoc) {
         logger.debug("----- Executing updateSongEntry");
-        Song song = ID3v2Utils.songDataFromID3(id3, fileLoc);
+        Song song = ID3v2Utils.songDataFromID3(id3, fileLoc, editorName);
         song.setId(databaseID);
         song.setEditor(editorName);
         SongRepository.addSong(song);
@@ -798,7 +808,7 @@ public class SongController {
 
     public void checkArtistField() {
         if (StringUtils.compareStrings(SongGlobal.getCurrentSong().getArtist(), textArtist.getText())) {
-            textArtist.setStyle("-fx-background-color: #" + defaultBackgroundColor);
+            textArtist.setStyle("-fx-background-color: ");
         } else {
             textArtist.setStyle("-fx-background-color: #" + changedBackgroundColor);
         }
@@ -813,7 +823,7 @@ public class SongController {
         pos = textYear.getLength() - len + pos;
         textYear.positionCaret(pos);
         if (StringUtils.compareStrings(String.valueOf(SongGlobal.getCurrentSong().getYear()), textYear.getText())) {
-            textYear.setStyle("-fx-background-color: #" + defaultBackgroundColor);
+            textYear.setStyle("-fx-background-color: ");
             textYear.setStyle("-fx-text-color: #" + defaultTextColor);
         } else {
             textYear.setStyle("-fx-background-color: #" + changedBackgroundColor);
@@ -837,7 +847,7 @@ public class SongController {
         }
         songDatabaseTable.setItems(sortedSongs);
 
-        labelSongNumber.setText("showing " + filteredSongs.size() + " out of " + songList.size() + " songs");
+        labelSongNumber.setText("showing " + filteredSongs.size() + " out of " + songList.size() + " songs with criteria: -->");
 
         SongGlobal.setDoneFilter(doneFilter.getSelectionModel().getSelectedIndex());
         SongGlobal.setTruncFilter(truncatedFilter.getSelectionModel().getSelectedIndex());
@@ -883,7 +893,9 @@ public class SongController {
             String title = new String();
         };
         songDatabaseTable.getItems().forEach(song -> {
-            if (song.getTitle().equals(ref.title)) {logger.debug(ref.title);}
+            if (song.getTitle().equals(ref.title)) {
+                logger.debug(ref.title);
+            }
             ref.title = song.getTitle();
         });
     }
