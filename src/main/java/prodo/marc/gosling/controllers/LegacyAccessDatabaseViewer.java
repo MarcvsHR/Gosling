@@ -26,14 +26,16 @@ import java.util.ResourceBundle;
 
 public class LegacyAccessDatabaseViewer implements   Initializable {
 
+    @FXML
     public ComboBox boxTableSelect;
+    @FXML
     public AnchorPane LegacyAccessDatabaseViewerPane;
     @FXML
     MenuItem openAccessDBMenuItem;
     @FXML
     private TableView LegacyDatabaseTableView;
 
-
+    String databasePath;
 
     private static final Logger logger = LogManager.getLogger(LegacyAccessDatabaseViewer.class);
 
@@ -50,25 +52,40 @@ public class LegacyAccessDatabaseViewer implements   Initializable {
         logger.debug("OpenAccessDb");
 
         File f = FileUtils.openFile("Access Db", "accdb", SongGlobal.getCurrentFolder());
+        databasePath = f.getPath();
 
-        logger.debug("file: "+ f.getPath());
+        logger.debug("file: "+ databasePath);
 
-        connectToAccessDatabase(f.getPath());
+        connectToAccessDatabase(databasePath);
     }
 
     public void connectToAccessDatabase(String databaseUrl){
-        String sql="SELECT * FROM snDatabase";
-        ObservableList<ObservableList<String> > data = FXCollections.observableArrayList();
         try (Connection connection = DriverManager.getConnection(JDBC_START_STRING+databaseUrl)) {
 
             try (ResultSet rsMD = connection.getMetaData().getTables(null, null, null, null)) {
-                logger.debug("Table names: ");
+                //logger.debug("Table names: ");
                 while (rsMD.next()) {
                     String tblName = rsMD.getString("TABLE_NAME");
                     //logger.debug("--> "+tblName);
                     boxTableSelect.getItems().add(tblName);
                 }
             }
+
+        } catch (SQLException e) {
+            logger.error("boom",e);
+        }
+
+    }
+
+    public void fillTable(String databaseUrl, String table){
+
+        LegacyDatabaseTableView.getItems().clear();
+        LegacyDatabaseTableView.getColumns().clear();
+
+        String sql="SELECT * FROM "+table;
+        ObservableList<ObservableList<String> > data = FXCollections.observableArrayList();
+        try (Connection connection = DriverManager.getConnection(JDBC_START_STRING+databaseUrl)) {
+
             try (ResultSet rs = connection.createStatement().executeQuery(sql)) {
                 logger.debug("execute sql "+sql );
                 ResultSetMetaData rsmd = rs.getMetaData();
@@ -105,13 +122,12 @@ public class LegacyAccessDatabaseViewer implements   Initializable {
                 LegacyDatabaseTableView.setItems(data);
             }
 
-
-
         } catch (SQLException e) {
             logger.error("boom",e);
         }
 
     }
+
 
 
     public void closeAccessDB(ActionEvent event){
@@ -124,18 +140,8 @@ public class LegacyAccessDatabaseViewer implements   Initializable {
         String selectedTable = boxTableSelect.getSelectionModel().getSelectedItem().toString();
         logger.debug("Selected table: "+selectedTable);
 
-        /*
-                    String query = "SELECT * FROM :selectedTable";
+        if (databasePath != null) {
+            fillTable(databasePath, selectedTable); }
 
-                    session = HibernateUtils.openSession();
-                    session.getTransaction().begin();
-                    ResultSetMetaData data = session.createQuery(query,Song.class)
-                                                    .setParameter("selectedTable",selectedTable)
-                                                    .getMetaData();
-                    session.getTransaction().commit();
-                    session.close();
-        */ /**
-                    nesto tog tipa bi valjda trebalo... kolko sam cito na ovaj nacin hybernate odma ocisti input
-         **/
     }
 }
