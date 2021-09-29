@@ -62,12 +62,10 @@ public class SongController {
     MediaPlayer mplayer;
     @FXML
     Button songBackButton, addSongButton, addFolderButton, parseFilenameButton, googleSongButton,
-            openLegacyDataButton;
+            openLegacyDataButton, backSongs, buttonPlay, buttonPause, skipBack, skipForward, skipForwardSmall,
+            skipBackSmall, buttonRevert;
     @FXML
-    Button backSongs, buttonPlay, buttonPause, skipBack, skipForward, skipForwardSmall, skipBackSmall,
-            buttonRevert;
-    @FXML
-    Label mp3Time, labelVolume, labelSongNumber;
+    Label mp3Time, labelVolume, labelSongNumber, mp3Label;
     @FXML
     TableView<Song> songDatabaseTable;
     @FXML
@@ -81,7 +79,7 @@ public class SongController {
     TableColumn<Song, Boolean> tableDone;
     @FXML
     TextField textAlbum, textArtist, textTitle, textPublisher, textComposer, textYear, textISRC,
-            textFilterFolder, mp3Label;
+            textFilterFolder;
     @FXML
     Slider mp3Slider, volumeSlider;
     @FXML
@@ -90,7 +88,7 @@ public class SongController {
     FilteredList<Song> filteredSongs = new FilteredList<>(songList);
     SortedList<Song> sortedSongs = new SortedList<>(filteredSongs);
     ID3v24Tag copiedID3 = new ID3v24Tag();
-    String changedBackgroundColor = "aa0000";
+    String changedBackgroundColor = "bb3333";
     String defaultTextColor = "FFFFFF";
     ObservableList<String> publisherList = FXCollections.observableArrayList();
     private boolean updateCheck = true;
@@ -104,7 +102,7 @@ public class SongController {
         String[] array = {"Aquarius", "Black Butter", "Capitol", "Columbia", "Crorec", "Dallas", "Emi",
                 "Epic", "Hit Records", "Insanity Records", "Menart", "Mikrofon Records", "Masterworks",
                 "Ministry of Sound Recordings", "Polydor", "Promo", "Rca", "Scardona", "Sony", "Spona",
-                "Melody"};
+                "Melody", "Dancing Bear", "Heksagon"};
         Arrays.sort(array);
         publisherList.addAll(Arrays.asList(array));
     }
@@ -334,7 +332,10 @@ public class SongController {
                 selectFileFromTable(currentFileLoc);
             }
         } else {
-            if (localFile) {updateTextFields(fileLoc);}
+            if (localFile) {
+                updateTextFields(fileLoc);
+                TextFields.bindAutoCompletion(textPublisher, publisherList).setMaxWidth(170);
+            }
         }
 
         logger.debug("----- ending openMP3");
@@ -879,10 +880,6 @@ public class SongController {
 
     }
 
-    @FXML
-    public void publisherTyped() {
-        TextFields.bindAutoCompletion(textPublisher, publisherList);
-    }
 
     public void dupeCheck(ActionEvent event) {
         textFilterFolder.setText(songDatabaseTable.getSelectionModel().getSelectedItem().getTitle());

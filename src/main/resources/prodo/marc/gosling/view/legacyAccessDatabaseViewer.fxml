@@ -1,36 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
 
-
-<AnchorPane fx:id="LegacyAccessDatabaseViewerPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="prodo.marc.gosling.controllers.LegacyAccessDatabaseViewer">
-   <children>
-      <BorderPane prefHeight="600.0" prefWidth="800.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <top>
+<AnchorPane fx:id="LegacyAccessDatabaseViewerPane" prefHeight="400.0" prefWidth="600.0"
+            xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="prodo.marc.gosling.controllers.LegacyAccessDatabaseViewer">
+    <BorderPane prefHeight="600.0" prefWidth="800.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <top>
             <MenuBar BorderPane.alignment="CENTER">
-              <menus>
                 <Menu mnemonicParsing="false" text="File">
-                  <items>
-                        <MenuItem fx:id="openAccessDBMenuItem" mnemonicParsing="false" onAction="#openAccessDB" text="Open" />
-                    <MenuItem mnemonicParsing="false" onAction="#closeAccessDB" text="Close" />
-                  </items>
+                    <MenuItem fx:id="openAccessDBMenuItem" mnemonicParsing="false" onAction="#openAccessDB"
+                              text="Open"/>
+                    <MenuItem mnemonicParsing="false" onAction="#closeAccessDB" text="Close"/>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">
-                  <items>
-                    <MenuItem mnemonicParsing="false" text="About" />
-                  </items>
+                    <MenuItem mnemonicParsing="false" text="About"/>
                 </Menu>
-              </menus>
             </MenuBar>
-         </top>
-         <center>
-            <TableView fx:id="LegacyDatabaseTableView" BorderPane.alignment="CENTER" />
-         </center>
-      </BorderPane>
-   </children>
+        </top>
+
+        <center>
+            <VBox alignment="TOP_RIGHT" style="-fx-background-color: #424242;">
+                <ComboBox fx:id="boxTableSelect" editable="true" onAction="#tableSelected" prefWidth="130.0"/>
+                <TableView fx:id="LegacyDatabaseTableView" BorderPane.alignment="CENTER"/>
+            </VBox>
+        </center>
+    </BorderPane>
 </AnchorPane>

@@ -54,7 +54,7 @@ public class FileUtils {
         logger.debug("----- Executing openFile");
 
         FileChooser fc = new FileChooser();
-        fc.setTitle("Open MP3");
+        fc.setTitle("Open "+desc);
         fc.setInitialDirectory(new File(initialDir));
         FileChooser.ExtensionFilter extFilter =
                 new FileChooser.ExtensionFilter(desc, "*."+ext);

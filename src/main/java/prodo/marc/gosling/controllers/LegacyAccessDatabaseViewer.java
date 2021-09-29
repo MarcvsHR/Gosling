@@ -7,14 +7,15 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.FileChooser;
 import javafx.util.Callback;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import prodo.marc.gosling.service.FileUtils;
 import prodo.marc.gosling.service.SongGlobal;
 
 
@@ -25,8 +26,8 @@ import java.util.ResourceBundle;
 
 public class LegacyAccessDatabaseViewer implements   Initializable {
 
-    @FXML
-    private AnchorPane LegacyAccessDatabaseViewerPane;
+    public ComboBox boxTableSelect;
+    public AnchorPane LegacyAccessDatabaseViewerPane;
     @FXML
     MenuItem openAccessDBMenuItem;
     @FXML
@@ -48,20 +49,11 @@ public class LegacyAccessDatabaseViewer implements   Initializable {
     public void openAccessDB(ActionEvent event){
         logger.debug("OpenAccessDb");
 
-        FileChooser fc = new FileChooser();
-        fc.setTitle("Open Access Db");
-        fc.setInitialDirectory(new File(SongGlobal.getCurrentFolder()));
-        FileChooser.ExtensionFilter extFilter =
-                new FileChooser.ExtensionFilter("Access Db", "*.accdb");
-        fc.getExtensionFilters().add(extFilter);
+        File f = FileUtils.openFile("Access Db", "accdb", SongGlobal.getCurrentFolder());
 
-        logger.debug("----- ending openFile");
+        logger.debug("file: "+ f.getPath());
 
-        File f= fc.showOpenDialog(null);
-
-        logger.debug("file: "+f.getPath().toString());
-
-        connectToAccessDatabase(f.getPath().toString());
+        connectToAccessDatabase(f.getPath());
     }
 
     public void connectToAccessDatabase(String databaseUrl){
@@ -73,7 +65,8 @@ public class LegacyAccessDatabaseViewer implements   Initializable {
                 logger.debug("Table names: ");
                 while (rsMD.next()) {
                     String tblName = rsMD.getString("TABLE_NAME");
-                    logger.debug("--> "+tblName);
+                    //logger.debug("--> "+tblName);
+                    boxTableSelect.getItems().add(tblName);
                 }
             }
             try (ResultSet rs = connection.createStatement().executeQuery(sql)) {
@@ -114,7 +107,6 @@ public class LegacyAccessDatabaseViewer implements   Initializable {
 
 
 
-
         } catch (SQLException e) {
             logger.error("boom",e);
         }
@@ -128,4 +120,22 @@ public class LegacyAccessDatabaseViewer implements   Initializable {
     }
 
 
+    public void tableSelected(ActionEvent event) {
+        String selectedTable = boxTableSelect.getSelectionModel().getSelectedItem().toString();
+        logger.debug("Selected table: "+selectedTable);
+
+        /*
+                    String query = "SELECT * FROM :selectedTable";
+
+                    session = HibernateUtils.openSession();
+                    session.getTransaction().begin();
+                    ResultSetMetaData data = session.createQuery(query,Song.class)
+                                                    .setParameter("selectedTable",selectedTable)
+                                                    .getMetaData();
+                    session.getTransaction().commit();
+                    session.close();
+        */ /**
+                    nesto tog tipa bi valjda trebalo... kolko sam cito na ovaj nacin hybernate odma ocisti input
+         **/
+    }
 }

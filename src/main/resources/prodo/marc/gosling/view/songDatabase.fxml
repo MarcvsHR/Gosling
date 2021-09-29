@@ -11,6 +11,8 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -19,58 +21,39 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane minWidth="1400.0" stylesheets="@css/song.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="prodo.marc.gosling.controllers.SongController">
-    <GridPane alignment="TOP_CENTER" minWidth="1400.0" style="-fx-background-color: #555555;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" GridPane.hgrow="ALWAYS">
+<AnchorPane stylesheets="@css/song.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="prodo.marc.gosling.controllers.SongController">
+    <GridPane alignment="TOP_CENTER" style="-fx-background-color: #555555;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" GridPane.hgrow="ALWAYS">
 
-        <HBox alignment="TOP_CENTER" minWidth="1400.0" GridPane.hgrow="ALWAYS" GridPane.vgrow="NEVER">
-            <VBox alignment="CENTER" minWidth="1400.0" spacing="5.0" HBox.hgrow="ALWAYS">
-                <HBox alignment="CENTER" style="-fx-background-color: #777777;" VBox.vgrow="ALWAYS">
-                    <padding>
-                        <Insets bottom="5.0" top="5.0" />
-                    </padding>
-                    <HBox alignment="CENTER_LEFT" spacing="10.0" HBox.hgrow="ALWAYS">
-                        <opaqueInsets>
-                            <Insets top="5.0" />
-                        </opaqueInsets>
-                        <Button fx:id="googleSongButton" mnemonicParsing="false" onAction="#googleSong" text="check google" />
-                        <TextField fx:id="mp3Label" alignment="CENTER" prefWidth="350.0">
-                            <font>
-                                <Font size="14.0" />
-                            </font>
-                        </TextField>
-                        <padding>
-                            <Insets left="10.0" right="30.0" />
-                        </padding>
-                    </HBox>
-                    <HBox alignment="CENTER" spacing="10.0" HBox.hgrow="ALWAYS">
-                        <Button fx:id="skipBack" mnemonicParsing="false" onAction="#moveTimeBack" text="-10s" />
-                        <Button fx:id="skipBackSmall" mnemonicParsing="false" onAction="#moveTimeBackLittle" text="-0.1s" />
-                        <Slider fx:id="mp3Slider" max="5000.0" onMousePressed="#sliderDrag" onMouseReleased="#moveTime" prefWidth="250.0">
-                            <padding>
-                                <Insets left="5.0" right="5.0" top="5.0" />
-                            </padding>
-                        </Slider>
-                        <Button fx:id="skipForwardSmall" mnemonicParsing="false" onAction="#moveTimeForwardLittle" text="+0.1s" />
-                        <Button fx:id="skipForward" mnemonicParsing="false" onAction="#moveTimeForward" text="+10s" />
-                    </HBox>
-                    <HBox alignment="CENTER_RIGHT" spacing="15.0" HBox.hgrow="ALWAYS">
-                        <Label fx:id="mp3Time" alignment="CENTER" contentDisplay="CENTER" text="00m 00.0s" textAlignment="CENTER">
-                            <font>
-                                <Font name="System Bold" />
-                            </font>
-                        </Label>
-                        <Button fx:id="buttonPlay" mnemonicParsing="false" onAction="#playMP3" style="-fx-background-color: #339955;" text="Play" />
-                        <Button fx:id="buttonPause" mnemonicParsing="false" onAction="#pauseMP3" style="-fx-background-color: #aa2222;" text="Pause" />
-                      <Slider fx:id="volumeSlider" blockIncrement="1.0" onKeyReleased="#changeVolume" onMouseClicked="#changeVolume" onMouseDragged="#changeVolume" prefWidth="100.0" value="100.0" />
-                      <Label fx:id="labelVolume" text="Volume: 100%" />
-                        <HBox.margin>
-                            <Insets left="30.0" />
-                        </HBox.margin>
-                  <padding>
-                     <Insets right="10.0" />
-                  </padding>
-                    </HBox>
-                </HBox>
+        <HBox alignment="TOP_CENTER" GridPane.hgrow="ALWAYS" GridPane.vgrow="NEVER">
+            <VBox alignment="CENTER" HBox.hgrow="ALWAYS">
+                 <HBox alignment="CENTER" spacing="10.0" style="-fx-background-color: #777777;">
+                     <Button fx:id="skipBack" focusTraversable="false" mnemonicParsing="false" onAction="#moveTimeBack" text="-10s" />
+                     <Button fx:id="skipBackSmall" focusTraversable="false" mnemonicParsing="false" onAction="#moveTimeBackLittle" text="-0.1s" />
+                     <Slider fx:id="mp3Slider" focusTraversable="false" max="5000.0" onMousePressed="#sliderDrag" onMouseReleased="#moveTime" prefWidth="250.0">
+                         <padding>
+                             <Insets left="5.0" right="5.0" top="5.0" />
+                         </padding>
+                     </Slider>
+                     <Button fx:id="skipForwardSmall" focusTraversable="false" mnemonicParsing="false" onAction="#moveTimeForwardLittle" text="+0.1s" />
+                     <Button fx:id="skipForward" focusTraversable="false" mnemonicParsing="false" onAction="#moveTimeForward" text="+10s" />
+               <padding>
+                  <Insets top="10.0" />
+               </padding>
+                 </HBox>
+                 <HBox alignment="CENTER" spacing="15.0" style="-fx-background-color: #777777;">
+                     <Button fx:id="buttonPlay" focusTraversable="false" mnemonicParsing="false" onAction="#playMP3" style="-fx-background-color: #339955;" text="Play" />
+                     <Button fx:id="buttonPause" focusTraversable="false" mnemonicParsing="false" onAction="#pauseMP3" style="-fx-background-color: #aa2222;" text="Pause" />
+                     <Label fx:id="mp3Time" alignment="CENTER" contentDisplay="CENTER" text="00m 00.0s" textAlignment="CENTER">
+                         <font>
+                             <Font name="System Bold" />
+                         </font>
+                     </Label>
+                   <Slider fx:id="volumeSlider" blockIncrement="1.0" focusTraversable="false" onKeyReleased="#changeVolume" onMouseClicked="#changeVolume" onMouseDragged="#changeVolume" prefWidth="100.0" value="100.0" />
+                   <Label fx:id="labelVolume" text="Volume: 100%" />
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="5.0" />
+               </padding>
+                 </HBox>
                 <HBox alignment="CENTER" spacing="5.0">
                     <Label text="Artist">
                         <font>
@@ -84,6 +67,16 @@
                         </font>
                     </Label>
                     <TextField fx:id="textTitle" prefWidth="250.0" />
+                     <Button fx:id="googleSongButton" focusTraversable="false" mnemonicParsing="false" onAction="#googleSong">
+                         <graphic>
+                             <ImageView fitHeight="20" fitWidth="20">
+                                 <Image url="@../images/google.png" />
+                             </ImageView>
+                         </graphic>
+                     </Button>
+               <padding>
+                  <Insets top="10.0" />
+               </padding>
                 </HBox>
                 <HBox alignment="CENTER" spacing="5.0">
                     <Label text="Composer">
@@ -98,6 +91,9 @@
                         </font>
                     </Label>
                     <TextField fx:id="textAlbum" prefWidth="250.0" />
+               <padding>
+                  <Insets top="5.0" />
+               </padding>
                 </HBox>
                 <HBox alignment="CENTER" spacing="5.0">
                     <Label text="Genre">
@@ -111,30 +107,33 @@
                             <Font size="14.0" />
                         </font>
                     </Label>
-                    <TextField fx:id="textPublisher" onKeyTyped="#publisherTyped" prefWidth="100.0" />
+                    <TextField fx:id="textPublisher" prefWidth="100.0" />
                     <Label text="Year">
                         <font>
                             <Font size="14.0" />
                         </font>
                     </Label>
                     <TextField fx:id="textYear" onKeyTyped="#checkYearField" prefWidth="80.0" />
+               <padding>
+                  <Insets top="5.0" />
+               </padding>
                 </HBox>
                 <HBox alignment="TOP_CENTER" spacing="5.0" visible="false">
                     <Label text="ISRC" />
                     <TextField fx:id="textISRC" />
                 </HBox>
                 <HBox alignment="CENTER" spacing="30.0">
-                    <Button fx:id="buttonRevert" mnemonicParsing="false" onAction="#revertID3" text="Revert">
+                    <Button fx:id="buttonRevert" focusTraversable="false" mnemonicParsing="false" onAction="#revertID3" text="Revert">
                         <font>
                             <Font name="System Italic" size="14.0" />
                         </font>
                     </Button>
-                    <CheckBox fx:id="checkDone" mnemonicParsing="false" text="File is done">
+                    <CheckBox fx:id="checkDone" focusTraversable="false" mnemonicParsing="false" text="File is done">
                         <font>
                             <Font name="System Bold Italic" size="14.0" />
                         </font>
                     </CheckBox>
-                    <Button fx:id="backSongs" mnemonicParsing="false" onAction="#updateMP3" text="Update">
+                    <Button fx:id="backSongs" focusTraversable="false" mnemonicParsing="false" onAction="#updateMP3" text="Update">
                         <font>
                             <Font name="System Bold" size="14.0" />
                         </font>
@@ -142,33 +141,59 @@
                 </HBox>
             </VBox>
         </HBox>
-        <VBox spacing="10.0" GridPane.rowIndex="2" GridPane.vgrow="NEVER">
+        <VBox spacing="10.0" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.vgrow="NEVER">
             <HBox alignment="CENTER_LEFT" spacing="20.0" VBox.vgrow="NEVER">
                 <padding>
                     <Insets left="10.0" top="10.0" />
                 </padding>
-            <Button fx:id="refreshTablebutton" defaultButton="true" mnemonicParsing="false" onAction="#updateTable" text="Refresh" />
-                 <Button fx:id="openLegacyDataButton" disable="true" mnemonicParsing="false" onAction="#openLegacyData" text="Access Stuff" />
-                <Button fx:id="songBackButton" disable="true" mnemonicParsing="false" onAction="#backToMain" text="Back to main window" />
-                <Button fx:id="addSongButton" mnemonicParsing="false" onAction="#addSong2DB" text="Add new song" />
-                <Button fx:id="addFolderButton" mnemonicParsing="false" onAction="#clickedFolderButton" text="Add folder" />
-                <Button fx:id="parseFilenameButton" mnemonicParsing="false" onAction="#clickedParseButton" text="Parse ID3 from filename" />
+            <Button fx:id="refreshTablebutton" defaultButton="true" focusTraversable="false" mnemonicParsing="false" onAction="#updateTable" text="Refresh" />
+                <Button fx:id="openLegacyDataButton" disable="false" focusTraversable="false" mnemonicParsing="false" onAction="#openLegacyData" text="Access Stuff">
+                    <graphic>
+                        <ImageView fitHeight="15" fitWidth="15">
+                            <Image url="@../images/accessLogo.png" />
+                        </ImageView>
+                    </graphic>
+                </Button>
+                <Button fx:id="songBackButton" disable="true" focusTraversable="false" mnemonicParsing="false" onAction="#backToMain" text="Back to main window" />
+                <Button fx:id="addSongButton" focusTraversable="false" mnemonicParsing="false" onAction="#addSong2DB" text="Add new song" />
+                <Button fx:id="addFolderButton" focusTraversable="false" mnemonicParsing="false" onAction="#clickedFolderButton" text="Add folder" />
+                <Button fx:id="parseFilenameButton" focusTraversable="false" mnemonicParsing="false" onAction="#clickedParseButton" text="Parse ID3 from filename" />
             </HBox>
-            <HBox alignment="CENTER_RIGHT" spacing="10.0" style="-fx-background-color: #444444;">
-                <padding>
-                    <Insets bottom="10.0" />
-                </padding>
-                <Label fx:id="labelSongNumber" text="Songs: x/y">
-                    <font>
-                        <Font name="System Bold Italic" size="14.0" />
-                    </font>
-                </Label>
-                <TextField fx:id="textFilterFolder" onKeyTyped="#filterTable" prefWidth="150.0" />
-                <ComboBox fx:id="doneFilter" onAction="#filterTable" prefWidth="100.0" promptText="Either" />
-                <ComboBox fx:id="truncatedFilter" onAction="#updateTable" prefWidth="100.0" promptText="Either" />
+            <HBox alignment="CENTER" spacing="10.0" style="-fx-background-color: #444444;" VBox.vgrow="ALWAYS">
+                <HBox alignment="CENTER_LEFT" minWidth="250.0" HBox.hgrow="ALWAYS">
+                    <padding>
+                        <Insets bottom="5.0" top="5.0"/>
+                    </padding>
+                    <Label fx:id="mp3Label" minWidth="300.0" HBox.hgrow="ALWAYS">
+                        <font>
+                            <Font name="System Bold Italic" size="18.0"/>
+                        </font>
+                        <padding>
+                            <Insets left="10.0"/>
+                        </padding>
+                    </Label>
+                </HBox>
+                <HBox alignment="CENTER_RIGHT" minWidth="730.0" spacing="10.0" HBox.hgrow="ALWAYS">
+                    <padding>
+                        <Insets right="5.0"/>
+                    </padding>
+                    <Label fx:id="labelSongNumber" text="Songs: x/y">
+                        <font>
+                            <Font name="System Bold Italic" size="14.0"/>
+                        </font>
+                    </Label>
+                    <TextField fx:id="textFilterFolder" onKeyTyped="#filterTable" prefWidth="150.0"/>
+                    <ComboBox fx:id="doneFilter" focusTraversable="false" onAction="#filterTable" prefWidth="100.0"
+                              promptText="Either"/>
+                    <ComboBox fx:id="truncatedFilter" focusTraversable="false" onAction="#updateTable" prefWidth="100.0"
+                              promptText="Either"/>
+                </HBox>
+            <padding>
+               <Insets bottom="8.0" top="5.0" />
+            </padding>
             </HBox>
         </VBox>
-        <TableView fx:id="songDatabaseTable" onMouseClicked="#clickTable" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" GridPane.vgrow="ALWAYS">
+        <TableView fx:id="songDatabaseTable" focusTraversable="false" onMouseClicked="#clickTable" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" GridPane.vgrow="ALWAYS">
             <columns>
                 <TableColumn fx:id="tableID" prefWidth="20.0" text="ID" />
                 <TableColumn fx:id="tableArtist" prefWidth="240.0" text="Artist" />
