@@ -16,14 +16,14 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.input.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.controlsfx.control.textfield.TextFields;
+import prodo.marc.gosling.HelloApplication;
 import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.hibernate.repository.SongRepository;
 import prodo.marc.gosling.service.*;
@@ -63,7 +63,7 @@ public class SongController {
     @FXML
     Button songBackButton, addSongButton, addFolderButton, parseFilenameButton, googleSongButton,
             openLegacyDataButton, backSongs, buttonPlay, buttonPause, skipBack, skipForward, skipForwardSmall,
-            skipBackSmall, buttonRevert;
+            skipBackSmall, buttonRevert, spotSongButton;
     @FXML
     Label mp3Time, labelVolume, labelSongNumber, mp3Label;
     @FXML
@@ -102,7 +102,7 @@ public class SongController {
         String[] array = {"Aquarius", "Black Butter", "Capitol", "Columbia", "Crorec", "Dallas", "Emi",
                 "Epic", "Hit Records", "Insanity Records", "Menart", "Mikrofon Records", "Masterworks",
                 "Ministry of Sound Recordings", "Polydor", "Promo", "Rca", "Scardona", "Sony", "Spona",
-                "Melody", "Dancing Bear", "Heksagon"};
+                "Melody", "Dancing Bear", "Heksagon", "Arista", "Geffen"};
         Arrays.sort(array);
         publisherList.addAll(Arrays.asList(array));
     }
@@ -169,6 +169,15 @@ public class SongController {
         logger.debug("----- ending initialize");
     }
 
+    public void installAccelerators() {
+        KeyCombination kc = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
+        Runnable rn = this::updateMP3;
+        backSongs.getScene().getAccelerators().put(kc, rn);
+        KeyCombination kc1 = new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN);
+        Runnable rn1 = () -> textFilterFolder.requestFocus();
+        backSongs.getScene().getAccelerators().put(kc1, rn1);
+    }
+
 
     private String[] getGenres() {
         return new String[]{"", "cro", "cro zabavne", "instrumental", "klape", "kuruza", "pop", "xxx"};
@@ -221,6 +230,9 @@ public class SongController {
 
         SongGlobal.setMP3List(FileUtils.getFileListFromFolder(directory, "mp3"));
         logger.debug("number of files in the list: " + SongGlobal.getMP3List().size());
+        Song tempSong = new Song();
+        tempSong.setEditor(editorName);
+        SongGlobal.setCurrentSong(tempSong);
 
         putMP3ListIntoDB();
 
@@ -289,6 +301,8 @@ public class SongController {
     protected void openMP3(String fileLoc) {
 
         logger.debug("----- Executing openMP3");
+
+        installAccelerators();
 
         Song currentSong = new Song();
         Song globalSong = SongGlobal.getCurrentSong();
@@ -841,10 +855,17 @@ public class SongController {
             doneFilterCheck = false;
         }
         if (doneFilterCheck == null) {
-            filteredSongs.setPredicate(x -> x.getFileLoc().toLowerCase().contains(filter));
+            filteredSongs.setPredicate(x -> (x.getFileLoc().toLowerCase().contains(filter) ||
+                                               x.getTitle().toLowerCase().contains(filter) ||
+                                              x.getArtist().toLowerCase().contains(filter) ||
+                                               x.getAlbum().toLowerCase().contains(filter)));
         } else {
             Boolean finalDoneFilterCheck = doneFilterCheck;
-            filteredSongs.setPredicate(x -> x.getFileLoc().toLowerCase().contains(filter) && x.getDone().equals(finalDoneFilterCheck));
+            filteredSongs.setPredicate(x -> (x.getFileLoc().toLowerCase().contains(filter) ||
+                                               x.getTitle().toLowerCase().contains(filter) ||
+                                              x.getArtist().toLowerCase().contains(filter) ||
+                                               x.getAlbum().toLowerCase().contains(filter)) &&
+                                                              x.getDone().equals(finalDoneFilterCheck));
         }
         songDatabaseTable.setItems(sortedSongs);
 
@@ -887,7 +908,7 @@ public class SongController {
         doneFilter.getSelectionModel().select(0);
         updateTable();
         var ref = new Object() {
-            String title = new String();
+            String title = "";
         };
         songDatabaseTable.getItems().forEach(song -> {
             if (song.getTitle().equals(ref.title)) {
@@ -895,5 +916,19 @@ public class SongController {
             }
             ref.title = song.getTitle();
         });
+    }
+
+    public void spotSong(ActionEvent event) {
+        String uri = textArtist.getText() + " " + textTitle.getText();
+        uri = uri.replace(" ", "%20");
+        uri = "https://open.spotify.com/search/" + uri;
+        Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+        if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+            try {
+                desktop.browse(URI.create(uri));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

@@ -44,11 +44,8 @@ public class StringUtils {
             text = text.replace("Đ", "Dj");
             text = text.replace("Ž", "Z");
 
-            text = text.replace("&", "i");
-            text = text.replace(" I ", " i ");
-            text = text.replace(" Of ", " of ");
-            text = text.replace("Feat.","ft");
-            text = text.replace("Ft","ft");
+            text = text.replace("Feat","ft");
+            text = text.replace("ft.","ft");
 
             return text;
         } else {
@@ -65,11 +62,11 @@ public class StringUtils {
         int length = array.length-1;
         if (length>0) {
         for (int i = 0; i < length; i++) {
-            returnText.append(array[i].substring(0, 1).toUpperCase()).append(array[i].substring(1)).append(s);
+            returnText.append(capWord(array[i])).append(s);
         } } else {
-            return text.substring(0, 1).toUpperCase() + text.substring(1);
+            return capWord(text);
         }
-        returnText.append(array[length].substring(0, 1).toUpperCase()).append(array[length].substring(1));
+        returnText.append(capWord(array[length]));
         return returnText.toString();
     }
 
@@ -77,5 +74,11 @@ public class StringUtils {
         Year yearOut = null;
         if (year != null) {yearOut = Year.parse(year);}
         return yearOut;
+    }
+
+    private static String capWord(String s) {
+        if (s.length() > 2) {
+            return s.substring(0,1).toUpperCase() + s.substring(1); }
+        else { return s; }
     }
 }

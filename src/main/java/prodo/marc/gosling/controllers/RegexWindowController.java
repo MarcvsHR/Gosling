@@ -11,6 +11,8 @@ import prodo.marc.gosling.service.SongGlobal;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class RegexWindowController {
@@ -21,16 +23,19 @@ public class RegexWindowController {
     public Label titleLabel;
     public Song song = SongGlobal.getCurrentSong();
     public Label titlePublisher;
+    List<String> regex = new ArrayList<>();
 
     private List<String> getRegexStuff() {
-        List<String> regexStuff = new ArrayList<>();
-        regexStuff.add("Artist - Title");
-        regexStuff.add("Title - Artist");
-        regexStuff.add("Track_Title_Artist");
-        regexStuff.add("Title-Artist");
-        regexStuff.add("ISRC_Title_Artist_Publisher");
-        regexStuff.add("Title");
-        return regexStuff;
+        regex.add("Artist - Title");
+        regex.add("Title - Artist");
+        regex.add("Track_Title_Artist");
+        regex.add("Title-Artist");
+        regex.add("ISRC_Title_Artist_Publisher");
+        regex.add("Title");
+        regex.add("Track - Artist - Title");
+        regex.add("Artist - Track - Title");
+        Collections.sort(regex);
+        return new ArrayList<>(regex);
     }
 
     public void changeSelectedRegex(MouseEvent mouseEvent) {
@@ -75,6 +80,20 @@ public class RegexWindowController {
             }
             case "Title": {
                 song.setTitle(mp3Filename.getText().trim());
+                isSet = true;
+                break;
+            }
+            case "Track - Artist - Title": {
+                String[] output = mp3Filename.getText().split(" - ");
+                song.setArtist(output[1]);
+                song.setTitle(output[2]);
+                isSet = true;
+                break;
+            }
+            case "Artist - Track - Title": {
+                String[] output = mp3Filename.getText().split(" - ");
+                song.setArtist(output[0]);
+                song.setTitle(output[2]);
                 isSet = true;
                 break;
             }

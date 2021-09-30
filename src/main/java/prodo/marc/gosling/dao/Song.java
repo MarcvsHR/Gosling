@@ -23,11 +23,11 @@ public class Song {
     private int id;
 
     @Truncated
-    private String artist;
+    private String artist = "";
     @Truncated
-    private String title;
+    private String title = "";
     @Truncated
-    private String album;
+    private String album = "";
     @Truncated
     private String publisher;
     @Truncated
@@ -59,7 +59,7 @@ public class Song {
                 StringUtils.compareStrings(fileLoc, that.fileLoc) &&
                 Objects.equals(year, that.year) &&
 
-                done.equals(that.done);
+                Objects.equals(done, that.done);
 
         //         StringUtils.compareStrings(ISRC, that.ISRC);
     }

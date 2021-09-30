@@ -66,8 +66,12 @@ public class ID3v2Utils {
         Song testSong = new Song();
 
         testSong.setArtist(id3Data.getArtist());
+        if (testSong.getArtist() == null) testSong.setArtist("");
         testSong.setTitle(id3Data.getTitle());
+        if (testSong.getTitle() == null) testSong.setTitle("");
         testSong.setAlbum(id3Data.getAlbum());
+        if (testSong.getAlbum() == null) testSong.setAlbum("");
+
         testSong.setPublisher(id3Data.getPublisher());
         testSong.setComposer(id3Data.getComposer());
         testSong.setYear(StringUtils.parseYear(id3Data.getYear()));
