@@ -170,10 +170,10 @@
 
 }
 .table-cell:odd:empty {
-    -fx-background-color: #2c040c;
+    -fx-background-color: #302222;
 }
 .table-cell:empty {
-    -fx-background-color: #420612;
+    -fx-background-color: #413333;
 }
 .table-row-cell:empty .table-cell {
     -fx-display: none;
