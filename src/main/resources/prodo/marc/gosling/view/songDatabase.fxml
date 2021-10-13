@@ -250,13 +250,14 @@
                         </tooltip>
                     </ComboBox>
                     <ComboBox fx:id="userFilter" focusTraversable="false" onAction="#filterTable" prefWidth="100.0" promptText="Any user" />
+                    <Button fx:id="tableToggleButton" focusTraversable="false" mnemonicParsing="false" onAction="#switchTable" text="+" />
                 </HBox>
                 <padding>
                     <Insets bottom="8.0" top="3.0" />
                 </padding>
             </HBox>
         </VBox>
-        <TableView fx:id="songDatabaseTable" focusTraversable="false" onMouseClicked="#clickTable" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" GridPane.vgrow="ALWAYS">
+        <TableView fx:id="songDatabaseTable" focusTraversable="false" onMouseClicked="#clickTable" onMouseDragged="#clickTable" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" GridPane.vgrow="ALWAYS">
             <columns>
                 <TableColumn fx:id="tableID" prefWidth="30.0" text="ID" visible="false" />
                 <TableColumn fx:id="tableArtist" prefWidth="240.0" text="Artist" />
@@ -264,8 +265,9 @@
                 <TableColumn fx:id="tableAlbum" prefWidth="100.0" text="Album" />
                 <TableColumn fx:id="tablePublisher" prefWidth="100.0" text="Publisher" />
                 <TableColumn fx:id="tableComposer" prefWidth="300.0" text="Composer" />
-                <TableColumn fx:id="tableYear" prefWidth="70.0" text="Year" />
+                <TableColumn fx:id="tableDuration" prefWidth="70.0" text="Time" />
                 <TableColumn fx:id="tableGenre" prefWidth="90.0" text="Genre" />
+                <TableColumn fx:id="tableYear" prefWidth="70.0" text="Year" />
                 <TableColumn fx:id="tableISRC" prefWidth="70.0" text="ISRC" visible="false" />
                 <TableColumn fx:id="tableDone" prefWidth="70.0" text="Done" />
                 <TableColumn fx:id="tableFileLoc" prefWidth="300.0" text="File Location" />

@@ -14,7 +14,7 @@ import java.util.Locale;
 public class SongRepository {
     private static final Logger logger = LogManager.getLogger(SongRepository.class);
 
-    public static void addSong(Song song ){
+    public static void addSong(Song song){
 
         Session session = null;
         try {

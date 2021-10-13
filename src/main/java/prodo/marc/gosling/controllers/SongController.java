@@ -62,7 +62,7 @@ public class SongController {
     @FXML
     Button songBackButton, addSongButton, addFolderButton, parseFilenameButton, googleSongButton,
             openLegacyDataButton, updateSongs, buttonPlay, buttonPause, skipBack, skipForward, skipForwardSmall,
-            skipBackSmall, buttonRevert, spotSongButton, zampSongButton, refreshTableButton;
+            skipBackSmall, buttonRevert, spotSongButton, zampSongButton, refreshTableButton, tableToggleButton;
     @FXML
     Label mp3Time, labelVolume, labelSongNumber, mp3Label;
     @FXML
@@ -76,6 +76,8 @@ public class SongController {
     TableColumn<Song, Year> tableYear;
     @FXML
     TableColumn<Song, Boolean> tableDone;
+    @FXML
+    TableColumn<Song, String> tableDuration;
     @FXML
     TextField textAlbum, textArtist, textTitle, textPublisher, textComposer, textYear, textISRC,
             textFilterFolder;
@@ -95,6 +97,7 @@ public class SongController {
     private String currentFileLoc = "";
     private Path tempDir;
     private String editorName;
+    private boolean tableMin = false;
 
 
     private void publisherAutocomplete() {
@@ -162,7 +165,9 @@ public class SongController {
         tableFileLoc.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getFileLoc()));
         tableDone.setCellValueFactory(cellData -> new ReadOnlyBooleanWrapper(cellData.getValue().getDone()));
         tableEditor.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getEditor()));
+        tableDuration.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getDurationString()));
         tableDone.setCellFactory(cellData -> new CheckBoxTableCell<>());
+
         sortedSongs.comparatorProperty().bind(songDatabaseTable.comparatorProperty());
 
         updateTable();
@@ -179,6 +184,8 @@ public class SongController {
         }
 
         publisherAutocomplete();
+
+        switchTable();
 
         logger.debug("----- ending initialize");
     }
@@ -273,23 +280,13 @@ public class SongController {
         List<Song> songList1 = songRepo.getSongs();
 
         songList.clear();
-        songList.addAll(removeNulls(songList1));
+        songList.addAll(songList1);
         filterTable();
         selectFileFromTable(currentFileLoc);
 
         logger.debug("----- ending updateTable");
     }
 
-    private List<Song> removeNulls(List<Song> songList1) {
-        List<Song> newList = new ArrayList<>();
-        for (Song song : songList1) {
-            if (song.getArtist().isEmpty()) {
-                song.setArtist("");
-            }
-            newList.add(song);
-        }
-        return newList;
-    }
 
     @FXML
     public void clickTable(MouseEvent event) {
@@ -302,9 +299,10 @@ public class SongController {
             try {
                 openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
             } catch (Exception e) {
-                logger.error("no table entry clicked", e);
+                logger.error("no table entry clicked"+songDatabaseTable.getSelectionModel().getSelectedItem(), e);
             }
         }
+        songDatabaseTable.setMaxWidth(getTableWidth());
 
         logger.debug("----- ending clickTable");
     }
@@ -562,6 +560,7 @@ public class SongController {
         id3.setPublisher(textPublisher.getText());
         id3.setComposer(textComposer.getText());
         id3.setYear(textYear.getText());
+        id3.setRecordingTime(String.valueOf(SongGlobal.getCurrentSong().getDuration()));
         if (checkDone.isSelected()) {
             id3.setKey("true");
         } else {
@@ -867,9 +866,18 @@ public class SongController {
                 return false;
             if (doneFilter.getSelectionModel().getSelectedIndex() == 2 && x.getDone())
                 return false;
-            if (!x.getTitle().toLowerCase().contains(filter) &&
-                    !x.getArtist().toLowerCase().contains(filter) &&
-                    !x.getAlbum().toLowerCase().contains(filter))
+            String title = x.getTitle();
+            if (title == null) title = "";
+            title = title.toLowerCase();
+            String artist = x.getArtist();
+            if (artist == null) artist = "";
+            artist = artist.toLowerCase();
+            String album = x.getAlbum();
+            if (album == null) album = "";
+            album = album.toLowerCase();
+            if (!title.contains(filter) &&
+                    !artist.contains(filter) &&
+                    !album.contains(filter))
                 return false;
             if (userFilter.getSelectionModel().getSelectedIndex() != 0 &&
                     !userFilter.getSelectionModel().getSelectedItem().equals(x.getEditor()))
@@ -988,4 +996,44 @@ public class SongController {
             }
         }
     }
+
+    public void switchTable() {
+        if (tableMin) {
+            tableComposer.setVisible(true);
+            tableEditor.setVisible(true);
+            tableFileLoc.setVisible(true);
+            tablePublisher.setVisible(true);
+            tableDone.setVisible(true);
+            tableToggleButton.setText("-");
+            songDatabaseTable.setMaxWidth(getTableWidth());
+            tableMin = false;
+        } else {
+            tableComposer.setVisible(false);
+            tableEditor.setVisible(false);
+            tableFileLoc.setVisible(false);
+            tablePublisher.setVisible(false);
+            tableDone.setVisible(false);
+            tableToggleButton.setText("+");
+            songDatabaseTable.setMaxWidth(getTableWidth());
+            tableMin = true;
+        }
+    }
+
+    private double getTableWidth() {
+        double width = 2;
+        if (tableArtist.isVisible()) width+=tableArtist.getWidth();
+        if (tableTitle.isVisible()) width+=tableTitle.getWidth();
+        if (tableAlbum.isVisible()) width+=tableAlbum.getWidth();
+        if (tablePublisher.isVisible()) width+=tablePublisher.getWidth();
+        if (tableComposer.isVisible()) width+=tableComposer.getWidth();
+        if (tableDuration.isVisible()) width+=tableDuration.getWidth();
+        if (tableGenre.isVisible()) width+=tableGenre.getWidth();
+        if (tableYear.isVisible()) width+=tableYear.getWidth();
+        if (tableDone.isVisible()) width+=tableDone.getWidth();
+        if (tableFileLoc.isVisible()) width+=tableFileLoc.getWidth();
+        if (tableEditor.isVisible()) width+=tableEditor.getWidth();
+        //logger.debug(width);
+        return width;
+    }
+
 }

@@ -121,4 +121,5 @@ public class SongGlobal {
     public static String getUserFilter() {
         return SongGlobal.userFilter;
     }
+
 }

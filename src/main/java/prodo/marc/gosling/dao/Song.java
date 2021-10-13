@@ -1,5 +1,6 @@
 package prodo.marc.gosling.dao;
 
+import javafx.util.Duration;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -41,6 +42,7 @@ public class Song {
     private String fileLoc;
     private Boolean done;
     private String editor;
+    private Duration duration;
     //private char truncated = 'Y';
 
 
@@ -58,10 +60,15 @@ public class Song {
                 StringUtils.compareStrings(genre, that.genre) &&
                 StringUtils.compareStrings(fileLoc, that.fileLoc) &&
                 Objects.equals(year, that.year) &&
+                //Objects.equals(duration, that.duration) &&
 
                 Objects.equals(done, that.done);
 
         //         StringUtils.compareStrings(ISRC, that.ISRC);
+    }
+
+    public String getDurationString() {
+        return String.format("%.0fm %.1fs",duration.toMinutes(),duration.toSeconds()%60);
     }
 
     @Converter(autoApply = true)

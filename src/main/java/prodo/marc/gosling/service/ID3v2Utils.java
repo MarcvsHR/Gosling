@@ -9,6 +9,8 @@ import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.hibernate.repository.SongRepository;
 
 import java.io.File;
+import javafx.util.Duration;
+
 
 public class ID3v2Utils {
 
@@ -34,6 +36,7 @@ public class ID3v2Utils {
                 id3tag.setAlbum(tempID3.getAlbum());
                 id3tag.setPublisher(tempID3.getPublisher());
                 id3tag.setComposer(tempID3.getComposer());
+                id3tag.setRecordingTime(String.valueOf(getDuration(mp3File)));
                 String genre = tempID3.getGenreDescription();
                 if (genre == null) {
                     genre = "";
@@ -66,16 +69,19 @@ public class ID3v2Utils {
         Song testSong = new Song();
 
         testSong.setArtist(id3Data.getArtist());
-        if (testSong.getArtist() == null) testSong.setArtist("");
+        //if (testSong.getArtist() == null) testSong.setArtist("");
         testSong.setTitle(id3Data.getTitle());
-        if (testSong.getTitle() == null) testSong.setTitle("");
+        //if (testSong.getTitle() == null) testSong.setTitle("");
         testSong.setAlbum(id3Data.getAlbum());
-        if (testSong.getAlbum() == null) testSong.setAlbum("");
+        //if (testSong.getAlbum() == null) testSong.setAlbum("");
+
 
         testSong.setPublisher(id3Data.getPublisher());
         testSong.setComposer(id3Data.getComposer());
         testSong.setYear(StringUtils.parseYear(id3Data.getYear()));
         testSong.setGenre(id3Data.getGenreDescription());
+        if (id3Data.getRecordingTime() == null) id3Data.setRecordingTime("0");
+        testSong.setDuration(Duration.millis(Double.parseDouble(id3Data.getRecordingTime())));
         //testSong.setISRC(id3Data.getISRC());
         testSong.setISRC(null);
         testSong.setFileLoc(path);
@@ -95,4 +101,23 @@ public class ID3v2Utils {
 
         return testSong;
     }
+
+    public static long getDuration(File file) {
+        logger.debug("----- Executing getDuration");
+        long duration = 0;
+
+        try {
+            Mp3File song = new Mp3File(file);
+
+            duration = song.getLengthInMilliseconds();
+
+        } catch (Exception error) {
+            logger.error("can't fetch duration data from file", error);
+        }
+
+        logger.debug("----- ending getDuration");
+
+        return duration;
+    }
+
 }

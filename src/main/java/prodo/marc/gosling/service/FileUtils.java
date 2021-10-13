@@ -71,6 +71,8 @@ public class FileUtils {
 
         Song song;
         ID3v24Tag id3tag = ID3v2Utils.getID3(new File(String.valueOf(path)));
+        if (id3tag.getRecordingTime() == null)
+            id3tag.setRecordingTime(String.valueOf(ID3v2Utils.getDuration(new File(String.valueOf(path)))));
         song = ID3v2Utils.songDataFromID3(id3tag, String.valueOf(path), editor);
         song.setEditor(editor);
         SongRepository songRepo = new SongRepository();
