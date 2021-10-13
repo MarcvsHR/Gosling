@@ -170,11 +170,7 @@ public class SongController {
         volumeSlider.setValue(INITIAL_VOLUME_SO_MY_EARS_DONT_EXPLODE);
         changeVolume();
 
-        //TODO: if global song not null, load into txt fields and select proper song
         if (!songDatabaseTable.getSelectionModel().isEmpty()) {
-//            if (SongGlobal.getCurrentSong().getFileLoc() != null) {
-//                songDatabaseTable.getSelectionModel().
-//            }
             updateTextFields(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
         }
 
@@ -277,11 +273,22 @@ public class SongController {
         List<Song> songList1 = songRepo.getSongs();
 
         songList.clear();
-        songList.addAll(songList1);
+        songList.addAll(removeNulls(songList1));
         filterTable();
         selectFileFromTable(currentFileLoc);
 
         logger.debug("----- ending updateTable");
+    }
+
+    private List<Song> removeNulls(List<Song> songList1) {
+        List<Song> newList = new ArrayList<>();
+        for (Song song : songList1) {
+            if (song.getArtist().isEmpty()) {
+                song.setArtist("");
+            }
+            newList.add(song);
+        }
+        return newList;
     }
 
     @FXML

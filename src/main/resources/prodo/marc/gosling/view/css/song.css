@@ -167,3 +167,14 @@
 .table-view > .virtual-flow > .scroll-bar:horizontal {
     -fx-background-color: transparent;
 }
+
+}
+.table-cell:odd:empty {
+    -fx-background-color: #2c040c;
+}
+.table-cell:empty {
+    -fx-background-color: #420612;
+}
+.table-row-cell:empty .table-cell {
+    -fx-display: none;
+}
