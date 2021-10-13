@@ -68,7 +68,11 @@ public class Song {
     }
 
     public String getDurationString() {
-        return String.format("%.0fm %.1fs",duration.toMinutes(),duration.toSeconds()%60);
+        String outout = String.format("%.0f", duration.toSeconds() % 60);
+        if (outout.length() < 2) outout = "0"+outout;
+        outout = String.format("%.0f:", duration.toMinutes()) + outout;
+        if (duration.toSeconds() < 600) outout = "0"+outout;
+        return outout;
     }
 
     @Converter(autoApply = true)
