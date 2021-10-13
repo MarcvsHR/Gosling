@@ -3,8 +3,167 @@
     -fx-border-color: #660000;
     -fx-border-width: 1px;
 }
-*/
 
 .auto-complete-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell {
     -fx-background-color: #444444;
+} */
+
+
+
+.label {
+    -fx-font-size: 16;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-family: "Futura";
+    /*-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 0,0,2,2 );*/
+}
+.fileLabel {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 18;
+    -fx-font-style: italic;
+    -fx-font-weight: 700;
+    -fx-font-family: "Futura";
+}
+.button .text {
+    -fx-fill: #FFFFF5;
+    /*-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 0,0,2,2 );*/
+    -fx-font-size: 14;
+    -fx-font-weight: 800;
+    -fx-font-family: "Futura";
+}
+.text-field {
+    -fx-background-radius: 8;
+    -fx-background-color: #555555;
+    -fx-text-fill: #FFFFFF;
+    -fx-border-radius: 8;
+    -fx-border-color: #AAAAAA;
+    -fx-border-width: 0 0 2 0;
+    /*-fx-effect: dropshadow(gaussian, rgba(255,255,255,.6), 0,0,1,1 );*/
+    -fx-font-family: "Futura";
+}
+.combo-box .list-cell .text {
+    -fx-fill: #FFFFFF;
+    -fx-font-family: "Futura";
+    /*-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 0,0,2,2 );*/
+}
+.check-box:determinate .text {
+-fx-fill: #FFFFFF;
+    -fx-font-size: 14;
+    -fx-font-family: "Futura";
+    -fx-font-weight: 700;
+}
+
+.check-box {
+    -fx-border-color: #AAAAAA;
+    -fx-border-width: 0 0 2 0;
+    -fx-padding: 0 0 4 0;
+}
+
+.button {
+   -fx-border-radius: 8;
+   -fx-background-radius: 8;
+   -fx-background-color: #555555;
+   -fx-effect: dropshadow( gaussian, rgba(255,255,210,.5) , 4,0,1,1 );
+}
+
+
+
+.button:hover {
+    -fx-background-color: #111111;
+}
+
+.combo-box {
+   -fx-background-radius: 8;
+   -fx-background-color: #555555;
+   -fx-border-width: 0 0 2 0;
+   -fx-border-radius: 8;
+   -fx-border-color: #AAAAAA;
+
+    /*-fx-effect: dropshadow(gaussian, rgba(255,255,255,.6), 0,0,1,1 );*/
+}
+.combo-box .list-cell:selected {
+    -fx-background-color: #555555;
+}
+
+
+.combo-box .list-view  {
+   -fx-background-radius: 10;
+   -fx-background-color: #444444;
+
+    -fx-effect: dropshadow( gaussian, rgba(255,255,255,.5) , 10,0,2,2 );
+}
+
+.combo-box .list-cell {
+    -fx-background-radius: 8;
+    -fx-background-color: #444444;
+}
+
+
+.combo-box .list-cell:hover {
+    -fx-background-color: #111111;
+}
+
+
+.slider .track {
+    -fx-background-color: linear-gradient(to right, lightgray, gray);
+}
+
+.slider .thumb {
+    -fx-pref-width: 5;
+    -fx-pref-height: 20;
+    -fx-background-radius: 0;
+}
+
+
+
+
+
+
+
+
+.table-view{
+   -fx-background-color: transparent;
+}
+
+.table-view:focused{
+    -fx-background-color: transparent;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #555555;
+}
+
+.table-view .column-header {
+        -fx-border-width: 0 1 3 0;
+        -fx-padding: 0 0 4 0;
+        -fx-border-color: white;
+        -fx-padding: 0;
+}
+
+.table-view .column-header-background .label{
+    -fx-text-fill: #FFFFEE;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+}
+
+.table-view .table-cell{
+    -fx-text-fill: white;
+}
+
+.table-row-cell{
+    -fx-background-color: #333333;
+}
+
+.table-row-cell:odd{
+    -fx-background-color: #222222;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #666666;
+}
+
+.table-view > .virtual-flow > .scroll-bar:vertical,
+.table-view > .virtual-flow > .scroll-bar:horizontal {
+    -fx-background-color: transparent;
 }

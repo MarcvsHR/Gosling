@@ -24,6 +24,7 @@ public class SongGlobal {
     private static int doneFilter = 0;
     private static int truncFilter = 0;
     private static String folderFilter = "";
+    private static String userFilter = "Any user";
 
     public static int getDoneFilter() {
         return doneFilter;
@@ -113,4 +114,11 @@ public class SongGlobal {
         mp3List = inputList;
     }
 
+    public static void setUserFilter(String selectedIndex) {
+        SongGlobal.userFilter = selectedIndex;
+    }
+
+    public static String getUserFilter() {
+        return SongGlobal.userFilter;
+    }
 }

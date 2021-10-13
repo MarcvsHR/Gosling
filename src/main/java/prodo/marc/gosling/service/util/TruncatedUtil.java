@@ -17,12 +17,18 @@ public class TruncatedUtil {
                     return true;
                 }
 
-                if (f.get(input) instanceof String){
-                    if (f.get(input).equals("")) {return true;};
+                if (f.get(input) instanceof String) {
+                    if (f.get(input).equals("")) {
+                        return true;
+                    }
                 }
+
                 if (f.get(input) instanceof Year) {
-                    if (((Year) f.get(input)).compareTo(Year.of(0)) == 0) {return true;}
+                    if (((Year) f.get(input)).compareTo(Year.of(0)) == 0) {
+                        return true;
+                    }
                 }
+
             }
         }
         return false;

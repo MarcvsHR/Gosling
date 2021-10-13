@@ -34,6 +34,7 @@ public class RegexWindowController {
         regex.add("Title");
         regex.add("Track - Artist - Title");
         regex.add("Artist - Track - Title");
+        regex.add("Artist-Title");
         Collections.sort(regex);
         return new ArrayList<>(regex);
     }
@@ -94,6 +95,13 @@ public class RegexWindowController {
                 String[] output = mp3Filename.getText().split(" - ");
                 song.setArtist(output[0]);
                 song.setTitle(output[2]);
+                isSet = true;
+                break;
+            }
+            case "Artist-Title": {
+                String[] output = mp3Filename.getText().split("-");
+                song.setArtist(output[0]);
+                song.setTitle(output[1]);
                 isSet = true;
                 break;
             }
