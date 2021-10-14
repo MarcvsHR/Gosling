@@ -3,7 +3,9 @@ package prodo.marc.gosling.service.id3;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import prodo.marc.gosling.dao.ID3Frame;
+import prodo.marc.gosling.dao.ID3Header;
 import prodo.marc.gosling.dao.MyID3;
+import prodo.marc.gosling.service.Popups;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -125,7 +127,9 @@ public class ID3Reader {
                 }
             }
         }
-        logger.debug("header: " + frame.getFrameID());
+        if (!ID3Header.CHECK_LIST(frame.getFrameID()))
+            Popups.giveInfoAlert("ID3 import error","found new unknown header", frame.getFrameID());
+//        logger.debug("header: " + frame.getFrameID());
 //        logger.debug("size: " + frame.getSize());
 //        logger.debug("content size: " + frame.getContent().length());
 //        logger.debug("f1: " + frame.getFlag1());

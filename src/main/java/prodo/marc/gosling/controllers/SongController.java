@@ -364,8 +364,8 @@ public class SongController {
             if (localFile) {
                 updateTextFields(fileLoc);
                 TextFields.bindAutoCompletion(textPublisher, publisherList).setMaxWidth(170);
-//                MyID3 testing = ID3Reader.getTag(new File(fileLoc));
-//                logger.debug(testing.getData(ID3Header.ARTIST.getName()));
+                MyID3 testing = ID3Reader.getTag(new File(fileLoc));
+                logger.debug(testing.getData(ID3Header.ARTIST));
 //                if (!testing.getVersionString().equals("2.4.0")) {
 //                    logger.debug("no id3 found");
 //                } else {

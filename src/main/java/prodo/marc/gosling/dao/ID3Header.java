@@ -1,23 +1,23 @@
 package prodo.marc.gosling.dao;
 
 
-public enum ID3Header {
-    PUBLISHER("TPUB"),
-    ALBUM("TALB"),
-    TITLE("TIT2"),
-    YEAR("TYER"),
-    TYPE("TCON"),
-    ARTIST("TPE1"),
-    COMPOSER("TCOM");
+public final class ID3Header {
+    public static final String PUBLISHER = "TPUB";
+    public static final String ALBUM = "TALB";
+    public static final String TITLE = "TIT2";
+    public static final String YEAR = "TYER";
+    public static final String TYPE = "TCON";
+    public static final String ARTIST = "TPE1";
+    public static final String COMPOSER = "TCOM";
 
-    private final String name;
+    public static final String[] LIST = {
+        "TPUB", "TALB", "TIT2", "TYER", "TCON", "TPE1", "TCOM"
+    };
 
-    ID3Header(String n){
-        this.name = n;
+    public static boolean CHECK_LIST(String s) {
+        for (String c : LIST) {
+            if (s.equals(c)) return true;
+        }
+        return false;
     }
-
-    public String getName() {
-        return this.name;
-    }
-
 }
