@@ -23,10 +23,13 @@ import javafx.util.Duration;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.controlsfx.control.textfield.TextFields;
+import prodo.marc.gosling.dao.ID3Header;
 import prodo.marc.gosling.dao.MyID3;
 import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.hibernate.repository.SongRepository;
 import prodo.marc.gosling.service.*;
+import prodo.marc.gosling.service.id3.ID3Reader;
+import prodo.marc.gosling.service.id3.ID3v2Utils;
 import prodo.marc.gosling.service.util.TruncatedUtil;
 
 import java.awt.*;
@@ -362,6 +365,7 @@ public class SongController {
                 updateTextFields(fileLoc);
                 TextFields.bindAutoCompletion(textPublisher, publisherList).setMaxWidth(170);
 //                MyID3 testing = ID3Reader.getTag(new File(fileLoc));
+//                logger.debug(testing.getData(ID3Header.ARTIST.getName()));
 //                if (!testing.getVersionString().equals("2.4.0")) {
 //                    logger.debug("no id3 found");
 //                } else {

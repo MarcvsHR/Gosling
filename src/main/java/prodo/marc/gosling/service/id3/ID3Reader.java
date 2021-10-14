@@ -1,7 +1,8 @@
-package prodo.marc.gosling.service;
+package prodo.marc.gosling.service.id3;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import prodo.marc.gosling.dao.ID3Frame;
 import prodo.marc.gosling.dao.MyID3;
 
 import java.io.File;
@@ -19,10 +20,10 @@ public class ID3Reader {
 
     private static final Logger logger = LogManager.getLogger(ID3v2Utils.class);
 
-
     public static MyID3 getTag(File file) {
         byte[] fileContent = null;
         MyID3 id3Data = new MyID3();
+
         try {
             fileContent = Files.readAllBytes(file.toPath());
         } catch (IOException e) {
@@ -38,26 +39,27 @@ public class ID3Reader {
             }
             if (id3Data.getVersionString().equals("2.4.0") || id3Data.getVersionString().equals("2.3.0")) {
                 id3Data.setFlags(fileContent[5]);
-                id3Data.setVersion(2, 4, 0);
+                id3Data.setVersionWithInts(2, 4, 0);
                 if (id3Data.getFlags() > 0) logger.debug("Flags detected!!!!   " + id3Data.getFlags());
                 id3Data.setSize(ByteBuffer.wrap(Arrays.copyOfRange(fileContent, 6, 10)).getInt(), true);
 //                logger.debug("Size: " + id3Data.getSize());
 //                logger.debug("size bytes in array" + Arrays.toString(Arrays.copyOfRange(fileContent, 6, 10)));
                 int startFrames = 10;
-                int i = 0;
                 while (startFrames < id3Data.getSize()) {
-                    id3Data.addFrame(getFrame(fileContent, startFrames));
-                    startFrames += id3Data.getFrame(i).getSize() + 10;
+                    ID3Frame frame;
+                    frame = getFrame(fileContent,startFrames);
+                    String frameID = frame.getFrameID();
+                    id3Data.addFrame(frame);
+                    startFrames += frame.getSize() + 10;
 //                    logger.debug("Current pos: " + startFrames);
-                    if (Objects.equals(id3Data.getFrame(i).getFrameID(), "XXXX")) {
-                        id3Data.removeFrame();
+                    if (Objects.equals(frameID, "XXXX")) {
+                        id3Data.removePadding();
                         break;
                     }
-                    if (id3Data.getFrame(i).getEncoding() == 1) {
-                        id3Data.getFrame(i).setSize(id3Data.getFrame(i).getContent().length() + 1);
-                        id3Data.getFrame(i).setEncoding((byte) 0);
+                    if (frame.getEncoding() == 1) {
+                        id3Data.getFrame(frameID).setSize(frame.getContent().length() + 1, false);
+                        id3Data.getFrame(frameID).setEncoding((byte) 0);
                     }
-                    i++;
                 }
                 id3Data.setSize(id3Data.totalFrameSize(), false);
 //                logger.debug("number of frames total: "+id3Data.getFrames().size());
@@ -87,15 +89,15 @@ public class ID3Reader {
 //        logger.debug("total byte mismatch: " + errors);
     }
 
-    private static MyID3.ID3Frame getFrame(byte[] fileContent, int start) {
-        MyID3.ID3Frame frame = new MyID3.ID3Frame();
+    private static ID3Frame getFrame(byte[] fileContent, int start) {
+        ID3Frame frame = new ID3Frame();
         frame.setFrameID(new String(Arrays.copyOfRange(fileContent, start, start + 4)));
         String test = String.valueOf((char) 0);
         test += test;
         test += test;
 
         start += 4;
-        frame.setSize(ByteBuffer.wrap(Arrays.copyOfRange(fileContent, start, start + 4)).getInt());
+        frame.setSize(ByteBuffer.wrap(Arrays.copyOfRange(fileContent, start, start + 4)).getInt(),true);
         start += 4;
         frame.setFlag1(fileContent[start]);
         frame.setFlag2(fileContent[start + 1]);
@@ -123,7 +125,7 @@ public class ID3Reader {
                 }
             }
         }
-//        logger.debug("header: " + frame.getFrameID());
+        logger.debug("header: " + frame.getFrameID());
 //        logger.debug("size: " + frame.getSize());
 //        logger.debug("content size: " + frame.getContent().length());
 //        logger.debug("f1: " + frame.getFlag1());
@@ -161,7 +163,8 @@ public class ID3Reader {
         System.arraycopy(id3Data,0,outputFileData,0,id3Data.length);
         System.arraycopy(mp3Data,0,outputFileData,id3Data.length,mp3Data.length);
 
-        File outputFile = new File("c:\\users\\glazb\\downloads\\testing.mp3");
+        File outputFile = new File("c:\\test\\testing.mp3");
+//        File outputFile = new File(fileLoc);
         try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
             outputStream.write(outputFileData);
         } catch (Exception e) {

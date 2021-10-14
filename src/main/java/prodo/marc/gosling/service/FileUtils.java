@@ -7,6 +7,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.hibernate.repository.SongRepository;
+import prodo.marc.gosling.service.id3.ID3v2Utils;
 
 import java.io.File;
 import java.io.IOException;

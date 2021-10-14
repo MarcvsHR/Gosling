@@ -1,4 +1,4 @@
-package prodo.marc.gosling.service;
+package prodo.marc.gosling.service.id3;
 
 import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.ID3v24Tag;
@@ -11,6 +11,7 @@ import prodo.marc.gosling.hibernate.repository.SongRepository;
 import java.io.File;
 
 import javafx.util.Duration;
+import prodo.marc.gosling.service.MyStringUtils;
 
 
 public class ID3v2Utils {
