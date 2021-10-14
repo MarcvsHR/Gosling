@@ -23,6 +23,7 @@ import javafx.util.Duration;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.controlsfx.control.textfield.TextFields;
+import prodo.marc.gosling.dao.MyID3;
 import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.hibernate.repository.SongRepository;
 import prodo.marc.gosling.service.*;
@@ -337,7 +338,7 @@ public class SongController {
             currentSong.setAlbum(textAlbum.getText());
             currentSong.setPublisher(textPublisher.getText());
             currentSong.setComposer(textComposer.getText());
-            currentSong.setYear(StringUtils.parseYear(textYear.getText()));
+            currentSong.setYear(MyStringUtils.parseYear(textYear.getText()));
             currentSong.setGenre(dropGenre.getSelectionModel().getSelectedItem());
             //currentSong.setISRC(textISRC.getText());
             currentSong.setFileLoc(SongGlobal.getCurrentSong().getFileLoc());
@@ -360,6 +361,12 @@ public class SongController {
             if (localFile) {
                 updateTextFields(fileLoc);
                 TextFields.bindAutoCompletion(textPublisher, publisherList).setMaxWidth(170);
+//                MyID3 testing = ID3Reader.getTag(new File(fileLoc));
+//                if (!testing.getVersionString().equals("2.4.0")) {
+//                    logger.debug("no id3 found");
+//                } else {
+//                    ID3Reader.writeFile(fileLoc, testing);
+//                }
             }
         }
 
@@ -392,7 +399,7 @@ public class SongController {
             }
             //TODO: ovo ne bi trebalo radit vako...
             if (id3Data.getGenreDescription() != null) {
-                dropGenre.getSelectionModel().select(StringUtils.replaceCroChars(id3Data.getGenreDescription()));
+                dropGenre.getSelectionModel().select(MyStringUtils.replaceCroChars(id3Data.getGenreDescription()));
             }
             if (dropGenre.getSelectionModel().getSelectedItem() == null || id3Data.getGenreDescription() == null) {
                 dropGenre.getSelectionModel().select(0);
@@ -772,11 +779,11 @@ public class SongController {
     }
 
     public void changeCRO() {
-        textArtist.setText(StringUtils.replaceCroChars(textArtist.getText()));
-        textTitle.setText(StringUtils.replaceCroChars(textTitle.getText()));
-        textAlbum.setText(StringUtils.replaceCroChars(textAlbum.getText()));
-        textPublisher.setText(StringUtils.replaceCroChars(textPublisher.getText()));
-        textComposer.setText(StringUtils.replaceCroChars(textComposer.getText()));
+        textArtist.setText(MyStringUtils.replaceCroChars(textArtist.getText()));
+        textTitle.setText(MyStringUtils.replaceCroChars(textTitle.getText()));
+        textAlbum.setText(MyStringUtils.replaceCroChars(textAlbum.getText()));
+        textPublisher.setText(MyStringUtils.replaceCroChars(textPublisher.getText()));
+        textComposer.setText(MyStringUtils.replaceCroChars(textComposer.getText()));
     }
 
     //TODO: this part needs to check if all the fields are there so it needs to be handled earlier, prolly in updateMP3()
@@ -834,7 +841,7 @@ public class SongController {
     }
 
     public void checkArtistField() {
-        if (StringUtils.compareStrings(SongGlobal.getCurrentSong().getArtist(), textArtist.getText())) {
+        if (MyStringUtils.compareStrings(SongGlobal.getCurrentSong().getArtist(), textArtist.getText())) {
             textArtist.setStyle("-fx-background-color: ");
         } else {
             textArtist.setStyle("-fx-background-color: #" + changedBackgroundColor);
@@ -849,7 +856,7 @@ public class SongController {
         }
         pos = textYear.getLength() - len + pos;
         textYear.positionCaret(pos);
-        if (StringUtils.compareStrings(String.valueOf(SongGlobal.getCurrentSong().getYear()), textYear.getText())) {
+        if (MyStringUtils.compareStrings(String.valueOf(SongGlobal.getCurrentSong().getYear()), textYear.getText())) {
             textYear.setStyle("-fx-background-color: ");
             textYear.setStyle("-fx-text-color: #" + defaultTextColor);
         } else {

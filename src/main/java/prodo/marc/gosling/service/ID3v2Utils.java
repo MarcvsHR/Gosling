@@ -9,6 +9,7 @@ import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.hibernate.repository.SongRepository;
 
 import java.io.File;
+
 import javafx.util.Duration;
 
 
@@ -78,10 +79,10 @@ public class ID3v2Utils {
 
         testSong.setPublisher(id3Data.getPublisher());
         testSong.setComposer(id3Data.getComposer());
-        testSong.setYear(StringUtils.parseYear(id3Data.getYear()));
+        testSong.setYear(MyStringUtils.parseYear(id3Data.getYear()));
         testSong.setGenre(id3Data.getGenreDescription());
         if (id3Data.getRecordingTime() == null) id3Data.setRecordingTime("0");
-        testSong.setDuration(Duration.millis(Double.parseDouble(id3Data.getRecordingTime())));
+        testSong.setDuration(Duration.millis(Double.parseDouble((id3Data.getRecordingTime().replaceAll(" ms","")))));
         //testSong.setISRC(id3Data.getISRC());
         testSong.setISRC(null);
         testSong.setFileLoc(path);
@@ -119,5 +120,6 @@ public class ID3v2Utils {
 
         return duration;
     }
+
 
 }

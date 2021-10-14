@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.apache.log4j.Logger;
-import prodo.marc.gosling.service.StringUtils;
+import prodo.marc.gosling.service.MyStringUtils;
 import prodo.marc.gosling.service.util.Truncated;
 
 import javax.persistence.*;
@@ -52,27 +52,28 @@ public class Song {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Song that = (Song) o;
-        return StringUtils.compareStrings(artist, that.artist) &&
-                StringUtils.compareStrings(title, that.title) &&
-                StringUtils.compareStrings(album, that.album) &&
-                StringUtils.compareStrings(publisher, that.publisher) &&
-                StringUtils.compareStrings(composer, that.composer) &&
-                StringUtils.compareStrings(genre, that.genre) &&
-                StringUtils.compareStrings(fileLoc, that.fileLoc) &&
+        return MyStringUtils.compareStrings(artist, that.artist) &&
+                MyStringUtils.compareStrings(title, that.title) &&
+                MyStringUtils.compareStrings(album, that.album) &&
+                MyStringUtils.compareStrings(publisher, that.publisher) &&
+                MyStringUtils.compareStrings(composer, that.composer) &&
+                MyStringUtils.compareStrings(genre, that.genre) &&
+                MyStringUtils.compareStrings(fileLoc, that.fileLoc) &&
                 Objects.equals(year, that.year) &&
                 //Objects.equals(duration, that.duration) &&
 
                 Objects.equals(done, that.done);
 
-        //         StringUtils.compareStrings(ISRC, that.ISRC);
+        //         MyStringUtils.compareStrings(ISRC, that.ISRC);
     }
 
     public String getDurationString() {
-        String outout = String.format("%.0f", duration.toSeconds() % 60);
-        if (outout.length() < 2) outout = "0"+outout;
-        outout = String.format("%.0f:", duration.toMinutes()) + outout;
-        if (duration.toSeconds() < 600) outout = "0"+outout;
-        return outout;
+        if (duration == null) duration = new Duration(0);
+        String output = String.format("%.0f", duration.toSeconds() % 60);
+        if (output.length() < 2) output = "0"+output;
+        output = String.format("%.0f:", duration.toMinutes()) + output;
+        if (duration.toSeconds() < 600) output = "0"+output;
+        return output;
     }
 
     @Converter(autoApply = true)

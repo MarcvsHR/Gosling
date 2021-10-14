@@ -4,7 +4,7 @@ package prodo.marc.gosling.service;
 import java.time.Year;
 import java.util.regex.Pattern;
 
-public class StringUtils {
+public class MyStringUtils {
     /**
      * Check if two strings are equal
      */
