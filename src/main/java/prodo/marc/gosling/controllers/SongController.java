@@ -406,7 +406,7 @@ public class SongController {
                         "The song has an unknown genre",
                         "Genre: " + id3Data.getData(id3Header.GENRE));
             }
-            logger.debug("***" + id3Data.getData(id3Header.GENRE) + "***");
+//            logger.debug("***" + id3Data.getData(id3Header.GENRE) + "***");
 
             //textISRC.setText(id3Data.getISRC());
 
@@ -563,7 +563,7 @@ public class SongController {
         id3.setFrame(id3Header.PUBLISHER,textPublisher.getText());
         id3.setFrame(id3Header.COMPOSER,textComposer.getText());
         id3.setFrame(id3Header.YEAR,textYear.getText());
-        id3.setFrame(id3Header.TIME,String.valueOf(SongGlobal.getCurrentSong().getDuration()));
+        id3.setFrame(id3Header.LENGTH,String.valueOf(SongGlobal.getCurrentSong().getDuration()));
         if (checkDone.isSelected()) {
             id3.setFrame(id3Header.KEY,"true");
         } else {

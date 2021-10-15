@@ -38,8 +38,8 @@ public class ID3v2Utils {
         testSong.setComposer(id3Data.getData(id3Header.COMPOSER));
         testSong.setYear(MyStringUtils.parseYear(id3Data.getData(id3Header.YEAR)));
         testSong.setGenre(id3Data.getData(id3Header.GENRE));
-        if (id3Data.getData(id3Header.TIME) == null) id3Data.addFrame(id3Header.TIME, "0");
-        testSong.setDuration(Duration.millis(Double.parseDouble((id3Data.getData(id3Header.TIME).replaceAll(" ms", "")))));
+        if (id3Data.getData(id3Header.LENGTH) == null) id3Data.addFrame(id3Header.LENGTH, "0");
+        testSong.setDuration(Duration.millis(Double.parseDouble((id3Data.getData(id3Header.LENGTH).replaceAll(" ms", "")))));
         testSong.setISRC(id3Data.getData(id3Header.ISRC));
         testSong.setFileLoc(path);
         testSong.setEditor(editor);
@@ -47,7 +47,7 @@ public class ID3v2Utils {
         if (key == null) {
             key = " ";
         }
-        logger.debug("key: "+id3Data.getData(id3Header.KEY));
+//        logger.debug("key: "+id3Data.getData(id3Header.KEY));
         testSong.setDone(key.equals("true"));
 
         Integer ID = SongRepository.getIDofFile(path);
@@ -73,7 +73,6 @@ public class ID3v2Utils {
         if (bitrate > 14) bitrate += bitrate - 13;
         if (bitrate == 33) bitrate = 37;
         bitrate = bitrate * 8 + 24;
-        logger.debug("bitrate: " + bitrate);
 
         int sampling = Integer.parseInt(header.substring(4, 6), 2);
         switch (sampling) {
@@ -87,20 +86,21 @@ public class ID3v2Utils {
                 sampling = 32000;
                 break;
         }
-        logger.debug("Sampling: " + sampling);
 
         int padding = Integer.parseInt(header.substring(6, 7));
-        logger.debug("Padding: " + padding);
 
         int frameLen = (144000 * bitrate / sampling) + padding;
-        logger.debug("Frame length: " + frameLen);
 
         double estDur = (mp3Data.length - 4) / (double)frameLen;
         estDur = estDur * 26.1;
-        logger.debug("Estimated file duration in ms: " + estDur);
 
         duration = (long) estDur;
 
+//        logger.debug("bitrate: " + bitrate);
+//        logger.debug("Sampling: " + sampling);
+//        logger.debug("Padding: " + padding);
+//        logger.debug("Frame length: " + frameLen);
+//        logger.debug("Estimated file duration in ms: " + estDur);
 
         logger.debug("----- ending getDuration");
 

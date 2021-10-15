@@ -75,7 +75,7 @@ public class FileUtils {
 
         Song song;
         MyID3 id3tag = ID3Reader.getTag(new File(String.valueOf(path)));
-        logger.debug("current time: "+id3tag.getData(id3Header.TIME));
+        logger.debug("current time: "+id3tag.getData(id3Header.LENGTH));
         song = ID3v2Utils.songDataFromID3(id3tag, String.valueOf(path), editor);
         song.setEditor(editor);
         SongRepository songRepo = new SongRepository();

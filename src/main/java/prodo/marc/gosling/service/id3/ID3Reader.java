@@ -60,8 +60,8 @@ public class ID3Reader {
                     //id3Data.getFrame(frameID).setSize(frame.getContent().length + 1, false);
 //                    logger.debug("Current pos: " + startFrames);
                 }
-                if (id3Data.getData(id3Header.TIME) == null) {
-                    id3Data.addFrame(id3Header.TIME, String.valueOf(ID3v2Utils.getDuration(fileContent,id3Data.getSize())));
+                if (id3Data.getData(id3Header.LENGTH) == null) {
+                    id3Data.addFrame(id3Header.LENGTH, String.valueOf(ID3v2Utils.getDuration(fileContent,id3Data.getSize())));
                 }
                 id3Data.setSize(id3Data.totalFrameSize(), false);
 //                logger.debug("final size: "+id3Data.getSize());
