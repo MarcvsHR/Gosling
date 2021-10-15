@@ -6,7 +6,19 @@ public class ID3Frame extends ID3Size {
     private byte flag1;
     private byte flag2;
     private byte encoding;
-    private String content;
+    private byte[] content;
+
+    public ID3Frame(String header, String data) {
+        super();
+        frameID = header;
+        flag1 = 0;
+        flag2 = 0;
+        encoding = 0;
+        content = data.getBytes();
+        setSize(data.length()+1,false);
+    }
+
+    public ID3Frame() {    }
 
     public byte getEncoding() {
         return encoding;
@@ -40,11 +52,11 @@ public class ID3Frame extends ID3Size {
         this.flag2 = flag2;
     }
 
-    public String getContent() {
-        return content;
+    public byte[] getContent() {
+        return (content);
     }
 
-    public void setContent(String content) {
+    public void setContent(byte[] content) {
         this.content = content;
     }
 }

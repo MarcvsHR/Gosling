@@ -1,5 +1,6 @@
 package prodo.marc.gosling.dao;
 
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 
 
@@ -10,6 +11,14 @@ public class MyID3 extends ID3Size {
 
     public void addFrame(ID3Frame frame) {
         this.frames.put(frame.getFrameID(),frame);
+        frames.get(frame.getFrameID()).setSize(frames.get(frame.getFrameID()).getContent().length+1,false);
+    }
+
+    public void addFrame(String header, String data) {
+        if (data != null){
+            this.frames.put(header, new ID3Frame(header, data));
+        }
+        setSize(totalFrameSize(),false);
     }
 
     public ID3Frame getFrame(String string) {
@@ -61,6 +70,8 @@ public class MyID3 extends ID3Size {
         output[4] = version[2];
         output[5] = flags;
         byte[] tempArr = convertIntToBytes(this.getSize());
+//        System.out.println(this.getSize());
+//        System.out.println("");
         System.arraycopy(tempArr, 0, output, 6, 4);
         int pos = 10;
 
@@ -68,22 +79,39 @@ public class MyID3 extends ID3Size {
             tempArr = frame.getFrameID().getBytes();
             System.arraycopy(tempArr,0,output,pos,4);
             pos += 4;
-            tempArr = convertIntToBytes(frame.getSize());
+            tempArr = ByteBuffer.allocate(4).putInt(frame.getSize()).array();
             System.arraycopy(tempArr,0,output,pos,4);
             pos +=4;
             output[pos] = frame.getFlag1();
             output[pos+1] = frame.getFlag2();
             output[pos+2] = frame.getEncoding();
             pos +=3;
-            tempArr = frame.getContent().getBytes();
+            tempArr = frame.getContent();
             System.arraycopy(tempArr,0,output,pos,tempArr.length);
             pos += tempArr.length;
-        }
 
+//            if (!frame.getFrameID().equals("APIC")) System.out.println(new String(frame.getContent()));
+//            System.out.println(frame.getSize());
+//            System.out.println(pos);
+//            System.out.println("");
+        }
+//        System.out.println(Arrays.toString(output));
         return output;
     }
 
     public String getData(String s) {
-        return frames.get(s).getContent();
+        if (frames.containsKey(s)) return new String(frames.get(s).getContent());
+        else return null;
+    }
+
+    public void setFrame(String header, String content) {
+        if (frames.containsKey(header)) {
+            frames.get(header).setContent(content.getBytes());
+            frames.get(header).setSize(content.length()+1,false);
+            setSize(totalFrameSize(),false);
+        } else {
+            addFrame(header,content);
+        }
     }
 }
+

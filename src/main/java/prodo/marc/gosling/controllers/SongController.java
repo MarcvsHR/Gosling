@@ -1,7 +1,5 @@
 package prodo.marc.gosling.controllers;
 
-import com.mpatric.mp3agic.ID3v24Tag;
-import com.mpatric.mp3agic.Mp3File;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -23,7 +21,7 @@ import javafx.util.Duration;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.controlsfx.control.textfield.TextFields;
-import prodo.marc.gosling.dao.ID3Header;
+import prodo.marc.gosling.dao.id3Header;
 import prodo.marc.gosling.dao.MyID3;
 import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.hibernate.repository.SongRepository;
@@ -93,7 +91,7 @@ public class SongController {
     ObservableList<Song> songList = FXCollections.observableArrayList();
     FilteredList<Song> filteredSongs = new FilteredList<>(songList);
     SortedList<Song> sortedSongs = new SortedList<>(filteredSongs);
-    ID3v24Tag copiedID3 = new ID3v24Tag();
+    MyID3 copiedID3 = new MyID3();
     String changedBackgroundColor = "bb3333";
     String defaultTextColor = "FFFFFF";
     ObservableList<String> publisherList = FXCollections.observableArrayList();
@@ -364,13 +362,6 @@ public class SongController {
             if (localFile) {
                 updateTextFields(fileLoc);
                 TextFields.bindAutoCompletion(textPublisher, publisherList).setMaxWidth(170);
-                MyID3 testing = ID3Reader.getTag(new File(fileLoc));
-                logger.debug(testing.getData(ID3Header.ARTIST));
-//                if (!testing.getVersionString().equals("2.4.0")) {
-//                    logger.debug("no id3 found");
-//                } else {
-//                    ID3Reader.writeFile(fileLoc, testing);
-//                }
             }
         }
 
@@ -389,32 +380,33 @@ public class SongController {
         //load id3 data into text fields
         try {
             File file = new File(fileLoc);
-            ID3v24Tag id3Data = ID3v2Utils.getID3(file);
-            textArtist.setText(id3Data.getArtist());
-            textTitle.setText(id3Data.getTitle());
-            textAlbum.setText(id3Data.getAlbum());
-            textPublisher.setText(id3Data.getPublisher());
-            textComposer.setText(id3Data.getComposer());
-            textYear.setText(id3Data.getYear());
-            if (id3Data.getKey() != null) {
-                checkDone.setSelected(id3Data.getKey().equals("true"));
+            MyID3 id3Data = ID3Reader.getTag(file);
+
+            textArtist.setText(id3Data.getData(id3Header.ARTIST));
+            textTitle.setText(id3Data.getData(id3Header.TITLE));
+            textAlbum.setText(id3Data.getData(id3Header.ALBUM));
+            textPublisher.setText(id3Data.getData(id3Header.PUBLISHER));
+            textComposer.setText(id3Data.getData(id3Header.COMPOSER));
+            textYear.setText(id3Data.getData(id3Header.YEAR));
+            if (id3Data.getData(id3Header.KEY) != null) {
+                checkDone.setSelected(id3Data.getData(id3Header.KEY).equals("true"));
             } else {
                 checkDone.setSelected(false);
             }
             //TODO: ovo ne bi trebalo radit vako...
-            if (id3Data.getGenreDescription() != null) {
-                dropGenre.getSelectionModel().select(MyStringUtils.replaceCroChars(id3Data.getGenreDescription()));
+            if (id3Data.getData(id3Header.GENRE) != null) {
+                dropGenre.getSelectionModel().select(MyStringUtils.replaceCroChars(id3Data.getData(id3Header.GENRE)));
             }
-            if (dropGenre.getSelectionModel().getSelectedItem() == null || id3Data.getGenreDescription() == null) {
+            if (dropGenre.getSelectionModel().getSelectedItem() == null || id3Data.getData(id3Header.GENRE) == null) {
                 dropGenre.getSelectionModel().select(0);
             }
             if (dropGenre.getSelectionModel().getSelectedIndex() == -1) {
-                logger.debug("could not find genre: " + id3Data.getGenreDescription());
+                logger.debug("could not find genre: " + id3Data.getData(id3Header.GENRE));
                 Popups.giveInfoAlert("Unknown genre",
                         "The song has an unknown genre",
-                        "Genre: " + id3Data.getGenreDescription());
+                        "Genre: " + id3Data.getData(id3Header.GENRE));
             }
-            logger.debug("***" + id3Data.getGenreDescription() + "***");
+            logger.debug("***" + id3Data.getData(id3Header.GENRE) + "***");
 
             //textISRC.setText(id3Data.getISRC());
 
@@ -553,7 +545,7 @@ public class SongController {
 
         changeCRO();
 
-        ID3v24Tag id3 = new ID3v24Tag();
+        MyID3 id3 = ID3Reader.getTag(new File(currentFileLoc));
 
         if (textAlbum.getText().isEmpty() || textAlbum.getText() == null) {
             textAlbum.setText(textTitle.getText());
@@ -561,23 +553,23 @@ public class SongController {
         if ((textTitle.getText().isEmpty() || textTitle.getText() == null) && !textAlbum.getText().isEmpty()) {
             textTitle.setText(textAlbum.getText());
         }
-        if (textYear.getText() == null) {
+        if (textYear.getText() == null || textYear.getText().isBlank()) {
             textYear.setText(String.valueOf(2021));
         }
 
-        id3.setArtist(textArtist.getText());
-        id3.setTitle(textTitle.getText());
-        id3.setAlbum(textAlbum.getText());
-        id3.setPublisher(textPublisher.getText());
-        id3.setComposer(textComposer.getText());
-        id3.setYear(textYear.getText());
-        id3.setRecordingTime(String.valueOf(SongGlobal.getCurrentSong().getDuration()));
+        id3.setFrame(id3Header.ARTIST,textArtist.getText());
+        id3.setFrame(id3Header.TITLE,textTitle.getText());
+        id3.setFrame(id3Header.ALBUM,textAlbum.getText());
+        id3.setFrame(id3Header.PUBLISHER,textPublisher.getText());
+        id3.setFrame(id3Header.COMPOSER,textComposer.getText());
+        id3.setFrame(id3Header.YEAR,textYear.getText());
+        id3.setFrame(id3Header.TIME,String.valueOf(SongGlobal.getCurrentSong().getDuration()));
         if (checkDone.isSelected()) {
-            id3.setKey("true");
+            id3.setFrame(id3Header.KEY,"true");
         } else {
-            id3.setKey(" ");
+            id3.setFrame(id3Header.KEY," ");
         }
-        id3.setGenreDescription(dropGenre.getSelectionModel().getSelectedItem());
+        id3.setFrame(id3Header.GENRE,dropGenre.getSelectionModel().getSelectedItem());
         //song.setISRC(textISRC.getText());
 
         if (renameFile()) {
@@ -595,45 +587,35 @@ public class SongController {
         textYear.setStyle("-fx-background-color: ");
     }
 
-    private void writeToMP3(ID3v24Tag song, String fileLoc) {
+    private void writeToMP3(MyID3 song, String fileLoc) {
 
         logger.debug("----- Executing writeToMP3");
 
-        String backupFileLoc = fileLoc + ".bak";
         try {
-            Mp3File mp3file = new Mp3File(fileLoc);
-            ID3v24Tag id3Data = ID3v2Utils.getID3(new File(fileLoc));
-            mp3file.setId3v2Tag(id3Data);
+            MyID3 id3Data = ID3Reader.getTag(new File(fileLoc));
 
-            id3Data.setArtist(song.getArtist());
-            id3Data.setTitle(song.getTitle());
-            id3Data.setAlbum(song.getAlbum());
-            id3Data.setPublisher(song.getPublisher());
-            id3Data.setComposer(song.getComposer());
-            id3Data.setYear(song.getYear());
+            id3Data.setFrame(id3Header.ARTIST,song.getData(id3Header.ARTIST));
+            id3Data.setFrame(id3Header.TITLE,song.getData(id3Header.TITLE));
+            id3Data.setFrame(id3Header.ALBUM,song.getData(id3Header.ALBUM));
+            id3Data.setFrame(id3Header.PUBLISHER,song.getData(id3Header.PUBLISHER));
+            id3Data.setFrame(id3Header.COMPOSER,song.getData(id3Header.COMPOSER));
+            id3Data.setFrame(id3Header.YEAR,song.getData(id3Header.YEAR));
             if (checkDone.isSelected()) {
-                id3Data.setKey("true");
+                id3Data.setFrame(id3Header.KEY,"true");
             } else {
-                id3Data.setKey(" ");
+                id3Data.setFrame(id3Header.KEY," ");
             }
-            if (song.getGenreDescription() != null) {
-                id3Data.setGenreDescription(song.getGenreDescription());
+            if (song.getData(id3Header.GENRE) != null) {
+                id3Data.setFrame(id3Header.GENRE,song.getData(id3Header.GENRE));
             }
-            //id3Data.setISRC(song.getISRC());
+            id3Data.setFrame(id3Header.ISRC,song.getData(id3Header.ISRC));
 
-            mp3file.save(backupFileLoc);
+            ID3Reader.writeFile(fileLoc,id3Data);
+
         } catch (Exception e) {
             logger.error("Error while opening file " + fileLoc, e);
         }
 
-        try {
-            Files.delete(Path.of(fileLoc));
-        } catch (IOException e) {
-            logger.debug("File cannot be deleted! " + fileLoc);
-        }
-        File mp3FileNew = new File(backupFileLoc);
-        boolean info = mp3FileNew.renameTo(new File(fileLoc));
-        logger.debug("rename results are " + info);
 
         logger.debug("----- ending writeToMP3");
     }
@@ -666,7 +648,7 @@ public class SongController {
 
         //set slider
         try {
-            double sliderValue = new Mp3File(mp3File).getLengthInMilliseconds();
+            double sliderValue = SongGlobal.getCurrentSong().getDuration().toMillis();
             mp3Slider.setMax(sliderValue / 100);
         } catch (Exception ex) {
             logger.error("can't open file to set slider: ", ex);
@@ -717,7 +699,7 @@ public class SongController {
     public void copyID3() {
         logger.debug("----- Executing copyID3");
 
-        copiedID3 = ID3v2Utils.getID3(new File(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc()));
+        copiedID3 = ID3Reader.getTag(new File(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc()));
         selectFileFromTable(currentFileLoc);
 
         logger.debug("----- ending copyID3");
@@ -834,7 +816,7 @@ public class SongController {
         return true;
     }
 
-    public void updateSongEntry(ID3v24Tag id3, Integer databaseID, String fileLoc) {
+    public void updateSongEntry(MyID3 id3, Integer databaseID, String fileLoc) {
         logger.debug("----- Executing updateSongEntry");
         Song song = ID3v2Utils.songDataFromID3(id3, fileLoc, editorName);
         song.setId(databaseID);

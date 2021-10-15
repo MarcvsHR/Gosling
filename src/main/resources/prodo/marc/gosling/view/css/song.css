@@ -51,6 +51,11 @@
     -fx-font-family: "Futura";
     -fx-font-weight: 700;
 }
+.context-menu .text {
+-fx-fill: #FFFFFF;
+    -fx-font-size: 14;
+    -fx-font-family: "Futura";
+}
 
 .check-box {
     -fx-border-color: #AAAAAA;
@@ -111,6 +116,11 @@
     -fx-pref-width: 5;
     -fx-pref-height: 20;
     -fx-background-radius: 0;
+}
+
+.context-menu {
+    -fx-background-radius: 8;
+    -fx-background-color: #444444;
 }
 
 

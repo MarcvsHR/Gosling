@@ -7,7 +7,6 @@ module prodo.marc.gosling {
     requires java.persistence;
     requires lombok;
     requires javafx.media;
-    requires mp3agic;
     requires java.sql;
     requires log4j;
     requires org.hibernate.orm.core;

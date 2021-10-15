@@ -1,12 +1,14 @@
 package prodo.marc.gosling.service;
 
-import com.mpatric.mp3agic.ID3v24Tag;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import prodo.marc.gosling.dao.MyID3;
 import prodo.marc.gosling.dao.Song;
+import prodo.marc.gosling.dao.id3Header;
 import prodo.marc.gosling.hibernate.repository.SongRepository;
+import prodo.marc.gosling.service.id3.ID3Reader;
 import prodo.marc.gosling.service.id3.ID3v2Utils;
 
 import java.io.File;
@@ -16,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public class FileUtils {
@@ -71,9 +74,8 @@ public class FileUtils {
         logger.debug("----- Executing addMP3");
 
         Song song;
-        ID3v24Tag id3tag = ID3v2Utils.getID3(new File(String.valueOf(path)));
-        if (id3tag.getRecordingTime() == null)
-            id3tag.setRecordingTime(String.valueOf(ID3v2Utils.getDuration(new File(String.valueOf(path)))));
+        MyID3 id3tag = ID3Reader.getTag(new File(String.valueOf(path)));
+        logger.debug("current time: "+id3tag.getData(id3Header.TIME));
         song = ID3v2Utils.songDataFromID3(id3tag, String.valueOf(path), editor);
         song.setEditor(editor);
         SongRepository songRepo = new SongRepository();
