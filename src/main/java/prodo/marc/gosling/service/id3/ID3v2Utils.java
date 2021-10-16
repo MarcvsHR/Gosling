@@ -3,6 +3,7 @@ package prodo.marc.gosling.service.id3;
 import javafx.util.Duration;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.hibernate.engine.jdbc.env.spi.IdentifierHelperBuilder;
 import prodo.marc.gosling.dao.MyID3;
 import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.dao.id3Header;
@@ -10,7 +11,9 @@ import prodo.marc.gosling.hibernate.repository.SongRepository;
 import prodo.marc.gosling.service.MyStringUtils;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 
 public class ID3v2Utils {
@@ -61,9 +64,11 @@ public class ID3v2Utils {
     }
 
     public static long getDuration(byte[] fileContent, int size) {
+
+        //TODO: needs a complete rewrite to read the mp3 frame by frame
+
         logger.debug("----- Executing getDuration");
-        long duration;
-        size += 10;
+        if (size != 0) size += 10;
 
         byte[] mp3Data = Arrays.copyOfRange(fileContent, size, fileContent.length - size);
         String header = Integer.toBinaryString(ByteBuffer.wrap(Arrays.copyOfRange(mp3Data, 0, 4)).getInt());
@@ -89,22 +94,29 @@ public class ID3v2Utils {
 
         int padding = Integer.parseInt(header.substring(6, 7));
 
-        int frameLen = (144000 * bitrate / sampling) + padding;
+        float frameLen = (144000 * (float)bitrate / (float)sampling) + padding;
 
-        double estDur = (mp3Data.length - 4) / (double)frameLen;
-        estDur = estDur * 26.1;
+        float estDur = (mp3Data.length) / frameLen;
+        estDur = (estDur * 261)/10;
 
-        duration = (long) estDur;
 
-//        logger.debug("bitrate: " + bitrate);
-//        logger.debug("Sampling: " + sampling);
-//        logger.debug("Padding: " + padding);
-//        logger.debug("Frame length: " + frameLen);
+        logger.debug("bitrate: " + bitrate);
+        logger.debug("Sampling: " + sampling);
+        logger.debug("Padding: " + padding);
+        logger.debug("Frame length: " + frameLen);
 //        logger.debug("Estimated file duration in ms: " + estDur);
+
+        int counter = 0;
+        ArrayList<Byte> lista = new ArrayList<>();
+        while (counter < mp3Data.length) {
+            lista.add(mp3Data[counter]);
+            counter += frameLen;
+        }
+        logger.debug(lista.toArray());
 
         logger.debug("----- ending getDuration");
 
-        return duration;
+        return (long)estDur;
     }
 
 

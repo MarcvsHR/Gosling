@@ -93,6 +93,7 @@ public class SongController {
     SortedList<Song> sortedSongs = new SortedList<>(filteredSongs);
     MyID3 copiedID3 = new MyID3();
     String changedBackgroundColor = "bb3333";
+    String defaultBackgroundColor = "555555";
     String defaultTextColor = "FFFFFF";
     ObservableList<String> publisherList = FXCollections.observableArrayList();
     private boolean updateCheck = true;
@@ -107,7 +108,7 @@ public class SongController {
                 "Epic", "Hit Records", "Insanity Records", "Menart", "Mikrofon Records", "Masterworks",
                 "Ministry of Sound Recordings", "Polydor", "Promo", "Rca", "Scardona", "Sony", "Spona",
                 "Melody", "Dancing Bear", "Heksagon", "Arista", "Geffen", "Intek", "Sedma Sekunda",
-                "Bonton", "Hamar", "Rubikon"};
+                "Bonton", "Hamar", "Rubikon", "Rtl", "Only Records"};
         Arrays.sort(array);
         publisherList.addAll(Arrays.asList(array));
     }
@@ -546,6 +547,7 @@ public class SongController {
         changeCRO();
 
         MyID3 id3 = ID3Reader.getTag(new File(currentFileLoc));
+        logger.debug("made new id3 with size: "+id3.totalFrameSize());
 
         if (textAlbum.getText().isEmpty() || textAlbum.getText() == null) {
             textAlbum.setText(textTitle.getText());
@@ -570,7 +572,9 @@ public class SongController {
             id3.setFrame(id3Header.KEY," ");
         }
         id3.setFrame(id3Header.GENRE,dropGenre.getSelectionModel().getSelectedItem());
-        //song.setISRC(textISRC.getText());
+        id3.setFrame(id3Header.ISRC,textISRC.getText());
+
+        logger.debug("updated id3 to size: "+id3.totalFrameSize());
 
         if (renameFile()) {
             updateSongEntry(id3, SongGlobal.getCurrentSong().getId(), currentFileLoc);
@@ -583,8 +587,8 @@ public class SongController {
     }
 
     private void makeTextFieldsWhite() {
-        textArtist.setStyle("-fx-background-color: ");
-        textYear.setStyle("-fx-background-color: ");
+        textArtist.setStyle("-fx-background-color: #"+defaultBackgroundColor);
+        textYear.setStyle("-fx-background-color: #"+defaultBackgroundColor);
     }
 
     private void writeToMP3(MyID3 song, String fileLoc) {
@@ -593,6 +597,7 @@ public class SongController {
 
         try {
             MyID3 id3Data = ID3Reader.getTag(new File(fileLoc));
+            logger.debug("made new id3 with size: "+id3Data.totalFrameSize());
 
             id3Data.setFrame(id3Header.ARTIST,song.getData(id3Header.ARTIST));
             id3Data.setFrame(id3Header.TITLE,song.getData(id3Header.TITLE));
@@ -609,6 +614,8 @@ public class SongController {
                 id3Data.setFrame(id3Header.GENRE,song.getData(id3Header.GENRE));
             }
             id3Data.setFrame(id3Header.ISRC,song.getData(id3Header.ISRC));
+
+            logger.debug("updated id3 to size: "+id3Data.totalFrameSize());
 
             ID3Reader.writeFile(fileLoc,id3Data);
 
@@ -828,7 +835,7 @@ public class SongController {
 
     public void checkArtistField() {
         if (MyStringUtils.compareStrings(SongGlobal.getCurrentSong().getArtist(), textArtist.getText())) {
-            textArtist.setStyle("-fx-background-color: ");
+            textArtist.setStyle("-fx-background-color: #"+defaultBackgroundColor);
         } else {
             textArtist.setStyle("-fx-background-color: #" + changedBackgroundColor);
         }
@@ -843,7 +850,7 @@ public class SongController {
         pos = textYear.getLength() - len + pos;
         textYear.positionCaret(pos);
         if (MyStringUtils.compareStrings(String.valueOf(SongGlobal.getCurrentSong().getYear()), textYear.getText())) {
-            textYear.setStyle("-fx-background-color: ");
+            textYear.setStyle("-fx-background-color: #"+defaultBackgroundColor);
             textYear.setStyle("-fx-text-color: #" + defaultTextColor);
         } else {
             textYear.setStyle("-fx-background-color: #" + changedBackgroundColor);
@@ -870,7 +877,8 @@ public class SongController {
             album = album.toLowerCase();
             if (!title.contains(filter) &&
                     !artist.contains(filter) &&
-                    !album.contains(filter))
+                    !album.contains(filter) &&
+                    !x.getFileLoc().toLowerCase().contains(filter))
                 return false;
             if (userFilter.getSelectionModel().getSelectedIndex() != 0 &&
                     !userFilter.getSelectionModel().getSelectedItem().equals(x.getEditor()))

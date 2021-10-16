@@ -3,8 +3,8 @@ package prodo.marc.gosling.service.id3;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import prodo.marc.gosling.dao.ID3Frame;
-import prodo.marc.gosling.dao.id3Header;
 import prodo.marc.gosling.dao.MyID3;
+import prodo.marc.gosling.dao.id3Header;
 import prodo.marc.gosling.service.Popups;
 
 import java.io.File;
@@ -43,7 +43,6 @@ public class ID3Reader {
             }
             if (id3Data.getVersionString().equals("2.4.0") || id3Data.getVersionString().equals("2.3.0")) {
                 id3Data.setFlags(fileContent[5]);
-                id3Data.setVersionWithInts(2, 4, 0);
                 if (id3Data.getFlags() > 0) logger.debug("Flags detected!!!!   " + id3Data.getFlags());
                 id3Data.setSize(ByteBuffer.wrap(Arrays.copyOfRange(fileContent, 6, 10)).getInt(), true);
 //                logger.debug("Size: " + id3Data.getSize());
@@ -60,9 +59,10 @@ public class ID3Reader {
                     //id3Data.getFrame(frameID).setSize(frame.getContent().length + 1, false);
 //                    logger.debug("Current pos: " + startFrames);
                 }
-                if (id3Data.getData(id3Header.LENGTH) == null) {
+
+                if (id3Data.getFrame(id3Header.LENGTH) == null)
                     id3Data.addFrame(id3Header.LENGTH, String.valueOf(ID3v2Utils.getDuration(fileContent,id3Data.getSize())));
-                }
+
                 id3Data.setSize(id3Data.totalFrameSize(), false);
 //                logger.debug("final size: "+id3Data.getSize());
 //                logger.debug("number of frames total: "+id3Data.getFrames().size());
@@ -72,6 +72,9 @@ public class ID3Reader {
 
             }
         }
+
+        if (id3Data.getVersionString().equals("2.5.0"))
+            id3Data = new MyID3(String.valueOf(ID3v2Utils.getDuration(fileContent, 0)));
 
         return id3Data;
     }
@@ -114,8 +117,9 @@ public class ID3Reader {
             }
         }
         if (!id3Header.CHECK_LIST(frame.getFrameID())) {
-            logger.debug("unknown header: "+ frame.getFrameID());
-            Popups.giveInfoAlert("ID3 import error", "found new unknown header", frame.getFrameID() + " - "); }
+            logger.debug("unknown header: " + frame.getFrameID());
+            Popups.giveInfoAlert("ID3 import error", "found new unknown header", frame.getFrameID() + " - ");
+        }
 //        logger.debug("header: " + frame.getFrameID());
 //        logger.debug("size: " + frame.getSize());
 //        if (!frame.getFrameID().equals("XXXX")) logger.debug("content size: " + frame.getContent().length);
@@ -142,9 +146,11 @@ public class ID3Reader {
         }
 
         if (fileContent != null) {
-            int size = MyID3.computeSize(ByteBuffer.wrap(Arrays.copyOfRange(fileContent, 6, 10)).getInt());
-//            logger.debug(size);
-            size += 10;
+            int size = 0;
+            if (Arrays.toString(Arrays.copyOfRange(fileContent, 0, 3)).equals("ID3")) {
+                size = MyID3.computeSize(ByteBuffer.wrap(Arrays.copyOfRange(fileContent, 6, 10)).getInt());
+                size += 10;
+            }
 //            logger.debug(fileContent[size]);
             mp3Data = new byte[fileContent.length - size];
             System.arraycopy(fileContent, size, mp3Data, 0, fileContent.length - size);

@@ -9,6 +9,21 @@ public class MyID3 extends ID3Size {
     private byte flags;
     private final HashMap<String, ID3Frame> frames = new HashMap<>();
 
+    public MyID3(String frame) {
+        this.flags = 0;
+        this.version[0] = 2;
+        this.version[1] = 4;
+        addFrame(id3Header.LENGTH,frame);
+        setSize(totalFrameSize(),false);
+    }
+
+    public MyID3() {
+        this.flags = 0;
+        this.version[0] = 2;
+        this.version[1] = 5;
+        setSize(totalFrameSize(),false);
+    }
+
     public void addFrame(ID3Frame frame) {
         this.frames.put(frame.getFrameID(),frame);
         frames.get(frame.getFrameID()).setSize(frames.get(frame.getFrameID()).getContent().length+1,false);
