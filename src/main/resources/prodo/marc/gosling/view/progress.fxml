@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane style="-fx-background-color: #777777;" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="prodo.marc.gosling.controllers.ProgressController">
+<AnchorPane style="-fx-background-color: #777777;" stylesheets="@css/song.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="prodo.marc.gosling.controllers.ProgressController">
    <VBox alignment="CENTER" spacing="5.0">
    <HBox alignment="CENTER" spacing="10.0">
       <Label fx:id="progressLabel" text="xxx/yyy">

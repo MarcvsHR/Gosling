@@ -71,9 +71,8 @@ public class Song {
         if (duration == null) duration = new Duration(0);
         String output = String.format("%.0f", duration.toSeconds() % 60);
         if (output.length() < 2) output = "0"+output;
-        double minutes = duration.toSeconds()/60;
-        minutes = Math.floor(minutes*10)/10;
-        output = String.format("%x:", (int)minutes) + output;
+        double minutes = Math.floor(duration.toSeconds()/60);
+        output = String.format("%.0f:", minutes) + output;
         if (duration.toSeconds() < 600) output = "0"+output;
         return output;
     }

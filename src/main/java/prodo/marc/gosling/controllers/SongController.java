@@ -115,7 +115,7 @@ public class SongController {
 
     private String[] getGenres() {
         String[] returnArr = {"", "Cro", "Cro Zabavne", "Instrumental", "Klape", "Kuruza",
-                "Pop", "xxx", "Italian", "Susjedi"};
+                "Pop", "xxx", "Italian", "Susjedi", "Religiozne", "Oldies"};
         Arrays.sort(returnArr);
         return returnArr;
     }
@@ -409,12 +409,13 @@ public class SongController {
             }
 //            logger.debug("***" + id3Data.getData(id3Header.GENRE) + "***");
 
-            //textISRC.setText(id3Data.getISRC());
+            textISRC.setText(id3Data.getData(id3Header.ISRC));
 
             if (SongGlobal.isFilenameParsed()) {
                 textArtist.setText(SongGlobal.getCurrentSong().getArtist());
                 textTitle.setText(SongGlobal.getCurrentSong().getTitle());
                 textPublisher.setText(SongGlobal.getCurrentSong().getPublisher());
+                textISRC.setText(SongGlobal.getCurrentSong().getISRC());
                 selectFileFromTable(currentFileLoc);
                 SongGlobal.setFilenameParsed(false);
             } else {
@@ -459,7 +460,7 @@ public class SongController {
             TimerTask sliderUpdateTask = new TimerTask() {
                 public void run() {
                     double currentTime = mplayer.getCurrentTime().toSeconds();
-                    int minutes = (int) (currentTime / 60);
+                    int minutes = (int) Math.floor(currentTime / 60);
                     double seconds = currentTime - minutes * 60;
                     DecimalFormat df = new DecimalFormat("##.#");
                     df.setRoundingMode(RoundingMode.DOWN);
@@ -473,7 +474,7 @@ public class SongController {
                     String finalSecondsString = secondsString;
                     Platform.runLater(() -> {
                         //show current time text, needs improving
-                        mp3Time.setText(String.format("%02xm ", minutes) + finalSecondsString + "s");
+                        mp3Time.setText(String.format("%02dm ", minutes) + finalSecondsString + "s");
                         //update slider to current time
                         if (updateCheck) {
                             mp3Slider.setValue(mplayer.getCurrentTime().toMillis() / 100);
@@ -547,7 +548,7 @@ public class SongController {
         changeCRO();
 
         MyID3 id3 = ID3Reader.getTag(new File(currentFileLoc));
-        logger.debug("made new id3 with size: "+id3.totalFrameSize());
+//        logger.debug("made new id3 with size: "+id3.totalFrameSize());
 
         if (textAlbum.getText().isEmpty() || textAlbum.getText() == null) {
             textAlbum.setText(textTitle.getText());
@@ -574,7 +575,7 @@ public class SongController {
         id3.setFrame(id3Header.GENRE,dropGenre.getSelectionModel().getSelectedItem());
         id3.setFrame(id3Header.ISRC,textISRC.getText());
 
-        logger.debug("updated id3 to size: "+id3.totalFrameSize());
+//        logger.debug("updated id3 to size: "+id3.totalFrameSize());
 
         if (renameFile()) {
             updateSongEntry(id3, SongGlobal.getCurrentSong().getId(), currentFileLoc);
@@ -597,7 +598,7 @@ public class SongController {
 
         try {
             MyID3 id3Data = ID3Reader.getTag(new File(fileLoc));
-            logger.debug("made new id3 with size: "+id3Data.totalFrameSize());
+//            logger.debug("made new id3 with size: "+id3Data.totalFrameSize());
 
             id3Data.setFrame(id3Header.ARTIST,song.getData(id3Header.ARTIST));
             id3Data.setFrame(id3Header.TITLE,song.getData(id3Header.TITLE));
@@ -615,7 +616,7 @@ public class SongController {
             }
             id3Data.setFrame(id3Header.ISRC,song.getData(id3Header.ISRC));
 
-            logger.debug("updated id3 to size: "+id3Data.totalFrameSize());
+//            logger.debug("updated id3 to size: "+id3Data.totalFrameSize());
 
             ID3Reader.writeFile(fileLoc,id3Data);
 
@@ -798,6 +799,10 @@ public class SongController {
                 genre = "";
             }
             String year = textYear.getText() + "\\";
+            if (genre.equalsIgnoreCase("religiozne\\") ||
+                    genre.equalsIgnoreCase("oldies\\")) {
+                year = "";
+            }
             newFileLoc = "Z:\\Songs\\" + genre + year + newFileLoc;
             new File(Paths.get(newFileLoc).getParent().toString()).mkdirs();
         }
@@ -905,20 +910,6 @@ public class SongController {
 
     }
 
-    public void googleSong() {
-        String uri = textArtist.getText() + " " + textTitle.getText();
-        uri = uri.replace(" ", "+");
-        uri = "https://www.google.com/search?q=" + uri;
-        Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-        if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
-            try {
-                desktop.browse(URI.create(uri));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     public void openLegacyData(ActionEvent event) throws IOException {
         logger.debug("Here we open new window");
 
@@ -944,24 +935,26 @@ public class SongController {
         });
     }
 
+    public void googleSong() {
+        String uri = textArtist.getText() + " " + textTitle.getText();
+        uri = "https://www.google.com/search?q=" + uri;
+        openURL(uri,"+");
+    }
     public void spotSong() {
         String uri = textArtist.getText() + " " + textTitle.getText();
-        uri = uri.replace(" ", "%20");
         uri = "https://open.spotify.com/search/" + uri;
-        Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-        if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
-            try {
-                desktop.browse(URI.create(uri));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        openURL(uri,"%20");
     }
 
     public void zampSong() {
         String uri = textTitle.getText();
-        uri = uri.replace(" ", "+");
         uri = "https://www.zamp.hr/baza-autora/rezultati-djela/pregled/" + uri;
+        openURL(uri,"+");
+    }
+
+    private void openURL(String uri, String space) {
+        uri = uri.replace(" ",space);
+        uri = uri.replaceAll("[\\[\\]]", "");
         Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
         if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
             try {

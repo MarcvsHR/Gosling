@@ -3,7 +3,6 @@ package prodo.marc.gosling.service.id3;
 import javafx.util.Duration;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.hibernate.engine.jdbc.env.spi.IdentifierHelperBuilder;
 import prodo.marc.gosling.dao.MyID3;
 import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.dao.id3Header;
@@ -11,9 +10,7 @@ import prodo.marc.gosling.hibernate.repository.SongRepository;
 import prodo.marc.gosling.service.MyStringUtils;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 
 public class ID3v2Utils {
@@ -30,11 +27,8 @@ public class ID3v2Utils {
         Song testSong = new Song();
 
         testSong.setArtist(id3Data.getData(id3Header.ARTIST));
-        //if (testSong.getArtist() == null) testSong.setArtist("");
         testSong.setTitle(id3Data.getData(id3Header.TITLE));
-        //if (testSong.getTitle() == null) testSong.setTitle("");
         testSong.setAlbum(id3Data.getData(id3Header.ALBUM));
-        //if (testSong.getAlbum() == null) testSong.setAlbum("");
 
 
         testSong.setPublisher(id3Data.getData(id3Header.PUBLISHER));
@@ -71,7 +65,46 @@ public class ID3v2Utils {
         if (size != 0) size += 10;
 
         byte[] mp3Data = Arrays.copyOfRange(fileContent, size, fileContent.length - size);
-        String header = Integer.toBinaryString(ByteBuffer.wrap(Arrays.copyOfRange(mp3Data, 0, 4)).getInt());
+        String header;
+        double frameLen;
+
+//        logger.debug("bitrate: " + bitrate);
+//        logger.debug("Sampling: " + sampling);
+//        logger.debug("Padding: " + padding);
+//        logger.debug("Frame length: " + frameLen);
+
+
+        int counter = 0;
+        int frames = 0;
+
+        header = Integer.toBinaryString(ByteBuffer.wrap(Arrays.copyOfRange(mp3Data, counter, counter+4)).getInt());
+        double multi = 1152;
+        if (header.startsWith("01", 20))
+            multi = multi/48;
+        else if (header.startsWith("10", 20))
+            multi = multi/32;
+        else
+            multi = multi/44.1;
+
+        while (counter < mp3Data.length) {
+            header = Integer.toBinaryString(ByteBuffer.wrap(Arrays.copyOfRange(mp3Data, counter, counter+4)).getInt());
+//            logger.debug(header);
+            if (!header.startsWith("111111111111101"))
+                break;
+            frameLen = getFrameLen(header);
+            counter+=frameLen;
+            frames++;
+        }
+        double estDur = frames*multi;
+        logger.debug("Estimated file duration in s: " + estDur/1000);
+
+        logger.debug("----- ending getDuration");
+
+        return (long)estDur;
+    }
+
+    private static double getFrameLen(String header) {
+        //TODO: one day this should return an object with all the proper frame info but for now it handles most mp3s
         header = header.substring(16);
         int bitrate = Integer.parseInt(header.substring(0, 4), 2);
         if (bitrate > 5) bitrate += bitrate - 5;
@@ -94,29 +127,7 @@ public class ID3v2Utils {
 
         int padding = Integer.parseInt(header.substring(6, 7));
 
-        float frameLen = (144000 * (float)bitrate / (float)sampling) + padding;
-
-        float estDur = (mp3Data.length) / frameLen;
-        estDur = (estDur * 261)/10;
-
-
-        logger.debug("bitrate: " + bitrate);
-        logger.debug("Sampling: " + sampling);
-        logger.debug("Padding: " + padding);
-        logger.debug("Frame length: " + frameLen);
-//        logger.debug("Estimated file duration in ms: " + estDur);
-
-        int counter = 0;
-        ArrayList<Byte> lista = new ArrayList<>();
-        while (counter < mp3Data.length) {
-            lista.add(mp3Data[counter]);
-            counter += frameLen;
-        }
-        logger.debug(lista.toArray());
-
-        logger.debug("----- ending getDuration");
-
-        return (long)estDur;
+        return Math.floor(144000 * (float)bitrate / (float)sampling) + padding;
     }
 
 

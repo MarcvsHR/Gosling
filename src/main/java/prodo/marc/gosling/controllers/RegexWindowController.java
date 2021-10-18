@@ -11,19 +11,20 @@ import prodo.marc.gosling.service.SongGlobal;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class RegexWindowController {
     public Button addRegexMethod;
-    public Label mp3Filename;
     public ListView<String> regexList;
-    public Label artistLabel;
-    public Label titleLabel;
     public Song song = SongGlobal.getCurrentSong();
-    public Label titlePublisher;
     List<String> regex = new ArrayList<>();
+
+    public Label mp3Filename;
+    public Label labelArtist;
+    public Label labelTitle;
+    public Label labelISRC;
+    public Label labelPublisher;
 
     private List<String> getRegexStuff() {
         regex.add("Artist - Title");
@@ -35,6 +36,8 @@ public class RegexWindowController {
         regex.add("Track - Artist - Title");
         regex.add("Artist - Track - Title");
         regex.add("Artist-Title");
+        regex.add("Track. Artist - Title_ISRC");
+        regex.add("Artist-Title-CROREC-ISRC");
         Collections.sort(regex);
         return new ArrayList<>(regex);
     }
@@ -105,11 +108,28 @@ public class RegexWindowController {
                 isSet = true;
                 break;
             }
+            case "Track. Artist - Title_ISRC": {
+                String[] output = mp3Filename.getText().split("\\.| - |_");
+                song.setArtist(output[1]);
+                song.setTitle(output[2]);
+                song.setISRC(output[3]);
+                isSet = true;
+                break;
+            }
+            case  "Artist-Title-CROREC-ISRC": {
+                String[] output = mp3Filename.getText().split("-CROATIA-RECORDS-");
+                song.setArtist(output[0].replace("-"," "));
+                song.setISRC(output[1]);
+                song.setPublisher("Crorec");
+                isSet = true;
+                break;
+            }
         }
         if (isSet) {
-            artistLabel.setText("Artist: " + song.getArtist());
-            titleLabel.setText("Title: " + song.getTitle());
-            titlePublisher.setText("Publisher: "+song.getPublisher());
+            labelArtist.setText("Artist: " + song.getArtist());
+            labelTitle.setText("Title: " + song.getTitle());
+            labelPublisher.setText("Publisher: "+song.getPublisher());
+            labelISRC.setText("ISRC: "+song.getISRC());
         }
     }
 

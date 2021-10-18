@@ -25,7 +25,7 @@ public class HelloApplication extends Application {
         Scene scene = new Scene(root);
         stage.setTitle("main");
         stage.setScene(scene);
-        stage.setX(100); stage.setY(50);
+        stage.setX(150); stage.setY(100);
         stage.setMinWidth(1100);
         stage.setMinHeight(490);
         //stage.initStyle(StageStyle.TRANSPARENT);

@@ -22,7 +22,7 @@ public class SceneController {
     public static void openScene(ActionEvent event, String window) throws IOException {
         FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(HelloApplication.class.getResource(window)));
         root = loader.load();
-        JMetro jMetro = new JMetro(root, Style.DARK);
+//        JMetro jMetro = new JMetro(root, Style.DARK);
 
         Stage stage = (Stage) ((Node) event.getTarget()).getScene().getWindow();
         scene = new Scene(root);
@@ -33,7 +33,7 @@ public class SceneController {
     public static void openWindow(ActionEvent event, String window) throws IOException {
         FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(window));
         root = loader.load();
-        JMetro jMetro = new JMetro(root, Style.DARK);
+//        JMetro jMetro = new JMetro(root, Style.DARK);
 
         Stage stage1 = new Stage();
         scene = new Scene(root);

@@ -98,7 +98,10 @@ public class ID3Reader {
             frame.setFrameID("XXXX");
         } else {
             byte[] tempArr = Arrays.copyOfRange(fileContent, start, start + frame.getSize() - 1);
-            if (frame.getEncoding() == 1) {
+            if (frame.getSize()==1) {
+                frame.setContent(new byte[0]);
+            }
+            else if (frame.getEncoding() == 1) {
                 Charset utf8charset = StandardCharsets.UTF_16;
                 Charset iso88591charset = StandardCharsets.ISO_8859_1;
                 ByteBuffer inputBuffer = ByteBuffer.wrap(tempArr);

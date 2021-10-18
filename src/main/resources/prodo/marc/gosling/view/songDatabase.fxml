@@ -184,13 +184,11 @@
 
                     </Label>
                     <TextField fx:id="textYear" onKeyTyped="#checkYearField" prefWidth="80.0" />
+                    <Label text="ISRC" />
+                    <TextField fx:id="textISRC" prefWidth="110.0" />
                     <padding>
-                        <Insets top="5.0" />
+                        <Insets top="5.0" bottom="10.0" />
                     </padding>
-                </HBox>
-                <HBox alignment="TOP_CENTER" spacing="5.0">
-                    <Label text="ISRC" visible="false" />
-                    <TextField fx:id="textISRC" visible="false" />
                 </HBox>
                 <HBox alignment="BOTTOM_CENTER" spacing="30.0">
                     <Button fx:id="buttonRevert" focusTraversable="false" mnemonicParsing="false" onAction="#revertID3" text="Revert">

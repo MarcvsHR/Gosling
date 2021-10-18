@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane minWidth="300.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="prodo.marc.gosling.controllers.RegexWindowController">
+<AnchorPane minWidth="300.0" xmlns="http://javafx.com/javafx/16" stylesheets="@css/song.css" xmlns:fx="http://javafx.com/fxml/1" fx:controller="prodo.marc.gosling.controllers.RegexWindowController">
     <GridPane alignment="TOP_CENTER" style="-fx-background-color: #555555;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <columnConstraints>
             <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
@@ -34,17 +34,22 @@
             <ListView fx:id="regexList" onMouseClicked="#changeSelectedRegex" />
         </VBox>
         <VBox GridPane.hgrow="NEVER" GridPane.rowIndex="2">
-            <Label fx:id="artistLabel" text="Artist:">
+            <Label fx:id="labelArtist" text="Artist:">
                 <font>
                     <Font size="18.0" />
                 </font>
             </Label>
-            <Label fx:id="titleLabel" text="Title: ">
+            <Label fx:id="labelTitle" text="Title: ">
                 <font>
                     <Font size="18.0" />
                 </font>
             </Label>
-            <Label fx:id="titlePublisher" text="Publisher: ">
+            <Label fx:id="labelPublisher" text="Publisher: ">
+                <font>
+                    <Font size="18.0" />
+                </font>
+            </Label>
+            <Label fx:id="labelISRC" text="ISRC: ">
                 <font>
                     <Font size="18.0" />
                 </font>
