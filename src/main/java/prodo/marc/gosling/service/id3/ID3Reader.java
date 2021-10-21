@@ -41,23 +41,29 @@ public class ID3Reader {
                 id3Data.setVersion((byte) 2, fileContent[3], fileContent[4]);
 //                logger.debug("id3 version: " + id3Data.getVersionString());
             }
-            if (id3Data.getVersionString().equals("2.4.0") || id3Data.getVersionString().equals("2.3.0")) {
+            if (id3Data.getVersionString().equals("2.4.0") ||
+                    id3Data.getVersionString().equals("2.3.0") ||
+                    id3Data.getVersionString().equals("2.2.0")) {
                 id3Data.setFlags(fileContent[5]);
                 if (id3Data.getFlags() > 0) logger.debug("Flags detected!!!!   " + id3Data.getFlags());
                 id3Data.setSize(ByteBuffer.wrap(Arrays.copyOfRange(fileContent, 6, 10)).getInt(), true);
 //                logger.debug("Size: " + id3Data.getSize());
 //                logger.debug("size bytes in array" + Arrays.toString(Arrays.copyOfRange(fileContent, 6, 10)));
-                int startFrames = 10;
-                while (startFrames < id3Data.getSize()) {
-                    ID3Frame frame;
-                    frame = getFrame(fileContent, startFrames);
-                    startFrames += frame.getSize() + 10;
-                    if (Objects.equals(frame.getFrameID(), "XXXX")) {
-                        break;
-                    }
-                    id3Data.addFrame(frame);
-                    //id3Data.getFrame(frameID).setSize(frame.getContent().length + 1, false);
+                if (!id3Data.getVersionString().equals("2.2.0")) {
+                    int startFrames = 10;
+                    while (startFrames < id3Data.getSize()) {
+                        ID3Frame frame;
+                        frame = getFrame(fileContent, startFrames);
+                        startFrames += frame.getSize() + 10;
+                        if (Objects.equals(frame.getFrameID(), "XXXX")) {
+                            break;
+                        }
+                        id3Data.addFrame(frame);
+                        //id3Data.getFrame(frameID).setSize(frame.getContent().length + 1, false);
 //                    logger.debug("Current pos: " + startFrames);
+                    }
+                } else {
+                    id3Data.setVersion((byte)2,(byte)4,(byte)0);
                 }
 
                 if (id3Data.getFrame(id3Header.LENGTH) == null)

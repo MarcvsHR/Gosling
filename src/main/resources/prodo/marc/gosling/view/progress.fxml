@@ -14,7 +14,7 @@
             <HBox.margin>
                <Insets left="5.0" />
             </HBox.margin></Label>
-      <ProgressBar fx:id="progressBar" prefHeight="20.0" prefWidth="250.0" progress="0.0">
+      <ProgressBar fx:id="progressBar" prefHeight="20.0" prefWidth="360.0" progress="0.0">
             <HBox.margin>
                <Insets right="5.0" top="5.0" />
             </HBox.margin></ProgressBar>

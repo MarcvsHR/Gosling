@@ -115,7 +115,7 @@ public class SongController {
 
     private String[] getGenres() {
         String[] returnArr = {"", "Cro", "Cro Zabavne", "Instrumental", "Klape", "Kuruza",
-                "Pop", "xxx", "Italian", "Susjedi", "Religiozne", "Oldies"};
+                "Pop", "xxx", "Italian", "Susjedi", "Religiozne", "Oldies", "X-Mas"};
         Arrays.sort(returnArr);
         return returnArr;
     }
@@ -800,11 +800,15 @@ public class SongController {
             }
             String year = textYear.getText() + "\\";
             if (genre.equalsIgnoreCase("religiozne\\") ||
-                    genre.equalsIgnoreCase("oldies\\")) {
+                    genre.equalsIgnoreCase("oldies\\") ||
+                    genre.equalsIgnoreCase("x-mas\\")) {
                 year = "";
             }
             newFileLoc = "Z:\\Songs\\" + genre + year + newFileLoc;
-            new File(Paths.get(newFileLoc).getParent().toString()).mkdirs();
+            boolean mkdResult =  new File(Paths.get(newFileLoc).getParent().toString()).mkdirs();
+            if (!mkdResult) {
+                logger.debug("creating folder failed:"+newFileLoc);
+            }
         }
         File newFile = new File(newFileLoc);
         if (!oldFile.getAbsolutePath().equals(newFile.getAbsolutePath())) {

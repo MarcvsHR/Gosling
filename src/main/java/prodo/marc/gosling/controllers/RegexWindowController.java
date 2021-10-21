@@ -1,6 +1,7 @@
 package prodo.marc.gosling.controllers;
 
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -38,6 +39,7 @@ public class RegexWindowController {
         regex.add("Artist-Title");
         regex.add("Track. Artist - Title_ISRC");
         regex.add("Artist-Title-CROREC-ISRC");
+        regex.add("Artist - Title - ISRC");
         Collections.sort(regex);
         return new ArrayList<>(regex);
     }
@@ -124,8 +126,19 @@ public class RegexWindowController {
                 isSet = true;
                 break;
             }
+            case "Artist - Title - ISRC": {
+                String[] output = mp3Filename.getText().split(" - ");
+                song.setArtist(output[0]);
+                song.setTitle(output[1]);
+                song.setISRC(output[2]);
+                isSet = true;
+                break;
+            }
         }
         if (isSet) {
+            if (song.getTitle() != null)
+                song.setTitle(song.getTitle().replace("[Clean]",""));
+
             labelArtist.setText("Artist: " + song.getArtist());
             labelTitle.setText("Title: " + song.getTitle());
             labelPublisher.setText("Publisher: "+song.getPublisher());
@@ -139,6 +152,7 @@ public class RegexWindowController {
 
         String fileLoc = song.getFileLoc();
         mp3Filename.setText(new File(fileLoc).getName().replaceAll("(?i).mp3", ""));
+
     }
 
     public void closeAndSave(ActionEvent event) throws IOException {

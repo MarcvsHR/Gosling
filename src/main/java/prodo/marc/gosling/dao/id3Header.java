@@ -26,6 +26,8 @@ public final class id3Header {
     public static final String SOFTWARE = "TSSE";
     public static final String ENCODER = "TENC";
     public static final String UNSYNCED_LYRICS = "USLT";
+    public static final String CD_IDENT = "MCDI";
+    public static final String PRIVATE = "PRIV";
 
     public static final String DELETE = "XXXX";
 
@@ -33,7 +35,7 @@ public final class id3Header {
         "TPUB", "TALB", "TIT2", "TYER", "TCON", "TPE1", "TPE2", "TCOM",
             "TKEY", "COMM", "TPOS", "TDRL", "TRCK", "TXXX", "TBPM",
             "APIC", "TDRC", "TIME", "DONE", "TSRC", "TSSE", "TLEN",
-            "TENC", "USLT",
+            "TENC", "USLT", "MCDI", "PRIV",
             "XXXX",
     };
 
