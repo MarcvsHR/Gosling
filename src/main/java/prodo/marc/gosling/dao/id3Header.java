@@ -14,11 +14,11 @@ public final class id3Header {
     public static final String KEY = "TKEY";
     public static final String ALBUM_ARTIST = "TPE2";
     public static final String ALBUM_ART = "APIC";
-    public static final String COMMENT = "COMM";
+    public static final String COMMENT = "COMM"; //can have multiple, implemented
     public static final String DISC_NUMBER = "TPOS";
     public static final String RELEASE_TIME = "TDRL";
     public static final String TRACK = "TRCK";
-    public static final String USER_DATA = "TXXX";
+    public static final String USER_DATA = "TXXX"; //can have multiple, implemented
     public static final String BPM = "TBPM";
     public static final String RECORDING_TIME = "TDRC";
     public static final String TIME = "TIME";
@@ -26,8 +26,10 @@ public final class id3Header {
     public static final String SOFTWARE = "TSSE";
     public static final String ENCODER = "TENC";
     public static final String UNSYNCED_LYRICS = "USLT";
-    public static final String CD_IDENT = "MCDI";
+    public static final String CD_IDENTI = "MCDI";
     public static final String PRIVATE = "PRIV";
+    public static final String DATE = "TDAT";
+    public static final String COPYRIGHT_MSG = "TCOP";
 
     public static final String DELETE = "XXXX";
 
@@ -35,7 +37,7 @@ public final class id3Header {
         "TPUB", "TALB", "TIT2", "TYER", "TCON", "TPE1", "TPE2", "TCOM",
             "TKEY", "COMM", "TPOS", "TDRL", "TRCK", "TXXX", "TBPM",
             "APIC", "TDRC", "TIME", "DONE", "TSRC", "TSSE", "TLEN",
-            "TENC", "USLT", "MCDI", "PRIV",
+            "TENC", "USLT", "MCDI", "PRIV", "TDAT", "TCOP",
             "XXXX",
     };
 

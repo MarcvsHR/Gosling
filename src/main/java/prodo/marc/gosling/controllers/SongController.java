@@ -21,11 +21,14 @@ import javafx.util.Duration;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.controlsfx.control.textfield.TextFields;
-import prodo.marc.gosling.dao.id3Header;
 import prodo.marc.gosling.dao.MyID3;
 import prodo.marc.gosling.dao.Song;
+import prodo.marc.gosling.dao.id3Header;
 import prodo.marc.gosling.hibernate.repository.SongRepository;
-import prodo.marc.gosling.service.*;
+import prodo.marc.gosling.service.FileUtils;
+import prodo.marc.gosling.service.MyStringUtils;
+import prodo.marc.gosling.service.Popups;
+import prodo.marc.gosling.service.SongGlobal;
 import prodo.marc.gosling.service.id3.ID3Reader;
 import prodo.marc.gosling.service.id3.ID3v2Utils;
 import prodo.marc.gosling.service.util.TruncatedUtil;
@@ -108,7 +111,7 @@ public class SongController {
                 "Epic", "Hit Records", "Insanity Records", "Menart", "Mikrofon Records", "Masterworks",
                 "Ministry of Sound Recordings", "Polydor", "Promo", "Rca", "Scardona", "Sony", "Spona",
                 "Melody", "Dancing Bear", "Heksagon", "Arista", "Geffen", "Intek", "Sedma Sekunda",
-                "Bonton", "Hamar", "Rubikon", "Rtl", "Only Records"};
+                "Bonton", "Hamar", "Rubikon", "Rtl", "Only Records", "Zvuci Mediterana", "Abudublin"};
         Arrays.sort(array);
         publisherList.addAll(Arrays.asList(array));
     }
@@ -149,7 +152,7 @@ public class SongController {
         dropGenre.getItems().addAll(getGenres());
         doneFilter.getItems().addAll("Ignore done", "Done", "Not Done");
         truncatedFilter.getItems().addAll("Ignore truncated", "Truncated");
-        userFilter.getItems().addAll("Any user","Direktor","Glazba","ONAIR");
+        userFilter.getItems().addAll("Any user", "Direktor", "Glazba", "ONAIR");
         doneFilter.getSelectionModel().select(SongGlobal.getDoneFilter());
         truncatedFilter.getSelectionModel().select(SongGlobal.getTruncFilter());
         textFilterFolder.setText(SongGlobal.getFolderFilter());
@@ -302,7 +305,7 @@ public class SongController {
             try {
                 openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
             } catch (Exception e) {
-                logger.error("no table entry clicked"+songDatabaseTable.getSelectionModel().getSelectedItem(), e);
+                logger.error("no table entry clicked" + songDatabaseTable.getSelectionModel().getSelectedItem(), e);
             }
         }
         songDatabaseTable.setMaxWidth(getTableWidth());
@@ -560,20 +563,20 @@ public class SongController {
             textYear.setText(String.valueOf(2021));
         }
 
-        id3.setFrame(id3Header.ARTIST,textArtist.getText());
-        id3.setFrame(id3Header.TITLE,textTitle.getText());
-        id3.setFrame(id3Header.ALBUM,textAlbum.getText());
-        id3.setFrame(id3Header.PUBLISHER,textPublisher.getText());
-        id3.setFrame(id3Header.COMPOSER,textComposer.getText());
-        id3.setFrame(id3Header.YEAR,textYear.getText());
-        id3.setFrame(id3Header.LENGTH,String.valueOf(SongGlobal.getCurrentSong().getDuration()));
+        id3.setFrame(id3Header.ARTIST, textArtist.getText());
+        id3.setFrame(id3Header.TITLE, textTitle.getText());
+        id3.setFrame(id3Header.ALBUM, textAlbum.getText());
+        id3.setFrame(id3Header.PUBLISHER, textPublisher.getText());
+        id3.setFrame(id3Header.COMPOSER, textComposer.getText());
+        id3.setFrame(id3Header.YEAR, textYear.getText());
+        id3.setFrame(id3Header.LENGTH, String.valueOf(SongGlobal.getCurrentSong().getDuration()));
         if (checkDone.isSelected()) {
-            id3.setFrame(id3Header.KEY,"true");
+            id3.setFrame(id3Header.KEY, "true");
         } else {
-            id3.setFrame(id3Header.KEY," ");
+            id3.setFrame(id3Header.KEY, " ");
         }
-        id3.setFrame(id3Header.GENRE,dropGenre.getSelectionModel().getSelectedItem());
-        id3.setFrame(id3Header.ISRC,textISRC.getText());
+        id3.setFrame(id3Header.GENRE, dropGenre.getSelectionModel().getSelectedItem());
+        id3.setFrame(id3Header.ISRC, textISRC.getText());
 
 //        logger.debug("updated id3 to size: "+id3.totalFrameSize());
 
@@ -588,8 +591,8 @@ public class SongController {
     }
 
     private void makeTextFieldsWhite() {
-        textArtist.setStyle("-fx-background-color: #"+defaultBackgroundColor);
-        textYear.setStyle("-fx-background-color: #"+defaultBackgroundColor);
+        textArtist.setStyle("-fx-background-color: #" + defaultBackgroundColor);
+        textYear.setStyle("-fx-background-color: #" + defaultBackgroundColor);
     }
 
     private void writeToMP3(MyID3 song, String fileLoc) {
@@ -600,25 +603,25 @@ public class SongController {
             MyID3 id3Data = ID3Reader.getTag(new File(fileLoc));
 //            logger.debug("made new id3 with size: "+id3Data.totalFrameSize());
 
-            id3Data.setFrame(id3Header.ARTIST,song.getData(id3Header.ARTIST));
-            id3Data.setFrame(id3Header.TITLE,song.getData(id3Header.TITLE));
-            id3Data.setFrame(id3Header.ALBUM,song.getData(id3Header.ALBUM));
-            id3Data.setFrame(id3Header.PUBLISHER,song.getData(id3Header.PUBLISHER));
-            id3Data.setFrame(id3Header.COMPOSER,song.getData(id3Header.COMPOSER));
-            id3Data.setFrame(id3Header.YEAR,song.getData(id3Header.YEAR));
+            id3Data.setFrame(id3Header.ARTIST, song.getData(id3Header.ARTIST));
+            id3Data.setFrame(id3Header.TITLE, song.getData(id3Header.TITLE));
+            id3Data.setFrame(id3Header.ALBUM, song.getData(id3Header.ALBUM));
+            id3Data.setFrame(id3Header.PUBLISHER, song.getData(id3Header.PUBLISHER));
+            id3Data.setFrame(id3Header.COMPOSER, song.getData(id3Header.COMPOSER));
+            id3Data.setFrame(id3Header.YEAR, song.getData(id3Header.YEAR));
             if (checkDone.isSelected()) {
-                id3Data.setFrame(id3Header.KEY,"true");
+                id3Data.setFrame(id3Header.KEY, "true");
             } else {
-                id3Data.setFrame(id3Header.KEY," ");
+                id3Data.setFrame(id3Header.KEY, " ");
             }
             if (song.getData(id3Header.GENRE) != null) {
-                id3Data.setFrame(id3Header.GENRE,song.getData(id3Header.GENRE));
+                id3Data.setFrame(id3Header.GENRE, song.getData(id3Header.GENRE));
             }
-            id3Data.setFrame(id3Header.ISRC,song.getData(id3Header.ISRC));
+            id3Data.setFrame(id3Header.ISRC, song.getData(id3Header.ISRC));
 
 //            logger.debug("updated id3 to size: "+id3Data.totalFrameSize());
 
-            ID3Reader.writeFile(fileLoc,id3Data);
+            ID3Reader.writeFile(fileLoc, id3Data);
 
         } catch (Exception e) {
             logger.error("Error while opening file " + fileLoc, e);
@@ -805,9 +808,9 @@ public class SongController {
                 year = "";
             }
             newFileLoc = "Z:\\Songs\\" + genre + year + newFileLoc;
-            boolean mkdResult =  new File(Paths.get(newFileLoc).getParent().toString()).mkdirs();
+            boolean mkdResult = new File(Paths.get(newFileLoc).getParent().toString()).mkdirs();
             if (!mkdResult) {
-                logger.debug("creating folder failed:"+newFileLoc);
+                logger.debug("creating folder failed:" + newFileLoc);
             }
         }
         File newFile = new File(newFileLoc);
@@ -844,7 +847,7 @@ public class SongController {
 
     public void checkArtistField() {
         if (MyStringUtils.compareStrings(SongGlobal.getCurrentSong().getArtist(), textArtist.getText())) {
-            textArtist.setStyle("-fx-background-color: #"+defaultBackgroundColor);
+            textArtist.setStyle("-fx-background-color: #" + defaultBackgroundColor);
         } else {
             textArtist.setStyle("-fx-background-color: #" + changedBackgroundColor);
         }
@@ -859,7 +862,7 @@ public class SongController {
         pos = textYear.getLength() - len + pos;
         textYear.positionCaret(pos);
         if (MyStringUtils.compareStrings(String.valueOf(SongGlobal.getCurrentSong().getYear()), textYear.getText())) {
-            textYear.setStyle("-fx-background-color: #"+defaultBackgroundColor);
+            textYear.setStyle("-fx-background-color: #" + defaultBackgroundColor);
             textYear.setStyle("-fx-text-color: #" + defaultTextColor);
         } else {
             textYear.setStyle("-fx-background-color: #" + changedBackgroundColor);
@@ -898,7 +901,7 @@ public class SongController {
                         !TruncatedUtil.isTruncated(x))
                     return false;
             } catch (IllegalAccessException e) {
-                logger.error("error while truncate checking: ",e);
+                logger.error("error while truncate checking: ", e);
             }
             return true;
         });
@@ -924,40 +927,64 @@ public class SongController {
 
 
     public void dupeCheck() {
-        textFilterFolder.setText(songDatabaseTable.getSelectionModel().getSelectedItem().getTitle());
-        truncatedFilter.getSelectionModel().select(0);
-        doneFilter.getSelectionModel().select(0);
-        updateTable();
-        var ref = new Object() {
-            String title = "";
-        };
-        songDatabaseTable.getItems().forEach(song -> {
-            if (song.getTitle().equals(ref.title)) {
-                logger.debug(ref.title);
+
+        StringBuilder list = new StringBuilder();
+        String selectedSong = songDatabaseTable.getSelectionModel().getSelectedItem().getArtist() + "-" +
+                songDatabaseTable.getSelectionModel().getSelectedItem().getTitle();
+        int minSearch = selectedSong.length();
+        String minString = "";
+        if (selectedSong.length() > 3) {
+            for (Song song : songList) {
+                if (!Objects.equals(song.getId(), songDatabaseTable.getSelectionModel().getSelectedItem().getId()) &&
+                        (song.getArtist().length() > 0 && song.getTitle().length() > 0)) {
+                    String currentSearch = song.getArtist() + "-" + song.getTitle();
+                    int distance = MyStringUtils.calculateSimilarity(currentSearch, selectedSong);
+                    if (distance > 0 && distance < minSearch) minSearch = distance;
+                    int sizeDif = distance - Math.abs(currentSearch.length() - selectedSong.length());
+                    if (distance <= minSearch || sizeDif == 0) {
+                        if (!currentSearch.equals(selectedSong)) {
+                            minString = currentSearch;
+                        }
+                        if (distance < 10 || sizeDif == 0) {
+                            list.append("\n").append(currentSearch).append(" --- ").append(distance).append(" char difference");
+                            minString = "";
+                        }
+                    }
+                }
             }
-            ref.title = song.getTitle();
-        });
+            if (!minString.equals("")) {
+                list.append("\n").append(minString).append(" --- ").append(minSearch).append(" char difference");
+            }
+            logger.debug("min found: " + minSearch);
+            Popups.giveInfoAlert("Similar songs",
+                    "Found these songs that are similar to:\n" + selectedSong,
+                    list.toString());
+        }
+
+        selectFileFromTable(currentFileLoc);
+
     }
 
     public void googleSong() {
         String uri = textArtist.getText() + " " + textTitle.getText();
         uri = "https://www.google.com/search?q=" + uri;
-        openURL(uri,"+");
+        openURL(uri, "+");
     }
+
     public void spotSong() {
         String uri = textArtist.getText() + " " + textTitle.getText();
         uri = "https://open.spotify.com/search/" + uri;
-        openURL(uri,"%20");
+        openURL(uri, "%20");
     }
 
     public void zampSong() {
         String uri = textTitle.getText();
         uri = "https://www.zamp.hr/baza-autora/rezultati-djela/pregled/" + uri;
-        openURL(uri,"+");
+        openURL(uri, "+");
     }
 
     private void openURL(String uri, String space) {
-        uri = uri.replace(" ",space);
+        uri = uri.replace(" ", space);
         uri = uri.replaceAll("[\\[\\]]", "");
         Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
         if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
@@ -976,7 +1003,13 @@ public class SongController {
             List<Path> mp3List = new ArrayList<>();
 
             for (File file : list) {
-                if (file.toString().substring(file.toString().length() - 4).equalsIgnoreCase(".mp3")) {
+                if (file.isDirectory()) {
+                    try {
+                        mp3List.addAll(FileUtils.getFileListFromFolder(file, "mp3"));
+                    } catch (IOException e) {
+                        logger.error("could not read files in folder: ", e);
+                    }
+                } else if (file.toString().substring(file.toString().length() - 4).equalsIgnoreCase(".mp3")) {
                     mp3List.add(Path.of(file.getAbsolutePath()));
                 }
             }
@@ -1019,19 +1052,25 @@ public class SongController {
 
     private double getTableWidth() {
         double width = 2;
-        if (tableArtist.isVisible()) width+=tableArtist.getWidth();
-        if (tableTitle.isVisible()) width+=tableTitle.getWidth();
-        if (tableAlbum.isVisible()) width+=tableAlbum.getWidth();
-        if (tablePublisher.isVisible()) width+=tablePublisher.getWidth();
-        if (tableComposer.isVisible()) width+=tableComposer.getWidth();
-        if (tableDuration.isVisible()) width+=tableDuration.getWidth();
-        if (tableGenre.isVisible()) width+=tableGenre.getWidth();
-        if (tableYear.isVisible()) width+=tableYear.getWidth();
-        if (tableDone.isVisible()) width+=tableDone.getWidth();
-        if (tableFileLoc.isVisible()) width+=tableFileLoc.getWidth();
-        if (tableEditor.isVisible()) width+=tableEditor.getWidth();
+        if (tableArtist.isVisible()) width += tableArtist.getWidth();
+        if (tableTitle.isVisible()) width += tableTitle.getWidth();
+        if (tableAlbum.isVisible()) width += tableAlbum.getWidth();
+        if (tablePublisher.isVisible()) width += tablePublisher.getWidth();
+        if (tableComposer.isVisible()) width += tableComposer.getWidth();
+        if (tableDuration.isVisible()) width += tableDuration.getWidth();
+        if (tableGenre.isVisible()) width += tableGenre.getWidth();
+        if (tableYear.isVisible()) width += tableYear.getWidth();
+        if (tableDone.isVisible()) width += tableDone.getWidth();
+        if (tableFileLoc.isVisible()) width += tableFileLoc.getWidth();
+        if (tableEditor.isVisible()) width += tableEditor.getWidth();
         //logger.debug(width);
         return width;
     }
 
+    public void listTag(ActionEvent event) {
+        String id3File = songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc();
+        MyID3 tempid3 = ID3Reader.getTag(new File(id3File));
+        Popups.giveInfoAlert("ID3 tag content for: ",
+                id3File, String.valueOf(tempid3.listFrames()));
+    }
 }

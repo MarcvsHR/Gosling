@@ -1,6 +1,8 @@
 package prodo.marc.gosling.dao;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 
@@ -8,6 +10,8 @@ public class MyID3 extends ID3Size {
     private final byte[] version = new byte[3];
     private byte flags;
     private final HashMap<String, ID3Frame> frames = new HashMap<>();
+    private int TXXX_Counter = 0;
+    private int COMM_Counter = 0;
 
     public MyID3(String frame) {
         this.flags = 0;
@@ -24,6 +28,16 @@ public class MyID3 extends ID3Size {
         setSize(totalFrameSize(),false);
     }
 
+    public ArrayList<String> listFrames() {
+        ArrayList<String> list = new ArrayList<>();
+        String breakLine = "";
+        for (ID3Frame frame : frames.values()) {
+            list.add(breakLine + frame.getFrameID() +" - "+ new String(frame.getContent()));
+            breakLine = "\n";
+        }
+        return list;
+    }
+
     public void addFrame(ID3Frame frame) {
         this.frames.put(frame.getFrameID(),frame);
         frames.get(frame.getFrameID()).setSize(frames.get(frame.getFrameID()).getContent().length+1,false);
@@ -38,16 +52,6 @@ public class MyID3 extends ID3Size {
 
     public ID3Frame getFrame(String string) {
         return frames.get(string);
-    }
-
-    public void removePadding() {
-        frames.remove("XXXX");
-    }
-
-    public void setVersionWithInts(int a, int b, int c) {
-        this.version[0] = (byte)a;
-        this.version[1] = (byte)b;
-        this.version[2] = (byte)c;
     }
 
     public String getVersionString() {
@@ -91,7 +95,13 @@ public class MyID3 extends ID3Size {
         int pos = 10;
 
         for (ID3Frame frame : frames.values()) {
-            tempArr = frame.getFrameID().getBytes();
+            if (frame.getFrameID().startsWith("TXXX")) {
+                   tempArr = "TXXX".getBytes();
+            } else if (frame.getFrameID().startsWith("COMM")) {
+                tempArr = "COMM".getBytes();
+            } else {
+                tempArr = frame.getFrameID().getBytes();
+            }
             System.arraycopy(tempArr,0,output,pos,4);
             pos += 4;
             tempArr = ByteBuffer.allocate(4).putInt(frame.getSize()).array();
@@ -127,6 +137,22 @@ public class MyID3 extends ID3Size {
         } else {
             addFrame(header,content);
         }
+    }
+
+    public void changeTXXX(int i) {
+        TXXX_Counter += i;
+    }
+
+    public int getTXXX() {
+        return TXXX_Counter;
+    }
+
+    public void changeCOMM(int i) {
+        COMM_Counter += i;
+    }
+
+    public int getCOMM() {
+        return COMM_Counter;
     }
 }
 

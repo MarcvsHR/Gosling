@@ -172,18 +172,12 @@
                     </padding>
                 </HBox>
                 <HBox alignment="BOTTOM_CENTER" spacing="8.0">
-                    <Label text="Genre">
-
-                    </Label>
-                    <ComboBox fx:id="dropGenre" prefWidth="130.0" />
-                    <Label text="Publisher">
-
-                    </Label>
-                    <TextField fx:id="textPublisher" prefWidth="100.0" />
-                    <Label text="Year">
-
-                    </Label>
+                    <Label text="Year" />
                     <TextField fx:id="textYear" onKeyTyped="#checkYearField" prefWidth="80.0" />
+                    <Label text="Genre" />
+                    <ComboBox fx:id="dropGenre" prefWidth="130.0" />
+                    <Label text="Publisher" />
+                    <TextField fx:id="textPublisher" prefWidth="100.0" />
                     <Label text="ISRC" />
                     <TextField fx:id="textISRC" prefWidth="110.0" />
                     <padding>
@@ -278,6 +272,7 @@
                         <MenuItem mnemonicParsing="false" onAction="#pasteID3" text="Paste" />
                         <MenuItem mnemonicParsing="false" onAction="#deleteFile" text="Delete" />
                         <MenuItem mnemonicParsing="false" onAction="#dupeCheck" text="Check dupes" />
+                        <MenuItem mnemonicParsing="false" onAction="#listTag" text="ID3 Tag info" />
                     </items>
                 </ContextMenu>
             </contextMenu>

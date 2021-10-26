@@ -57,6 +57,14 @@ public class ID3Reader {
                         startFrames += frame.getSize() + 10;
                         if (Objects.equals(frame.getFrameID(), "XXXX")) {
                             break;
+                        } else if (Objects.equals(frame.getFrameID(), "TXXX")) {
+                            String number = String.format("%02d",id3Data.getTXXX());
+                            frame.setFrameID("TXXX"+number);
+                            id3Data.changeTXXX(1);
+                        } else if (Objects.equals(frame.getFrameID(), "COMM")) {
+                            String number = String.format("%02d",id3Data.getCOMM());
+                            frame.setFrameID("COMM"+number);
+                            id3Data.changeCOMM(1);
                         }
                         id3Data.addFrame(frame);
                         //id3Data.getFrame(frameID).setSize(frame.getContent().length + 1, false);
