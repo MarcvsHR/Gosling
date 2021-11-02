@@ -10,31 +10,33 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: org.openjfx:javafx-controls:11.0.2" level="project" />
-    <orderEntry type="library" name="Maven: org.openjfx:javafx-controls:win:11.0.2" level="project" />
-    <orderEntry type="library" name="Maven: org.openjfx:javafx-graphics:11.0.2" level="project" />
-    <orderEntry type="library" name="Maven: org.openjfx:javafx-base:11.0.2" level="project" />
-    <orderEntry type="library" name="Maven: org.openjfx:javafx-fxml:11.0.2" level="project" />
-    <orderEntry type="library" name="Maven: org.openjfx:javafx-fxml:win:11.0.2" level="project" />
-    <orderEntry type="library" name="Maven: org.openjfx:javafx-web:11.0.2" level="project" />
-    <orderEntry type="library" name="Maven: org.openjfx:javafx-web:win:11.0.2" level="project" />
-    <orderEntry type="library" name="Maven: org.openjfx:javafx-media:11.0.2" level="project" />
-    <orderEntry type="library" name="Maven: org.openjfx:javafx-media:win:11.0.2" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-controls:16" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-controls:win:16" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-graphics:16" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-graphics:win:16" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-fxml:16" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-fxml:win:16" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-web:16" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-web:win:16" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-media:16" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-media:win:16" level="project" />
     <orderEntry type="library" name="Maven: org.controlsfx:controlsfx:11.1.0" level="project" />
-    <orderEntry type="library" name="Maven: com.dlsc.formsfx:formsfx-core:11.4.2" level="project" />
-    <orderEntry type="library" name="Maven: net.synedra:validatorfx:0.1.13" level="project" />
     <orderEntry type="library" name="Maven: org.kordamp.ikonli:ikonli-javafx:12.2.0" level="project" />
     <orderEntry type="library" name="Maven: org.kordamp.ikonli:ikonli-core:12.2.0" level="project" />
     <orderEntry type="library" name="Maven: org.kordamp.bootstrapfx:bootstrapfx-core:0.4.0" level="project" />
-    <orderEntry type="library" name="Maven: eu.hansolo:tilesfx:16.0.3" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.junit.jupiter:junit-jupiter-api:5.8.0" level="project" />
+    <orderEntry type="library" name="Maven: eu.hansolo:tilesfx:17.0.0" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-base:17.0.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-base:win:17.0.0.1" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: org.openjfx:javafx-swing:17.0.0.1" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: org.openjfx:javafx-swing:win:17.0.0.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.junit.jupiter:junit-jupiter-api:5.8.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.opentest4j:opentest4j:1.2.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.junit.platform:junit-platform-commons:1.8.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.junit.platform:junit-platform-commons:1.8.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.apiguardian:apiguardian-api:1.1.2" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.junit.jupiter:junit-jupiter-engine:5.8.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.junit.platform:junit-platform-engine:1.8.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.junit.jupiter:junit-jupiter-engine:5.8.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.junit.platform:junit-platform-engine:1.8.1" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: com.h2database:h2:1.4.200" level="project" />
-    <orderEntry type="library" name="Maven: org.hibernate:hibernate-core:5.5.7.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.hibernate:hibernate-core:5.5.8.Final" level="project" />
     <orderEntry type="library" name="Maven: org.jboss.logging:jboss-logging:3.4.2.Final" level="project" />
     <orderEntry type="library" name="Maven: javax.persistence:javax.persistence-api:2.2" level="project" />
     <orderEntry type="library" name="Maven: org.javassist:javassist:3.27.0-GA" level="project" />
@@ -51,11 +53,8 @@
     <orderEntry type="library" name="Maven: com.sun.istack:istack-commons-runtime:3.0.7" level="project" />
     <orderEntry type="library" name="Maven: org.jvnet.staxex:stax-ex:1.8" level="project" />
     <orderEntry type="library" name="Maven: com.sun.xml.fastinfoset:FastInfoset:1.2.15" level="project" />
-    <orderEntry type="library" name="Maven: org.projectlombok:lombok:1.18.20" level="project" />
+    <orderEntry type="library" name="Maven: org.projectlombok:lombok:1.18.22" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-lang3:3.12.0" level="project" />
-    <orderEntry type="library" name="Maven: org.jfxtras:jmetro:11.6.15" level="project" />
-    <orderEntry type="library" name="Maven: org.openjfx:javafx-graphics:win:11.0.2" level="project" />
-    <orderEntry type="library" name="Maven: org.openjfx:javafx-base:win:11.0.2" level="project" />
     <orderEntry type="library" name="Maven: log4j:log4j:1.2.17" level="project" />
     <orderEntry type="library" name="Maven: net.sf.ucanaccess:ucanaccess:5.0.1" level="project" />
     <orderEntry type="library" name="Maven: org.hsqldb:hsqldb:2.5.0" level="project" />

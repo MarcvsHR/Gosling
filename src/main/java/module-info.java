@@ -14,7 +14,6 @@ module prodo.marc.gosling {
     requires org.apache.commons.lang3;
     requires java.desktop;
     requires org.controlsfx.controls;
-    requires org.jfxtras.styles.jmetro;
 
 
     opens prodo.marc.gosling to javafx.fxml;

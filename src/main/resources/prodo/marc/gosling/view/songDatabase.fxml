@@ -145,6 +145,16 @@
                             <Tooltip showDelay="500ms" text="Search google for artist/title" />
                         </tooltip>
                     </Button>
+                    <Button fx:id="discogsSongButton" focusTraversable="false" mnemonicParsing="false" onAction="#discogSong">
+                        <graphic>
+                            <ImageView>
+                                <Image url="@../images/discog.png" />
+                            </ImageView>
+                        </graphic>
+                        <tooltip>
+                            <Tooltip showDelay="500ms" text="Search discogs for artist/title" />
+                        </tooltip>
+                    </Button>
                     <Button fx:id="zampSongButton" focusTraversable="false" mnemonicParsing="false" onAction="#zampSong" text="ZAMP">
                         <tooltip>
                             <Tooltip showDelay="500ms" text="Search zamp for song title" />
@@ -181,7 +191,7 @@
                     <Label text="ISRC" />
                     <TextField fx:id="textISRC" prefWidth="110.0" />
                     <padding>
-                        <Insets top="5.0" bottom="10.0" />
+                        <Insets bottom="10.0" top="5.0" />
                     </padding>
                 </HBox>
                 <HBox alignment="BOTTOM_CENTER" spacing="30.0">
@@ -252,7 +262,7 @@
         <TableView fx:id="songDatabaseTable" focusTraversable="false" onMouseClicked="#clickTable" onMouseDragged="#clickTable" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" GridPane.vgrow="ALWAYS">
             <columns>
                 <TableColumn fx:id="tableID" prefWidth="30.0" text="ID" visible="false" />
-                <TableColumn fx:id="tableArtist" prefWidth="240.0" text="Artist" />
+                <TableColumn fx:id="tableArtist" prefWidth="230.0" text="Artist" />
                 <TableColumn fx:id="tableTitle" prefWidth="200.0" text="Title" />
                 <TableColumn fx:id="tableAlbum" prefWidth="100.0" text="Album" />
                 <TableColumn fx:id="tablePublisher" prefWidth="100.0" text="Publisher" />

@@ -67,7 +67,8 @@ public class SongController {
     @FXML
     Button songBackButton, addSongButton, addFolderButton, parseFilenameButton, googleSongButton,
             openLegacyDataButton, updateSongs, buttonPlay, buttonPause, skipBack, skipForward, skipForwardSmall,
-            skipBackSmall, buttonRevert, spotSongButton, zampSongButton, refreshTableButton, tableToggleButton;
+            skipBackSmall, buttonRevert, spotSongButton, zampSongButton, refreshTableButton, tableToggleButton,
+            discogsSongButton;
     @FXML
     Label mp3Time, labelVolume, labelSongNumber, mp3Label;
     @FXML
@@ -983,6 +984,12 @@ public class SongController {
         openURL(uri, "+");
     }
 
+    public void discogSong() {
+        String uri = textArtist.getText()+" "+textTitle.getText();
+        uri = "https://www.discogs.com/search/?type=all&q=" + uri;
+        openURL(uri, "+");
+    }
+
     private void openURL(String uri, String space) {
         uri = uri.replace(" ", space);
         uri = uri.replaceAll("[\\[\\]]", "");
@@ -1067,10 +1074,12 @@ public class SongController {
         return width;
     }
 
-    public void listTag(ActionEvent event) {
+    public void listTag( ) {
         String id3File = songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc();
         MyID3 tempid3 = ID3Reader.getTag(new File(id3File));
         Popups.giveInfoAlert("ID3 tag content for: ",
                 id3File, String.valueOf(tempid3.listFrames()));
     }
+
+
 }
