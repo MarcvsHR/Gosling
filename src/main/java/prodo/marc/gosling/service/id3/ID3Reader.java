@@ -47,6 +47,8 @@ public class ID3Reader {
                 id3Data.setFlags(fileContent[5]);
                 if (id3Data.getFlags() > 0) logger.debug("Flags detected!!!!   " + id3Data.getFlags());
                 id3Data.setSize(ByteBuffer.wrap(Arrays.copyOfRange(fileContent, 6, 10)).getInt(), true);
+                int tempSize = id3Data.getSize();
+
 //                logger.debug("Size: " + id3Data.getSize());
 //                logger.debug("size bytes in array" + Arrays.toString(Arrays.copyOfRange(fileContent, 6, 10)));
                 if (!id3Data.getVersionString().equals("2.2.0")) {
@@ -75,7 +77,9 @@ public class ID3Reader {
                 }
 
                 if (id3Data.getFrame(id3Header.LENGTH) == null)
-                    id3Data.addFrame(id3Header.LENGTH, String.valueOf(ID3v2Utils.getDuration(fileContent,id3Data.getSize())));
+                    id3Data.addFrame(id3Header.LENGTH, String.valueOf(ID3v2Utils.getDuration(fileContent,id3Data.getSize(), String.valueOf(file.toPath()))));
+
+                logger.debug("duration: "+ ID3v2Utils.getDuration(fileContent, tempSize, String.valueOf(file.toPath())));
 
                 id3Data.setSize(id3Data.totalFrameSize(), false);
 //                logger.debug("final size: "+id3Data.getSize());
@@ -88,7 +92,7 @@ public class ID3Reader {
         }
 
         if (id3Data.getVersionString().equals("2.5.0"))
-            id3Data = new MyID3(String.valueOf(ID3v2Utils.getDuration(fileContent, 0)));
+            id3Data = new MyID3(String.valueOf(ID3v2Utils.getDuration(fileContent, 0, String.valueOf(file.toPath()))));
 
         return id3Data;
     }
@@ -164,10 +168,14 @@ public class ID3Reader {
 
         if (fileContent != null) {
             int size = 0;
-            if (Arrays.toString(Arrays.copyOfRange(fileContent, 0, 3)).equals("ID3")) {
+            String header = new String(Arrays.copyOfRange(fileContent, 0, 3));
+            if (header.equals("ID3")) {
                 size = MyID3.computeSize(ByteBuffer.wrap(Arrays.copyOfRange(fileContent, 6, 10)).getInt());
                 size += 10;
+//                logger.debug("Found old id3 of size: "+size);
             }
+//            logger.debug("first 3 chars are : - "+header);
+//            logger.debug("size should be above this...");
 //            logger.debug(fileContent[size]);
             mp3Data = new byte[fileContent.length - size];
             System.arraycopy(fileContent, size, mp3Data, 0, fileContent.length - size);

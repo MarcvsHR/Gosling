@@ -42,12 +42,11 @@ public class Song {
     private String fileLoc;
     private Boolean done;
     private String editor;
-    private Duration duration;
+    private Integer duration;
     //private char truncated = 'Y';
 
 
     @Override
-    //TODO: there's null and everything breaks! panic!
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -68,12 +67,12 @@ public class Song {
     }
 
     public String getDurationString() {
-        if (duration == null) duration = new Duration(0);
-        String output = String.format("%.0f", duration.toSeconds() % 60);
+        if (duration == null) duration = 0;
+        String output = String.format("%.0f", duration / 1000.0 % 60);
         if (output.length() < 2) output = "0"+output;
-        double minutes = Math.floor(duration.toSeconds()/60);
+        double minutes = Math.floor(duration / 1000.0/60);
         output = String.format("%.0f:", minutes) + output;
-        if (duration.toSeconds() < 600) output = "0"+output;
+        if (duration / 1000 < 600) output = "0"+output;
         return output;
     }
 

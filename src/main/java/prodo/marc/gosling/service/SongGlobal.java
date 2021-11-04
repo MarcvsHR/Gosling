@@ -18,11 +18,11 @@ public class SongGlobal {
 
     private static Song currentSong;
     private static String fileFolder;
-    private static String propertiesFile = System.getProperty("user.home") + "\\properties.txt";
+    private static final String propertiesFile = System.getProperty("user.home") + "\\properties.txt";
     private static List<Path> mp3List;
     private static boolean filenameParsed = false;
     private static int doneFilter = 0;
-    private static int truncFilter = 0;
+    private static int truncatedFilter = 0;
     private static String folderFilter = "";
     private static String userFilter = "Any user";
 
@@ -34,12 +34,12 @@ public class SongGlobal {
         SongGlobal.doneFilter = doneFilter;
     }
 
-    public static int getTruncFilter() {
-        return truncFilter;
+    public static int getTruncatedFilter() {
+        return truncatedFilter;
     }
 
-    public static void setTruncFilter(int truncFilter) {
-        SongGlobal.truncFilter = truncFilter;
+    public static void setTruncatedFilter(int truncatedFilter) {
+        SongGlobal.truncatedFilter = truncatedFilter;
     }
 
     public static String getFolderFilter() {
@@ -65,7 +65,7 @@ public class SongGlobal {
 
     public static void setCurrentSong(Song song) {
         currentSong = song;
-        logger.debug(currentSong);
+        //logger.debug(currentSong);
     }
 
     public static String getCurrentFolder() {
@@ -96,7 +96,7 @@ public class SongGlobal {
         try {
             //TODO: this needs to be handled differently
             boolean fileMade = new File(propertiesFile).createNewFile();
-            //logger.debug("file create result: " + fileMade);
+            logger.debug("file create result: " + fileMade);
             FileWriter out = new FileWriter(propertiesFile);
             prop.store(out, null);
             out.close();

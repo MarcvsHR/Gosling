@@ -8,30 +8,28 @@ import org.hibernate.cfg.Configuration;
 
 
 public class HibernateUtils {
-   private  static final SessionFactory sessionFactory;
+    private static final SessionFactory sessionFactory;
     private static final Logger logger = LogManager.getLogger(HibernateUtils.class);
+
     static {
         try {
 
             sessionFactory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory();
-        } catch (Exception ex){
+        } catch (Exception ex) {
 
-            logger.error("######## Initial SessionFactory creation failed.",ex);
+            logger.error("######## Initial SessionFactory creation failed.", ex);
             throw new ExceptionInInitializerError("Connection to database error!");
         }
     }
 
-    public static Session openSession() throws Exception {
+    public static Session openSession() {
         Session session;
         try {
             session = sessionFactory.openSession();
         } catch (Exception e) {
-            logger.error("######## openSession failed.",e);
+            logger.error("######## openSession failed.", e);
             throw e;
         }
         return session;
     }
-
-    public static void closeSession(){
-        sessionFactory.close();
-    }}
+}

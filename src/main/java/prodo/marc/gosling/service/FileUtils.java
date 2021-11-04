@@ -18,7 +18,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Stream;
 
 public class FileUtils {
@@ -78,8 +77,7 @@ public class FileUtils {
         logger.debug("current time: "+id3tag.getData(id3Header.LENGTH));
         song = ID3v2Utils.songDataFromID3(id3tag, String.valueOf(path), editor);
         song.setEditor(editor);
-        SongRepository songRepo = new SongRepository();
-        if (songRepo.checkForDupes(song)) {
+        if (SongRepository.getIDofFile(song.getFileLoc()) != null) {
             logger.debug("---song already exists - "+song);
             return song.getFileLoc();
         } else {

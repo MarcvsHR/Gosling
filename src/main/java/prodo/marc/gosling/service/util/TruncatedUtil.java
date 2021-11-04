@@ -11,7 +11,6 @@ public class TruncatedUtil {
         for (Field f : input.getClass().getDeclaredFields()) {
             if (f.isAnnotationPresent(Truncated.class)) {
                 f.setAccessible(true);
-                //TODO: Ovdje staviti dodatno kontrole za provjeru datuma/godina ili čega već treba
 
                 if (f.get(input) == null) {
                     return true;

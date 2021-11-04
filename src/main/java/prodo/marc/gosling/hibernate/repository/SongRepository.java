@@ -6,10 +6,8 @@ import org.hibernate.Session;
 import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.hibernate.HibernateUtils;
 
-import java.sql.PreparedStatement;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 public class SongRepository {
     private static final Logger logger = LogManager.getLogger(SongRepository.class);
@@ -93,30 +91,6 @@ public class SongRepository {
         }
 
         return null;
-    }
-
-    //TODO: This basically does the same as the above one... might need to combine them... or maybe dupe check will change
-    public Boolean checkForDupes(Song song){
-        Session session = null;
-        try {
-            session = HibernateUtils.openSession();
-            session.getTransaction().begin();
-            String query1 = "from Song S WHERE lower(S.fileLoc) = :fileLoc";
-            List<Song> songs = session.createQuery(query1,Song.class)
-                    .setParameter("fileLoc",song.getFileLoc().toLowerCase())
-                    .list();
-            session.getTransaction().commit();
-            if (!songs.isEmpty()) return true;
-        }catch (Exception e){
-            logger.error("Error while getting songs "+e);
-
-        }finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
-        }
-
-        return false;
     }
 
 
