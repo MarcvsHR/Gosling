@@ -40,6 +40,7 @@ public class RegexWindowController {
         regex.add("Track. Artist - Title_ISRC");
         regex.add("Artist-Title-CROREC-ISRC");
         regex.add("Artist - Title - ISRC");
+        regex.add("ISRC - Artist - Title - Publisher");
         Collections.sort(regex);
         return new ArrayList<>(regex);
     }
@@ -131,6 +132,15 @@ public class RegexWindowController {
                 song.setArtist(output[0]);
                 song.setTitle(output[1]);
                 song.setISRC(output[2]);
+                isSet = true;
+                break;
+            }
+            case "ISRC - Artist - Title - Publisher": {
+                String[] output = mp3Filename.getText().split(" - ");
+                song.setArtist(output[1]);
+                song.setTitle(output[2]);
+                song.setISRC(output[0]);
+                song.setPublisher(output[3]);
                 isSet = true;
                 break;
             }
