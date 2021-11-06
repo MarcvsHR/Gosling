@@ -58,7 +58,6 @@ public class SongController {
      * Initial volume for mp3
      */
     private static final Integer INITIAL_VOLUME_SO_MY_EARS_DONT_EXPLODE = 20;
-    final int skipIncrement = 10000;
 
     @FXML
     ComboBox<String> dropGenre, doneFilter, truncatedFilter, userFilter;
@@ -75,15 +74,13 @@ public class SongController {
     TableView<Song> songDatabaseTable;
     @FXML
     TableColumn<Song, String> tableArtist, tableTitle, tableAlbum, tablePublisher, tableComposer,
-            tableGenre, tableISRC, tableFileLoc, tableEditor;
+            tableGenre, tableISRC, tableFileLoc, tableEditor, tableDuration;
     @FXML
     TableColumn<Song, Integer> tableID;
     @FXML
     TableColumn<Song, Year> tableYear;
     @FXML
     TableColumn<Song, Boolean> tableDone;
-    @FXML
-    TableColumn<Song, String> tableDuration;
     @FXML
     TextField textAlbum, textArtist, textTitle, textPublisher, textComposer, textYear, textISRC,
             textFilterFolder;
@@ -525,14 +522,14 @@ public class SongController {
     @FXML
     protected void moveTimeForward() {
         if (mplayer != null) {
-            mplayer.seek(Duration.millis(mplayer.getCurrentTime().toMillis() + skipIncrement));
+            mplayer.seek(Duration.millis(mplayer.getCurrentTime().toMillis() + 10000));
         }
     }
 
     @FXML
     protected void moveTimeBack() {
         if (mplayer != null) {
-            mplayer.seek(Duration.millis(mplayer.getCurrentTime().toMillis() - skipIncrement));
+            mplayer.seek(Duration.millis(mplayer.getCurrentTime().toMillis() - 10000));
         }
     }
 
