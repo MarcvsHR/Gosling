@@ -7,6 +7,9 @@ public class mp3Frame {
     int layer;
     boolean padding;
     int frequency;
+    /**
+    * kilobits per second
+     */
     int bitrate;
     int samplesPerFrame;
     boolean valid = true;
@@ -23,10 +26,7 @@ public class mp3Frame {
 
         if (valid)
         {
-            int layerBit1 = hbi.testBit(17) ? 1 : 0;
-            int layerBit2 = hbi.testBit(18) ? 2 : 0;
-
-            layer = 4 - (layerBit1 + layerBit2);
+            layer = 4 - ((hbi.testBit(17) ? 1 : 0) + (hbi.testBit(18) ? 2 : 0));
             if (layer == 1) samplesPerFrame = 384;
             else samplesPerFrame = 1152;
 
@@ -78,7 +78,8 @@ public class mp3Frame {
     }
 
     public int getFrameSizeInBytes() {
-        return (144000 * bitrate / frequency) + (padding ? 1 : 0);
+        int byteRate = bitrate / 8 * 1000;
+        return (samplesPerFrame * byteRate / frequency) + (padding ? 1 : 0);
     }
 
     public String getAllData() {

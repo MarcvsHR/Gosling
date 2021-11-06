@@ -58,7 +58,7 @@ public class ID3v2Utils {
         return testSong;
     }
 
-    public static long getDuration(byte[] fileContent, int size, String fileLoc) {
+    public static long getDuration(byte[] fileContent, int size) {
 
         //logger.debug("----- Executing getDuration");
         if (size != 0) size += 10;
@@ -120,7 +120,7 @@ public class ID3v2Utils {
 //        logger.debug("Estimated file duration in s: " + estDur/1000);
         //logger.debug("----- ending getDuration");
 
-        return (long)estDur;
+        return estDur < 1000 ? 0 : (long)estDur;
     }
 
 }

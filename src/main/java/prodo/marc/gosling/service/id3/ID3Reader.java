@@ -77,9 +77,9 @@ public class ID3Reader {
                 }
 
                 if (id3Data.getFrame(id3Header.LENGTH) == null)
-                    id3Data.addFrame(id3Header.LENGTH, String.valueOf(ID3v2Utils.getDuration(fileContent,id3Data.getSize(), String.valueOf(file.toPath()))));
+                    id3Data.addFrame(id3Header.LENGTH, String.valueOf(ID3v2Utils.getDuration(fileContent,id3Data.getSize())));
 
-                logger.debug("duration: "+ ID3v2Utils.getDuration(fileContent, tempSize, String.valueOf(file.toPath())));
+                logger.debug("duration: "+ ID3v2Utils.getDuration(fileContent, tempSize));
 
                 id3Data.setSize(id3Data.totalFrameSize(), false);
 //                logger.debug("final size: "+id3Data.getSize());
@@ -92,7 +92,7 @@ public class ID3Reader {
         }
 
         if (id3Data.getVersionString().equals("2.5.0"))
-            id3Data = new MyID3(String.valueOf(ID3v2Utils.getDuration(fileContent, 0, String.valueOf(file.toPath()))));
+            id3Data = new MyID3(String.valueOf(ID3v2Utils.getDuration(fileContent, 0)));
 
         return id3Data;
     }
