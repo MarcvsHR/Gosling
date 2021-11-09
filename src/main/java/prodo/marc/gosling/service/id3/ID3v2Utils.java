@@ -103,6 +103,12 @@ public class ID3v2Utils {
         while (counter < mp3Data.length) {
             BigInteger HBI = BigInteger.valueOf(ByteBuffer.wrap(Arrays.copyOfRange(mp3Data, counter, counter + 4)).getInt());
             mp3Frame frame = new mp3Frame(HBI);
+            //error checking, not needed atm
+            if (counter < 0) {
+                logger.debug(size+counter);
+                logger.debug(frame.getAllData());
+            }
+
             if (!frame.isValid()) {
                 int distance = mp3Data.length - counter;
                 String headerString = new String(Arrays.copyOfRange(mp3Data,counter,counter+3));

@@ -30,6 +30,7 @@ public final class id3Header {
     public static final String PRIVATE = "PRIV";
     public static final String DATE = "TDAT";
     public static final String COPYRIGHT_MSG = "TCOP";
+    public static final String TEXT_WRITER = "TEXT";
 
     public static final String DELETE = "XXXX";
 
@@ -37,7 +38,8 @@ public final class id3Header {
         "TPUB", "TALB", "TIT2", "TYER", "TCON", "TPE1", "TPE2", "TCOM",
             "TKEY", "COMM", "TPOS", "TDRL", "TRCK", "TXXX", "TBPM",
             "APIC", "TDRC", "TIME", "DONE", "TSRC", "TSSE", "TLEN",
-            "TENC", "USLT", "MCDI", "PRIV", "TDAT", "TCOP",
+            "TENC", "USLT", "MCDI", "PRIV", "TDAT", "TCOP", "TEXT",
+            "XXXX",
             "XXXX",
     };
 

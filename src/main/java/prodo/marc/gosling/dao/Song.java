@@ -68,7 +68,8 @@ public class Song {
 
     public String getDurationString() {
         if (duration == null) duration = 0;
-        String output = String.format("%.0f", duration / 1000.0 % 60);
+        double seconds = Math.floor(duration / 1000.0 % 60);
+        String output = String.format("%.0f", seconds);
         if (output.length() < 2) output = "0"+output;
         double minutes = Math.floor(duration / 1000.0/60);
         output = String.format("%.0f:", minutes) + output;

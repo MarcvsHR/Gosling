@@ -102,6 +102,7 @@ public class SongController {
     private Path tempDir;
     private String editorName;
     private boolean tableMin = false;
+    private boolean publishersBound = false;
 
 
     private void publisherAutocomplete() {
@@ -109,7 +110,8 @@ public class SongController {
                 "Epic", "Hit Records", "Insanity Records", "Menart", "Mikrofon Records", "Masterworks",
                 "Ministry of Sound Recordings", "Polydor", "Promo", "Rca", "Scardona", "Sony", "Spona",
                 "Melody", "Dancing Bear", "Heksagon", "Arista", "Geffen", "Intek", "Sedma Sekunda",
-                "Bonton", "Hamar", "Rubikon", "Rtl", "Only Records", "Zvuci Mediterana", "Abudublin"};
+                "Bonton", "Hamar", "Rubikon", "Rtl", "Only Records", "Zvuci Mediterana", "Abudublin",
+                "Campus"};
         Arrays.sort(array);
         publisherList.addAll(Arrays.asList(array));
     }
@@ -207,6 +209,12 @@ public class SongController {
             openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
         };
         updateSongs.getScene().getAccelerators().put(kc2, rn2);
+        KeyCombination kc3 = new KeyCodeCombination(KeyCode.DOWN, KeyCombination.CONTROL_DOWN);
+        Runnable rn3 = () -> {
+            songDatabaseTable.getSelectionModel().select(songDatabaseTable.getSelectionModel().getSelectedIndex()+1);
+            openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
+        };
+        updateSongs.getScene().getAccelerators().put(kc3, rn3);
     }
 
 
@@ -368,7 +376,10 @@ public class SongController {
         } else {
             if (localFile) {
                 updateTextFields(fileLoc);
-                TextFields.bindAutoCompletion(textPublisher, publisherList).setMaxWidth(170);
+                if (!publishersBound) {
+                    TextFields.bindAutoCompletion(textPublisher, publisherList).setMaxWidth(170);
+                    publishersBound = true;
+                }
             }
         }
 
@@ -1079,8 +1090,8 @@ public class SongController {
     public void listTag( ) {
         String id3File = songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc();
         MyID3 tempid3 = ID3Reader.getTag(new File(id3File));
-        Popups.giveInfoAlert("ID3 tag content for: ",
-                id3File, tempid3.listFrames() +"---"+ tempid3.getSize());
+        //logger.debug(tempid3.listFrames());
+        Popups.giveInfoAlert("ID3 tag content for: ", id3File, tempid3.listFrames() +"---"+ tempid3.getSize());
     }
 
 
