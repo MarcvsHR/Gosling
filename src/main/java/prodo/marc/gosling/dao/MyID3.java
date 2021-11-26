@@ -2,6 +2,7 @@ package prodo.marc.gosling.dao;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 
@@ -119,6 +120,8 @@ public class MyID3 extends ID3Size {
             output[pos + 2] = frame.getEncoding();
             pos += 3;
             tempArr = frame.getContent();
+//            System.out.println(new String(tempArr));
+//            System.out.println(Arrays.toString(tempArr));
             System.arraycopy(tempArr, 0, output, pos, tempArr.length);
             pos += tempArr.length;
 

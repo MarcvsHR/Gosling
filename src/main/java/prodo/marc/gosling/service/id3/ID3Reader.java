@@ -134,18 +134,29 @@ public class ID3Reader {
                 Charset utf16Charset = StandardCharsets.UTF_16;
                 Charset utf16beCharset = StandardCharsets.UTF_16BE;
                 Charset iso88591charset = StandardCharsets.ISO_8859_1;
+                if (tempArr[0] != 0 && encoding == 1 && tempArr[0] != (byte)255){
+                    byte[] newArr = new byte[tempArr.length];
+                    newArr[0] = (byte)(0);
+                    System.arraycopy(tempArr,0, newArr, 1, tempArr.length-1);
+                    tempArr = newArr;
+                }
                 ByteBuffer inputBuffer = ByteBuffer.wrap(tempArr);
                 CharBuffer data = null;
+//                System.out.println(Arrays.toString(inputBuffer.array()));
                 if (encoding == 3) data = utf8charset.decode(inputBuffer);
                 if (encoding == 2) data = utf16beCharset.decode(inputBuffer);
                 if (encoding == 1) data = utf16Charset.decode(inputBuffer);
                 assert data != null;
                 ByteBuffer outputBuffer = iso88591charset.encode(data);
+//                System.out.println(new String(outputBuffer.array()));
+//                System.out.println(Arrays.toString(outputBuffer.array()));
                 //logger.debug("old data: " + Arrays.toString(tempArr));
                 tempArr = outputBuffer.array();
-                if (tempArr[0] == 63) tempArr = Arrays.copyOfRange(tempArr,1,tempArr.length);
-                if (tempArr[0] == 63) tempArr = Arrays.copyOfRange(tempArr,1,tempArr.length);
-                frame.setContent((Arrays.copyOf(tempArr, tempArr.length - 1)));
+//                if (tempArr[0] == 63) tempArr = Arrays.copyOfRange(tempArr,1,tempArr.length);
+//                if (tempArr[0] == 63) tempArr = Arrays.copyOfRange(tempArr,1,tempArr.length);
+                if (tempArr[tempArr.length-1] == 0)
+                    tempArr = Arrays.copyOf(tempArr,tempArr.length-1);
+                frame.setContent(tempArr);
                 //logger.debug("new data: " + Arrays.toString(tempArr));
                 frame.setEncoding((byte) 0);
             }

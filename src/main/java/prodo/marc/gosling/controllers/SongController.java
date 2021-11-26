@@ -49,6 +49,8 @@ import java.time.Year;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 
 public class SongController {
@@ -118,7 +120,7 @@ public class SongController {
 
     private String[] getGenres() {
         String[] returnArr = {"", "Cro", "Cro Zabavne", "Instrumental", "Klape", "Kuruza",
-                "Pop", "xxx", "Italian", "Susjedi", "Religiozne", "Oldies", "X-Mas"};
+                "Pop", "xxx", "Italian", "Susjedi", "Religiozne", "Oldies", "X-Mas", "Domoljubne"};
         Arrays.sort(returnArr);
         return returnArr;
     }
@@ -205,13 +207,13 @@ public class SongController {
         updateSongs.getScene().getAccelerators().put(kc1, rn1);
         KeyCombination kc2 = new KeyCodeCombination(KeyCode.UP, KeyCombination.CONTROL_DOWN);
         Runnable rn2 = () -> {
-            songDatabaseTable.getSelectionModel().select(songDatabaseTable.getSelectionModel().getSelectedIndex()-1);
+            songDatabaseTable.getSelectionModel().select(songDatabaseTable.getSelectionModel().getSelectedIndex() - 1);
             openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
         };
         updateSongs.getScene().getAccelerators().put(kc2, rn2);
         KeyCombination kc3 = new KeyCodeCombination(KeyCode.DOWN, KeyCombination.CONTROL_DOWN);
         Runnable rn3 = () -> {
-            songDatabaseTable.getSelectionModel().select(songDatabaseTable.getSelectionModel().getSelectedIndex()+1);
+            songDatabaseTable.getSelectionModel().select(songDatabaseTable.getSelectionModel().getSelectedIndex() + 1);
             openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
         };
         updateSongs.getScene().getAccelerators().put(kc3, rn3);
@@ -366,12 +368,18 @@ public class SongController {
 
             boolean result = Popups.giveConfirmAlert("Unsaved changes",
                     "You are switching to another file with possible unsaved changes",
-                    "Do you want to save the ID3 changes you have made?\n" + currentSong + "\n" + SongGlobal.getCurrentSong());
+                    "Do you want to save the ID3 changes you have made?\nChanges: " + currentSong + "\nFile data: " + SongGlobal.getCurrentSong());
 
             if (result) {
                 updateMP3();
             } else {
-                selectFileFromTable(currentFileLoc);
+                boolean resultNew = Popups.giveConfirmAlert("Continue?",
+                        "do you still want to switch to another file?",
+                        "Continue:");
+                if (!resultNew)
+                    selectFileFromTable(currentFileLoc);
+                else
+                    updateMP3();
             }
         } else {
             if (localFile) {
@@ -811,16 +819,19 @@ public class SongController {
                         "please select genre and try again");
                 return false;
             }
-            String genre = dropGenre.getSelectionModel().getSelectedItem() + "\\";
-            if (genre.equalsIgnoreCase("pop\\")) {
+            String genre = dropGenre.getSelectionModel().getSelectedItem().toLowerCase();
+            if (genre.equals("pop")) {
                 genre = "";
+            } else if (genre.equals("domoljubne")) {
+                genre = "cro\\" + genre;
             }
             String year = textYear.getText() + "\\";
-            if (genre.equalsIgnoreCase("religiozne\\") ||
-                    genre.equalsIgnoreCase("oldies\\") ||
-                    genre.equalsIgnoreCase("x-mas\\")) {
+
+            List<String> foldersWithNoYear = Arrays.asList("religiozne", "oldies", "x-mas", "cro\\domoljubne");
+            if (foldersWithNoYear.contains(genre)) {
                 year = "";
             }
+            if (genre.length() > 0) genre += "\\";
             newFileLoc = "Z:\\Songs\\" + genre + year + newFileLoc;
             boolean mkdResult = new File(Paths.get(newFileLoc).getParent().toString()).mkdirs();
             if (!mkdResult) {
@@ -885,34 +896,45 @@ public class SongController {
 
     @FXML
     public void filterTable() {
-        String filter = textFilterFolder.getText().toLowerCase();
+        String[] filter = textFilterFolder.getText().toLowerCase().split("[|]");
 
-        filteredSongs.setPredicate(x -> {
-            if (doneFilter.getSelectionModel().getSelectedIndex() == 1 && !x.getDone())
+        filteredSongs.setPredicate(currentSearchSong -> {
+            if (doneFilter.getSelectionModel().getSelectedIndex() == 1 && !currentSearchSong.getDone())
                 return false;
-            if (doneFilter.getSelectionModel().getSelectedIndex() == 2 && x.getDone())
+            if (doneFilter.getSelectionModel().getSelectedIndex() == 2 && currentSearchSong.getDone())
                 return false;
-            String title = x.getTitle();
+            String title = currentSearchSong.getTitle();
             if (title == null) title = "";
             title = title.toLowerCase();
-            String artist = x.getArtist();
+            String artist = currentSearchSong.getArtist();
             if (artist == null) artist = "";
             artist = artist.toLowerCase();
-            String album = x.getAlbum();
+            String album = currentSearchSong.getAlbum();
             if (album == null) album = "";
             album = album.toLowerCase();
-            if (!title.contains(filter) &&
-                    !artist.contains(filter) &&
-                    !album.contains(filter) &&
-                    !x.getFileLoc().toLowerCase().contains(filter))
-                return false;
+            String genre = currentSearchSong.getGenre();
+            if (genre == null) genre = "";
+            genre = genre.toLowerCase();
+            String publisher = currentSearchSong.getPublisher();
+            if (publisher == null) publisher = "";
+            publisher = publisher.toLowerCase();
+            for (String filterString : filter) {
+                //System.out.println(filterString);
+                if (!title.contains(filterString) &&
+                        !artist.contains(filterString) &&
+                        !album.contains(filterString) &&
+                        !genre.contains(filterString) &&
+                        !publisher.contains(filterString) &&
+                        !currentSearchSong.getFileLoc().toLowerCase().contains(filterString))
+                    return false;
+            }
             if (userFilter.getSelectionModel().getSelectedIndex() != 0 &&
-                    !userFilter.getSelectionModel().getSelectedItem().equals(x.getEditor()))
+                    !userFilter.getSelectionModel().getSelectedItem().equals(currentSearchSong.getEditor()))
                 return false;
 
             try {
                 if (truncatedFilter.getSelectionModel().getSelectedIndex() == 1 &&
-                        !TruncatedUtil.isTruncated(x))
+                        !TruncatedUtil.isTruncated(currentSearchSong))
                     return false;
             } catch (IllegalAccessException e) {
                 logger.error("error while truncate checking: ", e);
@@ -949,9 +971,13 @@ public class SongController {
         String minString = "";
         if (selectedSong.length() > 3) {
             for (Song song : songList) {
+                String artist = song.getArtist();
+                if (artist == null) artist = "";
+                String title = song.getTitle();
+                if (title == null) title = "";
                 if (!Objects.equals(song.getId(), songDatabaseTable.getSelectionModel().getSelectedItem().getId()) &&
-                        (song.getArtist().length() > 0 && song.getTitle().length() > 0)) {
-                    String currentSearch = song.getArtist() + "-" + song.getTitle();
+                        (artist.length() > 0 && title.length() > 0)) {
+                    String currentSearch = artist + "-" + title;
                     int distance = MyStringUtils.calculateSimilarity(currentSearch, selectedSong);
                     if (distance > 0 && distance < minSearch) minSearch = distance;
                     int sizeDif = distance - Math.abs(currentSearch.length() - selectedSong.length());
@@ -998,7 +1024,7 @@ public class SongController {
     }
 
     public void discogSong() {
-        String uri = textArtist.getText()+" "+textTitle.getText();
+        String uri = textArtist.getText() + " " + textTitle.getText();
         uri = "https://www.discogs.com/search/?type=all&q=" + uri;
         openURL(uri, "+");
     }
@@ -1021,6 +1047,7 @@ public class SongController {
                 && dragEvent.getDragboard().hasFiles()) {
             List<File> list = dragEvent.getDragboard().getFiles();
             List<Path> mp3List = new ArrayList<>();
+            int zipCounter = 0;
 
             for (File file : list) {
                 if (file.isDirectory()) {
@@ -1032,6 +1059,24 @@ public class SongController {
                 } else if (file.toString().substring(file.toString().length() - 4).equalsIgnoreCase(".mp3")) {
                     mp3List.add(Path.of(file.getAbsolutePath()));
                 }
+
+                //TODO: this checks for number of MP3s in a zip file, eventually maybe add a choice what to extract from a zip?
+                if (file.toString().endsWith(".zip")) {
+                    try {
+                        ZipFile zip = new ZipFile(String.valueOf(file));
+                        Enumeration<? extends ZipEntry> files = zip.entries();
+                        while (files.hasMoreElements()) {
+                            String filename = files.nextElement().getName();
+                            if (filename.toLowerCase().endsWith(".mp3")) {
+                                //if (filename.contains("stone")) logger.debug(filename);
+                                zipCounter++;
+                            }
+                        }
+                    } catch (IOException catchError) {
+                        logger.error("error handling zip file!", catchError);
+                    }
+                }
+
             }
 
             SongGlobal.setMP3List(mp3List);
@@ -1045,6 +1090,8 @@ public class SongController {
                         "There were no mp3 files to import",
                         list.toString());
             }
+
+            if (zipCounter > 0) logger.debug("mp3s found in zips: " + zipCounter);
         }
     }
 
@@ -1087,11 +1134,11 @@ public class SongController {
         return width;
     }
 
-    public void listTag( ) {
+    public void listTag() {
         String id3File = songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc();
         MyID3 tempid3 = ID3Reader.getTag(new File(id3File));
         //logger.debug(tempid3.listFrames());
-        Popups.giveInfoAlert("ID3 tag content for: ", id3File, tempid3.listFrames() +"---"+ tempid3.getSize());
+        Popups.giveInfoAlert("ID3 tag content for: ", id3File, tempid3.listFrames() + "---" + tempid3.getSize());
     }
 
 

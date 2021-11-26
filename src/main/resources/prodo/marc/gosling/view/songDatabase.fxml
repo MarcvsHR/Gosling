@@ -242,7 +242,7 @@
                     </Label>
                     <TextField fx:id="textFilterFolder" onKeyTyped="#filterTable" prefWidth="150.0">
                         <tooltip>
-                            <Tooltip showDelay="300ms" text="Search artist/title/album" />
+                            <Tooltip showDelay="300ms" text="Search artist/title/album&#xD;Use | for multiple terms" />
                         </tooltip>
                     </TextField>
                     <ComboBox fx:id="doneFilter" focusTraversable="false" onAction="#filterTable" prefWidth="110.0" promptText="Either" />

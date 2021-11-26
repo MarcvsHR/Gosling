@@ -24,6 +24,7 @@ public class MyStringUtils {
             text = text.trim().replaceAll(" +", " ");
             text = text.replace("Mc ", "Mc");
             text = text.replace(" .", ".");
+            text = text.replace("&","i");
             text = text.toLowerCase();
             text = text.trim();
             text = capitalizeAfter(" ", text);

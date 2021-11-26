@@ -18,6 +18,7 @@ import java.util.Objects;
 @Entity
 @ToString
 @NoArgsConstructor
+//TODO: need to handle nulls better so there isn't a shitload of null checks all over the place
 public class Song {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,6 +59,7 @@ public class Song {
                 MyStringUtils.compareStrings(composer, that.composer) &&
                 MyStringUtils.compareStrings(genre, that.genre) &&
                 MyStringUtils.compareStrings(fileLoc, that.fileLoc) &&
+                MyStringUtils.compareStrings(ISRC, that.ISRC) &&
                 Objects.equals(year, that.year) &&
                 //Objects.equals(duration, that.duration) &&
 
@@ -95,6 +97,7 @@ public class Song {
             log.info("Convert Short [" + dbValue + "] to Year [" + year + "]");
             return year;
         }
+
     }
 
 }

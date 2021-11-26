@@ -201,6 +201,10 @@
     -fx-background-color: transparent;
 }
 
+.table-view .arrow {
+    -fx-background-color: #000000;
+}
+
 /*
 }
 .table-cell:odd:empty {
@@ -213,3 +217,9 @@
     -fx-display: none;
 }
 */
+
+.tooltip {
+    -fx-font-size: 14;
+    -fx-font-weight: 800;
+    -fx-font-family: "Futura";
+}
