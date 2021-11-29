@@ -113,7 +113,7 @@ public class SongController {
                 "Ministry of Sound Recordings", "Polydor", "Promo", "Rca", "Scardona", "Sony", "Spona",
                 "Melody", "Dancing Bear", "Heksagon", "Arista", "Geffen", "Intek", "Sedma Sekunda",
                 "Bonton", "Hamar", "Rubikon", "Rtl", "Only Records", "Zvuci Mediterana", "Abudublin",
-                "Campus"};
+                "Campus", "Atlantic", "Parlophone "};
         Arrays.sort(array);
         publisherList.addAll(Arrays.asList(array));
     }

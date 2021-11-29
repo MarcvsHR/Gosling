@@ -31,6 +31,7 @@ public final class id3Header {
     public static final String DATE = "TDAT";
     public static final String COPYRIGHT_MSG = "TCOP";
     public static final String TEXT_WRITER = "TEXT";
+    public static final String REMIXED_BY = "TPE4";
 
     public static final String DELETE = "XXXX";
 
@@ -39,7 +40,7 @@ public final class id3Header {
             "TKEY", "COMM", "TPOS", "TDRL", "TRCK", "TXXX", "TBPM",
             "APIC", "TDRC", "TIME", "DONE", "TSRC", "TSSE", "TLEN",
             "TENC", "USLT", "MCDI", "PRIV", "TDAT", "TCOP", "TEXT",
-            "XXXX",
+            "TPE4",
             "XXXX",
     };
 
