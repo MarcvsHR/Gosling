@@ -5,7 +5,7 @@ import org.apache.log4j.Logger;
 import prodo.marc.gosling.dao.MyID3;
 import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.dao.id3Header;
-import prodo.marc.gosling.dao.mp3Frame;
+import prodo.marc.gosling.dao.MP3Frame;
 import prodo.marc.gosling.hibernate.repository.SongRepository;
 import prodo.marc.gosling.service.MyStringUtils;
 
@@ -103,31 +103,42 @@ public class ID3v2Utils {
         double estDur = 0;
         while (counter < mp3Data.length) {
             BigInteger HBI = BigInteger.valueOf(ByteBuffer.wrap(Arrays.copyOfRange(mp3Data, counter, counter + 4)).getInt());
-            mp3Frame frame = new mp3Frame(HBI);
+            MP3Frame frame = new MP3Frame(HBI);
             //error checking, not needed atm
             if (counter < 0) {
-                logger.debug(size+counter);
+                logger.debug(size + counter);
                 logger.debug(frame.getAllData());
             }
 
             if (!frame.isValid()) {
                 int distance = mp3Data.length - counter;
-                String headerString = new String(Arrays.copyOfRange(mp3Data,counter,counter+3));
+                String headerString = new String(Arrays.copyOfRange(mp3Data, counter, counter + 3));
                 logger.debug(headerString);
-                logger.debug("weird header found at "+(distance)+" before the end");
-                logger.debug(size+counter);
-                break; }
+                logger.debug(Arrays.toString(Arrays.copyOfRange(mp3Data, counter, counter + 3)));
+                logger.debug("weird header found at " + (distance) + " before the end");
+                logger.debug(size + counter);
+                break;
+            }
 //            logger.debug(frame.getAllData());
             frameLen = frame.getFrameSizeInBytes();
 //            logger.debug("frame length: "+frameLen);
-            counter+=frameLen;
-            estDur+=frame.getFrameTimeInMS();
-//            logger.debug(estDur);
+            counter += frameLen;
+            estDur += frame.getFrameTimeInMS();
+            //logger.debug(estDur);
+            //logger.debug(frame.getAllData());
+
+            //TODO: this needs to raise an error instead of just returning the duration
+            //if this is 0, that means there's somehow a bad frame in the data
+            if (frame.getFrameSizeInBytes() == 0) {
+                logger.debug("error at byte: "+(counter+size));
+                return (long) estDur;
+            }
         }
+        //logger.debug(counter+size);
 //        logger.debug("Estimated file duration in s: " + estDur/1000);
         //logger.debug("----- ending getDuration");
 
-        return estDur < 1000 ? 0 : (long)estDur;
+        return estDur < 1000 ? 0 : (long) estDur;
     }
 
 }

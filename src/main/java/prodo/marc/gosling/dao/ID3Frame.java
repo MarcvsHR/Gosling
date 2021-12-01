@@ -7,6 +7,7 @@ public class ID3Frame extends ID3Size {
     private byte flag2;
     private byte encoding;
     private byte[] content;
+    private byte[] MCDI_header;
 
     public ID3Frame(String header, String data) {
         super();
@@ -59,4 +60,8 @@ public class ID3Frame extends ID3Size {
     public void setContent(byte[] content) {
         this.content = content;
     }
+
+    public void setMCDI_header(byte[] content) {this.MCDI_header = content; }
+
+    public byte[] getMCDI_header() {return MCDI_header;}
 }

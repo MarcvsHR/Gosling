@@ -1,11 +1,18 @@
 package prodo.marc.gosling.service;
 
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import prodo.marc.gosling.controllers.SongController;
+
 import java.time.Year;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
 public class MyStringUtils {
+
+    private static final Logger logger = LogManager.getLogger(MyStringUtils.class);
+
     /**
      * Check if two strings are equal
      */
@@ -75,7 +82,13 @@ public class MyStringUtils {
 
     public static Year parseYear(String year) {
         Year yearOut = null;
-        if (year != null) {yearOut = Year.parse(year);}
+        if (year != null) {
+            try {
+                yearOut = Year.parse(year.trim());
+            } catch (Exception exception) {
+                logger.error("could not parse year: "+year, exception);
+            }
+        }
         return yearOut;
     }
 

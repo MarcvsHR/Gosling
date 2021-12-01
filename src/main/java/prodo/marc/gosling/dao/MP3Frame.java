@@ -2,7 +2,7 @@ package prodo.marc.gosling.dao;
 
 import java.math.BigInteger;
 
-public class mp3Frame {
+public class MP3Frame {
 
     int layer;
     boolean padding;
@@ -14,7 +14,7 @@ public class mp3Frame {
     int samplesPerFrame;
     boolean valid = true;
 
-    public mp3Frame(BigInteger hbi) {
+    public MP3Frame(BigInteger hbi) {
 
         for (int i = 0; i<13;i++) {
             if (!hbi.testBit(20+i)) {
@@ -47,6 +47,7 @@ public class mp3Frame {
 
     private int checkBitrate(int tempBitrate, int layer) {
         int place = (layer*16-16) + tempBitrate;
+        //System.out.println(tempBitrate+"  "+layer);
 //        System.out.println(place);
 
         int[] bitrateArray = new int[]{

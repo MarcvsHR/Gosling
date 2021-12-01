@@ -24,7 +24,7 @@ import java.util.zip.ZipFile;
 
 public class FileUtils {
 
-    private static final Logger logger = LogManager.getLogger(ID3v2Utils.class);
+    private static final Logger logger = LogManager.getLogger(FileUtils.class);
 
     //@FXML
     public static File pickFolder(String initialDir) {
@@ -74,15 +74,17 @@ public class FileUtils {
 
         logger.debug("----- Executing addMP3");
 
-        Song song;
-        MyID3 id3tag = ID3Reader.getTag(new File(String.valueOf(path)));
-        logger.debug("current time: "+id3tag.getData(id3Header.LENGTH));
-        song = ID3v2Utils.songDataFromID3(id3tag, String.valueOf(path), editor);
+        Song song = new Song();
+        song.setFileLoc(String.valueOf(path));
         song.setEditor(editor);
         if (SongRepository.getIDofFile(song.getFileLoc()) != null) {
             logger.debug("---song already exists - "+song);
             return song.getFileLoc();
         } else {
+            File mp3 = new File(String.valueOf(path));
+            MyID3 id3tag = ID3Reader.getTag(mp3);
+            logger.debug("current time: "+id3tag.getData(id3Header.LENGTH));
+            song = ID3v2Utils.songDataFromID3(id3tag, String.valueOf(path), editor);
             SongRepository.addSong(song);
         }
 

@@ -2,7 +2,6 @@ package prodo.marc.gosling.dao;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 
@@ -12,6 +11,7 @@ public class MyID3 extends ID3Size {
     private byte flags;
     private int TXXX_Counter = 0;
     private int COMM_Counter = 0;
+    private int GEOB_Counter = 0;
 
     public MyID3(String frame) {
         this.flags = 0;
@@ -163,6 +163,14 @@ public class MyID3 extends ID3Size {
 
     public int getCOMM() {
         return COMM_Counter;
+    }
+
+    public void changeGEOB(int i) {
+        GEOB_Counter += i;
+    }
+
+    public int getGEOB() {
+        return GEOB_Counter;
     }
 
     public void removeFrame(String frame_id) {

@@ -20,7 +20,7 @@ import java.util.Objects;
 
 public class ID3Reader {
 
-    private static final Logger logger = LogManager.getLogger(ID3v2Utils.class);
+    private static final Logger logger = LogManager.getLogger(ID3Reader.class);
 
     public static MyID3 getTag(File file) {
         byte[] fileContent = null;
@@ -65,12 +65,23 @@ public class ID3Reader {
                             frame.setFrameID("TXXX"+number);
                             id3Data.changeTXXX(1);
                             //logger.debug("TXXX DATA: "+ new String(frame.getContent()));
-                        } else if (Objects.equals(frame.getFrameID(), "COMM")) {
+                        } else if (frame.getFrameID().equals(id3Header.COMMENT)) {
                             String number = String.format("%02d",id3Data.getCOMM());
                             frame.setFrameID("COMM"+number);
                             id3Data.changeCOMM(1);
+                        } else if (frame.getFrameID().equals(id3Header.GENERAL_OBJECT)) {
+                            String number = String.format("%02d",id3Data.getGEOB());
+                            frame.setFrameID("GEOB"+number);
+                            id3Data.changeGEOB(1);
+                        } else if (frame.getFrameID().equals(id3Header.CD_ID)) {
+                            String tempHeader = new String(Arrays.copyOfRange(fileContent, startFrames, startFrames + 4));
+                            if (!id3Header.CHECK_LIST(tempHeader))
+                                startFrames++;
                         }
-                        id3Data.addFrame(frame);
+                        if (!frame.getFrameID().equals(id3Header.CD_ID))
+                            id3Data.addFrame(frame);
+                        logger.debug(frame.getFrameID());
+//                        logger.debug(frame.getSize());
                         //id3Data.getFrame(frameID).setSize(frame.getContent().length + 1, false);
 //                    logger.debug("Current pos: " + startFrames);
                     }
@@ -78,11 +89,7 @@ public class ID3Reader {
                     id3Data.setVersion((byte)2,(byte)4,(byte)0);
                 }
 
-                if (id3Data.exists(id3Header.LENGTH)) {
-                    if ((id3Data.getData(id3Header.LENGTH).equals("0")))
-                        id3Data.removeFrame(id3Header.LENGTH);
-                }
-                if (!id3Data.exists(id3Header.LENGTH))
+                if (!id3Data.exists(id3Header.LENGTH) || id3Data.getData(id3Header.LENGTH).equals("0"))
                     id3Data.addFrame(id3Header.LENGTH, String.valueOf(ID3v2Utils.getDuration(fileContent,id3Data.getSize())));
 
                 logger.debug("duration: "+ ID3v2Utils.getDuration(fileContent, tempSize));
