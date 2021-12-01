@@ -47,7 +47,11 @@ import java.nio.file.StandardCopyOption;
 import java.text.DecimalFormat;
 import java.time.Year;
 import java.util.List;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -178,7 +182,7 @@ public class SongController {
 
         sortedSongs.comparatorProperty().bind(songDatabaseTable.comparatorProperty());
 
-        updateTable();
+        //updateTable();
 
         volumeSlider.setValue(INITIAL_VOLUME_SO_MY_EARS_DONT_EXPLODE);
         changeVolume();
@@ -349,7 +353,7 @@ public class SongController {
             updateSongs.setDisable(false);
         }
 
-        if (!Objects.equals(currentFileLoc, "") && new File(currentFileLoc).exists()) {
+        if (!currentFileLoc.equals("") && new File(currentFileLoc).exists()) {
 
             currentSong.setArtist(textArtist.getText());
             currentSong.setTitle(textTitle.getText());
@@ -767,14 +771,13 @@ public class SongController {
         dialog.setTitle("Delete");
         dialog.setHeaderText("Select what you want to delete");
 
-        Optional<String> result = dialog.showAndWait();
-        if (result.isPresent()) {
-            String picked = result.get();
-            if (Objects.equals(picked, "File")) {
+        String result = dialog.showAndWait().orElse(null);
+        if (result != null) {
+            if (result.equals("File")) {
                 Song song = songDatabaseTable.getSelectionModel().getSelectedItem();
                 SongRepository.delete(song);
                 updateTable();
-                if (Objects.equals(song.getFileLoc(), currentFileLoc)) {
+                if (currentFileLoc.equals(song.getFileLoc())) {
                     currentFileLoc = "";
                 }
                 try {
@@ -782,11 +785,11 @@ public class SongController {
                 } catch (IOException er) {
                     logger.error("can't delete file: ", er);
                 }
-            } else if (Objects.equals(picked, "Database entry")) {
+            } else if (result.equals("Database entry")) {
                 Song song = songDatabaseTable.getSelectionModel().getSelectedItem();
                 SongRepository.delete(song);
                 updateTable();
-                if (Objects.equals(song.getFileLoc(), currentFileLoc)) {
+                if (currentFileLoc.equals(song.getFileLoc())) {
                     currentFileLoc = "";
                 }
             } else {
@@ -975,7 +978,7 @@ public class SongController {
                 if (artist == null) artist = "";
                 String title = song.getTitle();
                 if (title == null) title = "";
-                if (!Objects.equals(song.getId(), songDatabaseTable.getSelectionModel().getSelectedItem().getId()) &&
+                if (song.getId() != songDatabaseTable.getSelectionModel().getSelectedItem().getId() &&
                         (artist.length() > 0 && title.length() > 0)) {
                     String currentSearch = artist + "-" + title;
                     int distance = MyStringUtils.calculateSimilarity(currentSearch, selectedSong);
@@ -1136,9 +1139,9 @@ public class SongController {
 
     public void listTag() {
         String id3File = songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc();
-        MyID3 tempid3 = ID3Reader.getTag(new File(id3File));
-        //logger.debug(tempid3.listFrames());
-        Popups.giveInfoAlert("ID3 tag content for: ", id3File, tempid3.listFrames() + "---" + tempid3.getSize());
+        MyID3 tempID3 = ID3Reader.getTag(new File(id3File));
+        //logger.debug(tempID3.listFrames());
+        Popups.giveInfoAlert("ID3 tag content for: ", id3File, tempID3.listFrames() + "---" + tempID3.getSize());
     }
 
 
