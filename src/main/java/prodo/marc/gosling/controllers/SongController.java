@@ -47,11 +47,7 @@ import java.nio.file.StandardCopyOption;
 import java.text.DecimalFormat;
 import java.time.Year;
 import java.util.List;
-import java.util.Arrays;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -124,7 +120,8 @@ public class SongController {
 
     private String[] getGenres() {
         String[] returnArr = {"", "Cro", "Cro Zabavne", "Instrumental", "Klape", "Kuruza",
-                "Pop", "xxx", "Italian", "Susjedi", "Religiozne", "Oldies", "X-Mas", "Domoljubne"};
+                "Pop", "xxx", "Italian", "Susjedi", "Religiozne", "Oldies", "X-Mas", "Domoljubne",
+                "Country"};
         Arrays.sort(returnArr);
         return returnArr;
     }
@@ -830,7 +827,9 @@ public class SongController {
             }
             String year = textYear.getText() + "\\";
 
-            List<String> foldersWithNoYear = Arrays.asList("religiozne", "oldies", "x-mas", "cro\\domoljubne");
+            List<String> foldersWithNoYear = Arrays.asList(
+                    "religiozne", "oldies", "x-mas", "cro\\domoljubne", "country"
+            );
             if (foldersWithNoYear.contains(genre)) {
                 year = "";
             }

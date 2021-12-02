@@ -52,7 +52,7 @@ public final class id3Header {
     public static final String DELETE = "XXXX";
 
     public static final String[] LIST = {
-        "TPUB", "TALB", "TIT2", "TYER", "TCON", "TPE1", "TPE2", "TCOM",
+            "TPUB", "TALB", "TIT2", "TYER", "TCON", "TPE1", "TPE2", "TCOM",
             "TKEY", "COMM", "TPOS", "TDRL", "TRCK", "TXXX", "TBPM",
             "APIC", "TDRC", "TIME", "DONE", "TSRC", "TSSE", "TLEN",
             "TENC", "USLT", "MCDI", "PRIV", "TDAT", "TCOP", "TEXT",

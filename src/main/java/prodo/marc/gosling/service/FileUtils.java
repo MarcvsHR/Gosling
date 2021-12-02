@@ -19,8 +19,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 public class FileUtils {
 
@@ -44,12 +42,14 @@ public class FileUtils {
 
         List<Path> mp3List = new ArrayList<>();
 
-        Stream<Path> walk = Files.walk(Paths.get(directory.getAbsolutePath())); {
+        Stream<Path> walk = Files.walk(Paths.get(directory.getAbsolutePath()));
+        {
             walk.filter(Files::isRegularFile).forEach(file -> {
-                if (file.toString().endsWith("."+ext)) {
+                if (file.toString().endsWith("." + ext)) {
                     mp3List.add(file);
                 }
-            });}
+            });
+        }
 
         logger.debug("----- Ending addSongsFromFolder");
         return mp3List;
@@ -59,10 +59,10 @@ public class FileUtils {
         logger.debug("----- Executing openFile");
 
         FileChooser fc = new FileChooser();
-        fc.setTitle("Open "+desc);
+        fc.setTitle("Open " + desc);
         fc.setInitialDirectory(new File(initialDir));
         FileChooser.ExtensionFilter extFilter =
-                new FileChooser.ExtensionFilter(desc, "*."+ext);
+                new FileChooser.ExtensionFilter(desc, "*." + ext);
         fc.getExtensionFilters().add(extFilter);
 
         logger.debug("----- ending openFile");
@@ -78,12 +78,12 @@ public class FileUtils {
         song.setFileLoc(String.valueOf(path));
         song.setEditor(editor);
         if (SongRepository.getIDofFile(song.getFileLoc()) != null) {
-            logger.debug("---song already exists - "+song);
+            logger.debug("---song already exists - " + song);
             return song.getFileLoc();
         } else {
             File mp3 = new File(String.valueOf(path));
             MyID3 id3tag = ID3Reader.getTag(mp3);
-            logger.debug("current time: "+id3tag.getData(id3Header.LENGTH));
+            logger.debug("current time: " + id3tag.getData(id3Header.LENGTH));
             song = ID3v2Utils.songDataFromID3(id3tag, String.valueOf(path), editor);
             SongRepository.addSong(song);
         }

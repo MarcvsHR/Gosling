@@ -53,10 +53,6 @@ public class MyID3 extends ID3Size {
         setSize(totalFrameSize(), false);
     }
 
-    public ID3Frame getFrame(String string) {
-        return frames.get(string);
-    }
-
     public String getVersionString() {
         return version[0] + "." + version[1] + "." + version[2];
     }
@@ -173,12 +169,16 @@ public class MyID3 extends ID3Size {
         return GEOB_Counter;
     }
 
+    public boolean exists(String frame_id) {
+        return frames.get(frame_id) != null;
+    }
+
     public void removeFrame(String frame_id) {
         frames.remove(frame_id);
     }
 
-    public boolean exists(String frame_id) {
-        return frames.get(frame_id) != null;
+    public ID3Frame getFrame(String string) {
+        return frames.get(string);
     }
 }
 

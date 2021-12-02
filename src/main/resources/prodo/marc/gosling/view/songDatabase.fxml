@@ -89,7 +89,7 @@
                     </HBox>
                     <HBox alignment="CENTER_RIGHT" spacing="10.0" HBox.hgrow="ALWAYS">
                         <Button fx:id="songBackButton" disable="true" focusTraversable="false" minHeight="30.0" mnemonicParsing="false" onAction="#backToMain" text="Main window" />
-                        <Button fx:id="openLegacyDataButton" disable="true" focusTraversable="false" minHeight="30.0" mnemonicParsing="false" onAction="#openLegacyData" text="Access">
+                        <Button fx:id="openLegacyDataButton" disable="false" focusTraversable="false" minHeight="30.0" mnemonicParsing="false" onAction="#openLegacyData" text="Access">
                             <graphic>
                                 <ImageView fitHeight="15" fitWidth="15">
                                     <Image url="@../images/accessLogo.png" />

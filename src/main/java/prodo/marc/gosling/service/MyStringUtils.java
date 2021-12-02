@@ -3,7 +3,6 @@ package prodo.marc.gosling.service;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import prodo.marc.gosling.controllers.SongController;
 
 import java.time.Year;
 import java.util.Arrays;
@@ -17,8 +16,12 @@ public class MyStringUtils {
      * Check if two strings are equal
      */
     public static boolean compareStrings(String text1, String text2) {
-        if (text1 == null) {text1 = "";}
-        if (text2 == null) {text2 = "";}
+        if (text1 == null) {
+            text1 = "";
+        }
+        if (text2 == null) {
+            text2 = "";
+        }
         return text1.equalsIgnoreCase(text2);
     }
 
@@ -26,7 +29,7 @@ public class MyStringUtils {
     public static String replaceCroChars(String text) {
         if (text != null) {
 
-            text = text.replaceAll("(\\p{Ll})(\\p{Lu})","$1,$2");
+            text = text.replaceAll("(\\p{Ll})(\\p{Lu})", "$1,$2");
             text = text.replace(",", ", ");
             text = text.trim().replaceAll(" +", " ");
             text = text.replace("Mc ", "Mc");
@@ -53,9 +56,12 @@ public class MyStringUtils {
             text = text.replace("Đ", "Dj");
             text = text.replace("Ž", "Z");
 
-            text = text.replace("Feat","Ft");
-            text = text.replace("Ft.","Ft");
-            text = text.replace("Ft","ft");
+            text = text.replaceAll("[^\\x00-\\x7F]", "%%");
+
+
+            text = text.replace("Feat", "Ft");
+            text = text.replace("Ft.", "Ft");
+            text = text.replace("Ft", "ft");
 
             return text;
         } else {
@@ -69,11 +75,12 @@ public class MyStringUtils {
         }
         String[] array = text.split(Pattern.quote(s));
         StringBuilder returnText = new StringBuilder();
-        int length = array.length-1;
-        if (length>0) {
-        for (int i = 0; i < length; i++) {
-            returnText.append(capWord(array[i])).append(s);
-        } } else {
+        int length = array.length - 1;
+        if (length > 0) {
+            for (int i = 0; i < length; i++) {
+                returnText.append(capWord(array[i])).append(s);
+            }
+        } else {
             return capWord(text);
         }
         returnText.append(capWord(array[length]));
@@ -86,7 +93,7 @@ public class MyStringUtils {
             try {
                 yearOut = Year.parse(year.trim());
             } catch (Exception exception) {
-                logger.error("could not parse year: "+year, exception);
+                logger.error("could not parse year: " + year, exception);
             }
         }
         return yearOut;
@@ -95,8 +102,10 @@ public class MyStringUtils {
     private static String capWord(String s) {
         int minCapSize = 0;
         if (s.length() > minCapSize) {
-            return s.substring(0,1).toUpperCase() + s.substring(1); }
-        else { return s; }
+            return s.substring(0, 1).toUpperCase() + s.substring(1);
+        } else {
+            return s;
+        }
     }
 
 
@@ -107,11 +116,9 @@ public class MyStringUtils {
             for (int j = 0; j <= y.length(); j++) {
                 if (i == 0) {
                     dp[i][j] = j;
-                }
-                else if (j == 0) {
+                } else if (j == 0) {
                     dp[i][j] = i;
-                }
-                else {
+                } else {
                     dp[i][j] = min(dp[i - 1][j - 1]
                                     + costOfSubstitution(x.charAt(i - 1), y.charAt(j - 1)),
                             dp[i - 1][j] + 1,
