@@ -3,3 +3,5 @@
 ### IntelliJ Idea
 .idea/
 /out/
+!/Gosling.iml
+!/.idea/
