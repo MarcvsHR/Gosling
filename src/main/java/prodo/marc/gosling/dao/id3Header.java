@@ -48,17 +48,20 @@ public final class id3Header {
     public static final String ORIGINAL_LYRICIST = "TOLY";
     public static final String RADIO_STATION = "TRSN";
     public static final String ENCODING_DATE = "TDEN";
+    public static final String MOOD = "TMOO";
+    public static final String MUSICIAN_CREDITS = "TMCL";
+    public static final String PEOPLE_INVOLVED = "TIPL";
 
     public static final String DELETE = "XXXX";
 
     public static final String[] LIST = {
-            "TPUB", "TALB", "TIT2", "TYER", "TCON", "TPE1", "TPE2", "TCOM",
+            "TPUB", "TALB", "TIT2", "TYER", "TCON", "TPE1", "TPE2",
             "TKEY", "COMM", "TPOS", "TDRL", "TRCK", "TXXX", "TBPM",
             "APIC", "TDRC", "TIME", "DONE", "TSRC", "TSSE", "TLEN",
             "TENC", "USLT", "MCDI", "PRIV", "TDAT", "TCOP", "TEXT",
             "TPE4", "GEOB", "TLAN", "TIT3", "WXXX", "TOPE", "TMED",
             "TIT1", "TIT2", "UFID", "POPM", "TDTG", "TOAL", "TPE3",
-            "TOLY", "TRSN", "TDEN",
+            "TOLY", "TRSN", "TDEN", "TMOO", "TMCL", "TIPL", "TCOM",
             "XXXX",
     };
 

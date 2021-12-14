@@ -113,7 +113,7 @@ public class SongController {
                 "Ministry of Sound Recordings", "Polydor", "Promo", "Rca", "Scardona", "Sony", "Spona",
                 "Melody", "Dancing Bear", "Heksagon", "Arista", "Geffen", "Intek", "Sedma Sekunda",
                 "Bonton", "Hamar", "Rubikon", "Rtl", "Only Records", "Zvuci Mediterana", "Abudublin",
-                "Campus", "Atlantic", "Parlophone "};
+                "Campus", "Atlantic", "Parlophone", "Interscope", "Def Jam", "Republic", "Tonika", "Decca"};
         Arrays.sort(array);
         publisherList.addAll(Arrays.asList(array));
     }
@@ -121,7 +121,7 @@ public class SongController {
     private String[] getGenres() {
         String[] returnArr = {"", "Cro", "Cro Zabavne", "Instrumental", "Klape", "Kuruza",
                 "Pop", "xxx", "Italian", "Susjedi", "Religiozne", "Oldies", "X-Mas", "Domoljubne",
-                "Country"};
+                "Country", "World Music"};
         Arrays.sort(returnArr);
         return returnArr;
     }
@@ -172,9 +172,10 @@ public class SongController {
         tableGenre.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getGenre()));
         tableISRC.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getISRC()));
         tableFileLoc.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getFileLoc()));
-        tableDone.setCellValueFactory(cellData -> new ReadOnlyBooleanWrapper(cellData.getValue().getDone()));
         tableEditor.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getEditor()));
         tableDuration.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getDurationString()));
+
+        tableDone.setCellValueFactory(cellData -> new ReadOnlyBooleanWrapper(cellData.getValue().getDone()));
         tableDone.setCellFactory(cellData -> new CheckBoxTableCell<>());
 
         sortedSongs.comparatorProperty().bind(songDatabaseTable.comparatorProperty());
@@ -1101,7 +1102,7 @@ public class SongController {
         if (tableMin) {
             tableComposer.setVisible(true);
             tableEditor.setVisible(true);
-            tableFileLoc.setVisible(true);
+            //tableFileLoc.setVisible(true);
             tablePublisher.setVisible(true);
             tableDone.setVisible(true);
             tableToggleButton.setText("-");
@@ -1110,7 +1111,7 @@ public class SongController {
         } else {
             tableComposer.setVisible(false);
             tableEditor.setVisible(false);
-            tableFileLoc.setVisible(false);
+            //tableFileLoc.setVisible(false);
             tablePublisher.setVisible(false);
             tableDone.setVisible(false);
             tableToggleButton.setText("+");

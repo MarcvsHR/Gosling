@@ -36,8 +36,6 @@ public class ID3v2Utils {
         testSong.setComposer(id3Data.getData(id3Header.COMPOSER));
         testSong.setYear(MyStringUtils.parseYear(id3Data.getData(id3Header.YEAR)));
         testSong.setGenre(id3Data.getData(id3Header.GENRE));
-        //if (id3Data.getData(id3Header.LENGTH) == null) id3Data.addFrame(id3Header.LENGTH, "0");
-        //testSong.setDuration(Integer.parseInt(id3Data.getData(id3Header.LENGTH).replaceAll(" ms", "")));
         testSong.setDuration(Integer.parseInt(id3Data.getData(id3Header.LENGTH)));
         testSong.setISRC(id3Data.getData(id3Header.ISRC));
         testSong.setFileLoc(path);
