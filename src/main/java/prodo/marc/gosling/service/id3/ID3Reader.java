@@ -75,7 +75,7 @@ public class ID3Reader {
                             id3Data.changeGEOB(1);
                         } else if (frame.getFrameID().equals(id3Header.CD_ID)) {
                             String tempHeader = new String(Arrays.copyOfRange(fileContent, startFrames, startFrames + 4));
-                            if (!id3Header.CHECK_LIST(tempHeader))
+                            if (id3Header.LIST_NOT_CONTAINS(tempHeader))
                                 startFrames++;
                         }
                         if (!frame.getFrameID().equals(id3Header.CD_ID))
@@ -117,6 +117,7 @@ public class ID3Reader {
         String test = String.valueOf((char) 0);
         test += test;
         test += test;
+        int uneditedSongs = 0;
 
         start += 4;
         frame.setSize(ByteBuffer.wrap(Arrays.copyOfRange(fileContent, start, start + 4)).getInt(), calculateSize);
@@ -127,6 +128,7 @@ public class ID3Reader {
         start += 3;
         if (frame.getFrameID().equals(test)) {
             frame.setFrameID("XXXX");
+            //logger.debug("found id3 padding!");
         } else {
             //logger.debug("header: "+frame.getFrameID());
 
@@ -173,9 +175,8 @@ public class ID3Reader {
                 }
             }
         }
-        if (!id3Header.CHECK_LIST(frame.getFrameID())) {
+        if (id3Header.LIST_NOT_CONTAINS(frame.getFrameID())) {
             logger.debug("unknown header: " + frame.getFrameID());
-            Popups.giveInfoAlert("ID3 import error", "found new unknown header", frame.getFrameID() + " - ");
         }
 //        logger.debug("header: " + frame.getFrameID());
 //        logger.debug("size: " + frame.getSize());

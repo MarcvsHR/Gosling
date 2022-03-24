@@ -75,13 +75,13 @@
                     </HBox>
                     <HBox alignment="TOP_CENTER" spacing="10.0" HBox.hgrow="ALWAYS">
                         <Button fx:id="skipBack" focusTraversable="false" mnemonicParsing="false" onAction="#moveTimeBack" text="-10s" />
-                        <Button fx:id="skipBackSmall" focusTraversable="false" mnemonicParsing="false" onAction="#moveTimeBackLittle" text="-0.1s" />
+                        <Button fx:id="skipBackSmall" focusTraversable="false" mnemonicParsing="false" onAction="#moveTimeBackLittle" text="-0.2s" />
                         <Slider fx:id="mp3Slider" focusTraversable="false" max="5000.0" onMousePressed="#sliderDrag" onMouseReleased="#moveTime" prefWidth="250.0">
                             <padding>
                                 <Insets left="5.0" right="5.0" top="5.0" />
                             </padding>
                         </Slider>
-                        <Button fx:id="skipForwardSmall" focusTraversable="false" mnemonicParsing="false" onAction="#moveTimeForwardLittle" text="+0.1s" />
+                        <Button fx:id="skipForwardSmall" focusTraversable="false" mnemonicParsing="false" onAction="#moveTimeForwardLittle" text="+0.2s" />
                         <Button fx:id="skipForward" focusTraversable="false" mnemonicParsing="false" onAction="#moveTimeForward" text="+10s" />
                         <padding>
                             <Insets top="10.0" />
@@ -204,13 +204,13 @@
                     <CheckBox fx:id="checkDone" focusTraversable="false" mnemonicParsing="false" text=" File is done">
 
                         <tooltip>
-                            <Tooltip showDelay="250ms" text="Mark file as ready for reproduction" />
+                            <Tooltip showDelay="250ms" text="Mark file as ready for reproduction (CTRL+D)" />
                         </tooltip>
                     </CheckBox>
                     <Button fx:id="updateSongs" focusTraversable="false" mnemonicParsing="false" onAction="#updateMP3" text="Update">
 
                         <tooltip>
-                            <Tooltip showDelay="500ms" text="Save changes to file/database" />
+                            <Tooltip showDelay="500ms" text="Save changes to file/database (CTRL+S)" />
                         </tooltip>
                     </Button>
                     <padding>
@@ -237,7 +237,7 @@
                     <padding>
                         <Insets right="5.0" />
                     </padding>
-                    <Label fx:id="labelSongNumber" text="Songs: x/y">
+                    <Label fx:id="labelSongNumber" text="DATABASE NOT LOADED, PLEASE CLICK REFRESH!!!">
 
                     </Label>
                     <TextField fx:id="textFilterFolder" onKeyTyped="#filterTable" prefWidth="150.0">

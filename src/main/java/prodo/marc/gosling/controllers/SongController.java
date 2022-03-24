@@ -219,6 +219,9 @@ public class SongController {
             openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
         };
         updateSongs.getScene().getAccelerators().put(kc3, rn3);
+        KeyCombination kc4 = new KeyCodeCombination(KeyCode.D, KeyCombination.CONTROL_DOWN);
+        Runnable rn4 = () -> checkDone.setSelected(!checkDone.isSelected());
+        updateSongs.getScene().getAccelerators().put(kc4, rn4);
     }
 
 
@@ -380,20 +383,23 @@ public class SongController {
                         "Continue:");
                 if (!resultNew)
                     selectFileFromTable(currentFileLoc);
-                else
-                    updateMP3();
+                else changeSong(fileLoc, localFile);
             }
         } else {
-            if (localFile) {
-                updateTextFields(fileLoc);
-                if (!publishersBound) {
-                    TextFields.bindAutoCompletion(textPublisher, publisherList).setMaxWidth(170);
-                    publishersBound = true;
-                }
-            }
+            changeSong(fileLoc, localFile);
         }
 
         //logger.debug("----- ending openMP3");
+    }
+
+    private void changeSong(String fileLoc, boolean localFile) {
+        if (localFile) {
+            updateTextFields(fileLoc);
+            if (!publishersBound) {
+                TextFields.bindAutoCompletion(textPublisher, publisherList).setMaxWidth(170);
+                publishersBound = true;
+            }
+        }
     }
 
 
@@ -447,6 +453,12 @@ public class SongController {
                 SongGlobal.setFilenameParsed(false);
             } else {
                 SongGlobal.setCurrentSong(ID3v2Utils.songDataFromID3(id3Data, file.getAbsolutePath(), editorName));
+            }
+
+            String unknownFrames = id3Data.checkFrames().toString();
+            if (!unknownFrames.equals("[]")) {
+                Popups.giveInfoAlert("Unknown ID3 header in file: ", file.toString(), unknownFrames);
+                //logger.debug(unknownFrames);
             }
 
         } catch (Exception report) {
@@ -557,14 +569,14 @@ public class SongController {
     @FXML
     protected void moveTimeForwardLittle() {
         if (mplayer != null) {
-            mplayer.seek(Duration.millis(mplayer.getCurrentTime().toMillis() + 100));
+            mplayer.seek(Duration.millis(mplayer.getCurrentTime().toMillis() + 200));
         }
     }
 
     @FXML
     protected void moveTimeBackLittle() {
         if (mplayer != null) {
-            mplayer.seek(Duration.millis(mplayer.getCurrentTime().toMillis() - 100));
+            mplayer.seek(Duration.millis(mplayer.getCurrentTime().toMillis() - 200));
         }
     }
 
@@ -583,8 +595,9 @@ public class SongController {
         if ((textTitle.getText().isEmpty() || textTitle.getText() == null) && !textAlbum.getText().isEmpty()) {
             textTitle.setText(textAlbum.getText());
         }
+        //if there's no year set, set it to current year
         if (textYear.getText() == null || textYear.getText().isBlank()) {
-            textYear.setText(String.valueOf(2021));
+            textYear.setText(String.valueOf(Year.now().getValue()));
         }
 
         id3.setFrame(id3Header.ARTIST, textArtist.getText());
@@ -932,7 +945,7 @@ public class SongController {
                     return false;
             }
             if (userFilter.getSelectionModel().getSelectedIndex() != 0 &&
-                    !userFilter.getSelectionModel().getSelectedItem().equals(currentSearchSong.getEditor()))
+                    !userFilter.getSelectionModel().getSelectedItem().equalsIgnoreCase(currentSearchSong.getEditor()))
                 return false;
 
             try {
@@ -1121,7 +1134,7 @@ public class SongController {
     }
 
     private double getTableWidth() {
-        double width = 2;
+        double width = 20;
         if (tableArtist.isVisible()) width += tableArtist.getWidth();
         if (tableTitle.isVisible()) width += tableTitle.getWidth();
         if (tableAlbum.isVisible()) width += tableAlbum.getWidth();
@@ -1141,7 +1154,7 @@ public class SongController {
         String id3File = songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc();
         MyID3 tempID3 = ID3Reader.getTag(new File(id3File));
         //logger.debug(tempID3.listFrames());
-        Popups.giveInfoAlert("ID3 tag content for: ", id3File, tempID3.listFrames() + "---" + tempID3.getSize());
+        Popups.giveInfoAlert("ID3 tag content for: ", id3File, tempID3.listFrames() + "   ---" + tempID3.getSize() + "bytes");
     }
 
 

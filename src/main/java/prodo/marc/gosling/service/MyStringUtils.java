@@ -30,9 +30,10 @@ public class MyStringUtils {
         if (text != null) {
 
             text = text.replaceAll("(\\p{Ll})(\\p{Lu})", "$1,$2");
+            text = text.replace(" ,", ",");
             text = text.replace(",", ", ");
             text = text.trim().replaceAll(" +", " ");
-            text = text.replace("Mc ", "Mc");
+            text = text.replace("Mc, ", "Mc");
             text = text.replace(" .", ".");
             //text = text.replace("&","i");
             text = text.toLowerCase();

@@ -1,6 +1,8 @@
 package prodo.marc.gosling.dao;
 
 
+import java.util.Set;
+
 public final class id3Header {
     public static final String ARTIST = "TPE1";
     public static final String TITLE = "TIT2";
@@ -35,7 +37,6 @@ public final class id3Header {
     public static final String GENERAL_OBJECT = "GEOB"; //can have multiple, implemented
     public static final String LANGUAGE = "TLAN";
     public static final String CONTENT_GROUP = "TIT1";
-    public static final String TITLE_DESCRIPTION = "TIT2";
     public static final String SUBTITLE_INFO = "TIT3";
     public static final String URL_CUSTOM = "WXXX";
     public static final String ORIGINAL_ARTIST = "TOPE";
@@ -51,24 +52,29 @@ public final class id3Header {
     public static final String MOOD = "TMOO";
     public static final String MUSICIAN_CREDITS = "TMCL";
     public static final String PEOPLE_INVOLVED = "TIPL";
+    public static final String FILE_TYPE = "TFLT";
+    public static final String INVOLVED_PEOPLE_OLD = "IPLS";
+    public static final String RECORDING_DATES = "TRDA";
+    public static final String COPYRIGHT = "WCOP";
+    public static final String TABLE_OF_CONTENT = "CTOC";
+    public static final String CHAPTER = "CHAP";
+    public static final String COMPOSER_SORT = "TSOC";
 
     public static final String DELETE = "XXXX";
 
-    public static final String[] LIST = {
+    public static final Set<String> LIST = Set.of(
             "TPUB", "TALB", "TIT2", "TYER", "TCON", "TPE1", "TPE2",
             "TKEY", "COMM", "TPOS", "TDRL", "TRCK", "TXXX", "TBPM",
             "APIC", "TDRC", "TIME", "DONE", "TSRC", "TSSE", "TLEN",
             "TENC", "USLT", "MCDI", "PRIV", "TDAT", "TCOP", "TEXT",
             "TPE4", "GEOB", "TLAN", "TIT3", "WXXX", "TOPE", "TMED",
-            "TIT1", "TIT2", "UFID", "POPM", "TDTG", "TOAL", "TPE3",
+            "TIT1", "UFID", "POPM", "TDTG", "TOAL", "TPE3", "WCOP",
             "TOLY", "TRSN", "TDEN", "TMOO", "TMCL", "TIPL", "TCOM",
-            "XXXX",
-    };
+            "TFLT", "IPLS", "TRDA", "CTOC", "CHAP", "TSOC",
+            "XXXX"
+    );
 
-    public static boolean CHECK_LIST(String s) {
-        for (String c : LIST) {
-            if (s.equals(c)) return true;
-        }
-        return false;
+    public static boolean LIST_NOT_CONTAINS(String s) {
+        return !LIST.contains(s);
     }
 }
