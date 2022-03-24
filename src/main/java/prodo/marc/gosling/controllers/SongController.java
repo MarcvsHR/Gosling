@@ -105,6 +105,7 @@ public class SongController {
     private String editorName;
     private boolean tableMin = false;
     private boolean publishersBound = false;
+    private boolean acceleratorsInstalled = false;
 
 
     private void publisherAutocomplete() {
@@ -151,6 +152,8 @@ public class SongController {
         } catch (UnknownHostException ex) {
             logger.error("Unknown host:", ex);
         }
+
+        refreshTableButton.setStyle("-fx-background-color: #" + changedBackgroundColor);
 
         dropGenre.getItems().addAll(getGenres());
         doneFilter.getItems().addAll("Ignore done", "Done", "Not Done");
@@ -201,27 +204,54 @@ public class SongController {
     }
 
     public void installAccelerators() {
-        KeyCombination kc = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
-        Runnable rn = this::updateMP3;
-        updateSongs.getScene().getAccelerators().put(kc, rn);
-        KeyCombination kc1 = new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN);
-        Runnable rn1 = () -> textFilterFolder.requestFocus();
-        updateSongs.getScene().getAccelerators().put(kc1, rn1);
-        KeyCombination kc2 = new KeyCodeCombination(KeyCode.UP, KeyCombination.CONTROL_DOWN);
-        Runnable rn2 = () -> {
-            songDatabaseTable.getSelectionModel().select(songDatabaseTable.getSelectionModel().getSelectedIndex() - 1);
-            openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
-        };
-        updateSongs.getScene().getAccelerators().put(kc2, rn2);
-        KeyCombination kc3 = new KeyCodeCombination(KeyCode.DOWN, KeyCombination.CONTROL_DOWN);
-        Runnable rn3 = () -> {
-            songDatabaseTable.getSelectionModel().select(songDatabaseTable.getSelectionModel().getSelectedIndex() + 1);
-            openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
-        };
-        updateSongs.getScene().getAccelerators().put(kc3, rn3);
-        KeyCombination kc4 = new KeyCodeCombination(KeyCode.D, KeyCombination.CONTROL_DOWN);
-        Runnable rn4 = () -> checkDone.setSelected(!checkDone.isSelected());
-        updateSongs.getScene().getAccelerators().put(kc4, rn4);
+        if (!acceleratorsInstalled) {
+            KeyCombination kc = new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN);
+            Runnable rn = this::updateMP3;
+            updateSongs.getScene().getAccelerators().put(kc, rn);
+
+            KeyCombination kc1 = new KeyCodeCombination(KeyCode.F, KeyCombination.SHORTCUT_DOWN);
+            Runnable rn1 = () -> textFilterFolder.requestFocus();
+            updateSongs.getScene().getAccelerators().put(kc1, rn1);
+
+            KeyCombination kc2 = new KeyCodeCombination(KeyCode.UP, KeyCombination.SHORTCUT_DOWN);
+            Runnable rn2 = () -> {
+                songDatabaseTable.getSelectionModel().select(songDatabaseTable.getSelectionModel().getSelectedIndex() - 1);
+                openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
+            };
+            updateSongs.getScene().getAccelerators().put(kc2, rn2);
+
+            KeyCombination kc3 = new KeyCodeCombination(KeyCode.DOWN, KeyCombination.SHORTCUT_DOWN);
+            Runnable rn3 = () -> {
+                songDatabaseTable.getSelectionModel().select(songDatabaseTable.getSelectionModel().getSelectedIndex() + 1);
+                openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
+            };
+            updateSongs.getScene().getAccelerators().put(kc3, rn3);
+
+            KeyCombination kc4 = new KeyCodeCombination(KeyCode.D, KeyCombination.SHORTCUT_DOWN);
+            Runnable rn4 = () -> checkDone.setSelected(!checkDone.isSelected());
+            updateSongs.getScene().getAccelerators().put(kc4, rn4);
+
+            KeyCombination kc5 = new KeyCodeCombination(KeyCode.PAGE_DOWN, KeyCombination.SHORTCUT_DOWN);
+            Runnable rn5 = () -> {
+                songDatabaseTable.getSelectionModel().select(songList.size()-1);
+                songDatabaseTable.scrollTo(songList.size());
+                openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
+            };
+            updateSongs.getScene().getAccelerators().put(kc5, rn5);
+
+            KeyCombination kc6 = new KeyCodeCombination(KeyCode.PAGE_UP, KeyCombination.SHORTCUT_DOWN);
+            Runnable rn6 = () -> {
+                songDatabaseTable.getSelectionModel().select(0);
+                songDatabaseTable.scrollTo(0);
+                openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
+            };
+            updateSongs.getScene().getAccelerators().put(kc6, rn6);
+
+            refreshTableButton.setStyle("");
+
+            acceleratorsInstalled = true;
+
+        }
     }
 
 
@@ -301,6 +331,8 @@ public class SongController {
 
         //logger.debug("----- Executing updateTable");
 
+        installAccelerators();
+
         SongRepository songRepo = new SongRepository();
         List<Song> songList1 = songRepo.getSongs();
 
@@ -336,8 +368,6 @@ public class SongController {
     protected void openMP3(String fileLoc) {
 
         //logger.debug("----- Executing openMP3");
-
-        installAccelerators();
 
         Song currentSong = new Song();
         Song globalSong = SongGlobal.getCurrentSong();
@@ -429,7 +459,7 @@ public class SongController {
             }
             //TODO: ovo ne bi trebalo radit vako... al genre ce ionako radit drugacije eventually...
             if (id3Data.getData(id3Header.GENRE) != null) {
-                dropGenre.getSelectionModel().select(MyStringUtils.replaceCroChars(id3Data.getData(id3Header.GENRE)));
+                dropGenre.getSelectionModel().select(MyStringUtils.replaceCroChars(id3Data.getData(id3Header.GENRE),id3Header.GENRE));
             }
             if (dropGenre.getSelectionModel().getSelectedItem() == null || id3Data.getData(id3Header.GENRE) == null) {
                 dropGenre.getSelectionModel().select(0);
@@ -583,6 +613,8 @@ public class SongController {
     public void updateMP3() {
 
         //logger.debug("----- Executing updateMP3");
+
+        installAccelerators();
 
         changeCRO();
 
@@ -812,11 +844,11 @@ public class SongController {
     }
 
     public void changeCRO() {
-        textArtist.setText(MyStringUtils.replaceCroChars(textArtist.getText()));
-        textTitle.setText(MyStringUtils.replaceCroChars(textTitle.getText()));
-        textAlbum.setText(MyStringUtils.replaceCroChars(textAlbum.getText()));
-        textPublisher.setText(MyStringUtils.replaceCroChars(textPublisher.getText()));
-        textComposer.setText(MyStringUtils.replaceCroChars(textComposer.getText()));
+        textArtist.setText(MyStringUtils.replaceCroChars(textArtist.getText(),id3Header.ARTIST));
+        textTitle.setText(MyStringUtils.replaceCroChars(textTitle.getText(),id3Header.TITLE));
+        textAlbum.setText(MyStringUtils.replaceCroChars(textAlbum.getText(),id3Header.ALBUM));
+        textPublisher.setText(MyStringUtils.replaceCroChars(textPublisher.getText(),id3Header.PUBLISHER));
+        textComposer.setText(MyStringUtils.replaceCroChars(textComposer.getText(),id3Header.COMPOSER));
     }
 
     //TODO: this part needs to check if all the fields are there so it needs to be handled earlier, prolly in updateMP3()

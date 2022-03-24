@@ -3,6 +3,7 @@ package prodo.marc.gosling.service;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import prodo.marc.gosling.dao.id3Header;
 
 import java.time.Year;
 import java.util.Arrays;
@@ -26,10 +27,12 @@ public class MyStringUtils {
     }
 
     //TODO: this should be an in-app thing where you pick a filter for renaming stuff
-    public static String replaceCroChars(String text) {
+    public static String replaceCroChars(String text, String field) {
         if (text != null) {
 
-            text = text.replaceAll("(\\p{Ll})(\\p{Lu})", "$1,$2");
+            if (field.equals(id3Header.COMPOSER)) {
+                text = text.replaceAll("(\\p{Ll})(\\p{Lu})", "$1,$2");
+            }
             text = text.replace(" ,", ",");
             text = text.replace(",", ", ");
             text = text.trim().replaceAll(" +", " ");
