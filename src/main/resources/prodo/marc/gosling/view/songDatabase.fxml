@@ -120,11 +120,11 @@
                     <Label text="Artist">
 
                     </Label>
-                    <TextField fx:id="textArtist" onKeyTyped="#checkArtistField" prefWidth="250.0" />
+                    <TextField fx:id="textArtist" onKeyTyped="#checkFields" prefWidth="250.0" />
                     <Label text="Title">
 
                     </Label>
-                    <TextField fx:id="textTitle" prefWidth="250.0" />
+                    <TextField fx:id="textTitle" onKeyTyped="#checkFields" prefWidth="250.0" />
                     <Button fx:id="spotSongButton" focusTraversable="false" mnemonicParsing="false" onAction="#spotSong">
                         <graphic>
                             <ImageView>
@@ -172,7 +172,7 @@
                     <Label text="Composer">
 
                     </Label>
-                    <TextField fx:id="textComposer" prefWidth="460.0" />
+                    <TextField fx:id="textComposer" onKeyTyped="#checkFields" prefWidth="460.0" />
                     <Label text="Album">
 
                     </Label>
@@ -183,9 +183,9 @@
                 </HBox>
                 <HBox alignment="BOTTOM_CENTER" spacing="8.0">
                     <Label text="Year" />
-                    <TextField fx:id="textYear" onKeyTyped="#checkYearField" prefWidth="80.0" />
+                    <TextField fx:id="textYear" onKeyTyped="#checkFields" prefWidth="80.0" />
                     <Label text="Genre" />
-                    <ComboBox fx:id="dropGenre" prefWidth="130.0" />
+                    <ComboBox fx:id="dropGenre" onAction="#checkFields" prefWidth="130.0" />
                     <Label text="Publisher" />
                     <TextField fx:id="textPublisher" prefWidth="100.0" />
                     <Label text="ISRC" />
@@ -201,7 +201,7 @@
                             <Tooltip showDelay="250ms" text="Return data to original" />
                         </tooltip>
                     </Button>
-                    <CheckBox fx:id="checkDone" focusTraversable="false" mnemonicParsing="false" text=" File is done">
+                    <CheckBox fx:id="checkDone" onMouseClicked="#checkFields" focusTraversable="false" mnemonicParsing="false" text=" File is done">
 
                         <tooltip>
                             <Tooltip showDelay="250ms" text="Mark file as ready for reproduction (CTRL+D)" />

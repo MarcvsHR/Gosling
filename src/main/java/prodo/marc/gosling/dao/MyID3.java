@@ -46,7 +46,7 @@ public class MyID3 extends ID3Size {
         String breakLine = "";
         for (ID3Frame frame : frames.values()) {
             //System.out.println(Arrays.toString(frame.getContent()));
-            if (!frame.getFrameID().equals(id3Header.ALBUM_ART)) {
+            if (!frame.getFrameID().equals(id3Header.ALBUM_ART) && frame.getFrameID().length() == 4) {
                 if (id3Header.LIST_NOT_CONTAINS(frame.getFrameID())) {
                     list.add(breakLine + frame.getFrameID() + " - " + new String(frame.getContent()));
                 }

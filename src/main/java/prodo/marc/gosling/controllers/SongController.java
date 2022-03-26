@@ -233,7 +233,7 @@ public class SongController {
 
             KeyCombination kc5 = new KeyCodeCombination(KeyCode.PAGE_DOWN, KeyCombination.SHORTCUT_DOWN);
             Runnable rn5 = () -> {
-                songDatabaseTable.getSelectionModel().select(songList.size()-1);
+                songDatabaseTable.getSelectionModel().select(songList.size() - 1);
                 songDatabaseTable.scrollTo(songList.size());
                 openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
             };
@@ -459,7 +459,7 @@ public class SongController {
             }
             //TODO: ovo ne bi trebalo radit vako... al genre ce ionako radit drugacije eventually...
             if (id3Data.getData(id3Header.GENRE) != null) {
-                dropGenre.getSelectionModel().select(MyStringUtils.replaceCroChars(id3Data.getData(id3Header.GENRE),id3Header.GENRE));
+                dropGenre.getSelectionModel().select(MyStringUtils.replaceCroChars(id3Data.getData(id3Header.GENRE), id3Header.GENRE));
             }
             if (dropGenre.getSelectionModel().getSelectedItem() == null || id3Data.getData(id3Header.GENRE) == null) {
                 dropGenre.getSelectionModel().select(0);
@@ -490,6 +490,8 @@ public class SongController {
                 Popups.giveInfoAlert("Unknown ID3 header in file: ", file.toString(), unknownFrames);
                 //logger.debug(unknownFrames);
             }
+
+            checkFields();
 
         } catch (Exception report) {
             logger.error("Error while opening file " + fileLoc, report);
@@ -646,6 +648,8 @@ public class SongController {
         }
         id3.setFrame(id3Header.GENRE, dropGenre.getSelectionModel().getSelectedItem());
         id3.setFrame(id3Header.ISRC, textISRC.getText());
+
+        checkFields();
 
 //        logger.debug("updated id3 to size: "+id3.totalFrameSize());
 
@@ -844,27 +848,18 @@ public class SongController {
     }
 
     public void changeCRO() {
-        textArtist.setText(MyStringUtils.replaceCroChars(textArtist.getText(),id3Header.ARTIST));
-        textTitle.setText(MyStringUtils.replaceCroChars(textTitle.getText(),id3Header.TITLE));
-        textAlbum.setText(MyStringUtils.replaceCroChars(textAlbum.getText(),id3Header.ALBUM));
-        textPublisher.setText(MyStringUtils.replaceCroChars(textPublisher.getText(),id3Header.PUBLISHER));
-        textComposer.setText(MyStringUtils.replaceCroChars(textComposer.getText(),id3Header.COMPOSER));
+        textArtist.setText(MyStringUtils.replaceCroChars(textArtist.getText(), id3Header.ARTIST));
+        textTitle.setText(MyStringUtils.replaceCroChars(textTitle.getText(), id3Header.TITLE));
+        textAlbum.setText(MyStringUtils.replaceCroChars(textAlbum.getText(), id3Header.ALBUM));
+        textPublisher.setText(MyStringUtils.replaceCroChars(textPublisher.getText(), id3Header.PUBLISHER));
+        textComposer.setText(MyStringUtils.replaceCroChars(textComposer.getText(), id3Header.COMPOSER));
     }
 
-    //TODO: this part needs to check if all the fields are there so it needs to be handled earlier, prolly in updateMP3()
-    public boolean renameFile() {
-        //logger.debug("----- Executing renameFile");
-        File oldFile = new File(currentFileLoc);
-        String newFileLoc = "\\" + textArtist.getText() + " - " + textTitle.getText() + ".mp3";
-        if (!checkDone.isSelected()) {
-            newFileLoc = oldFile.getParent() + newFileLoc;
+    private String generateNewFilename(String oldFile, boolean checkNew) {
+        String newFileLoc =  textArtist.getText() + " - " + textTitle.getText() + ".mp3";
+        if (!checkDone.isSelected() && !checkNew) {
+            newFileLoc = oldFile +"\\"+  newFileLoc;
         } else {
-            if (dropGenre.getSelectionModel().getSelectedItem().equals("")) {
-                Popups.giveInfoAlert("file rename error",
-                        "no genre selected",
-                        "please select genre and try again");
-                return false;
-            }
             String genre = dropGenre.getSelectionModel().getSelectedItem().toLowerCase();
             if (genre.equals("pop")) {
                 genre = "";
@@ -881,10 +876,27 @@ public class SongController {
             }
             if (genre.length() > 0) genre += "\\";
             newFileLoc = "Z:\\Songs\\" + genre + year + newFileLoc;
-            boolean mkdResult = new File(Paths.get(newFileLoc).getParent().toString()).mkdirs();
-            if (!mkdResult) {
-                logger.debug("creating folder failed:" + newFileLoc);
-            }
+
+        }
+        return newFileLoc;
+    }
+
+    //TODO: this part needs to check if all the fields are there so it needs to be handled earlier, prolly in updateMP3()
+    public boolean renameFile() {
+        //logger.debug("----- Executing renameFile");
+        File oldFile = new File(currentFileLoc);
+        String newFileLoc = generateNewFilename(oldFile.getParent(), false);
+
+        if (dropGenre.getSelectionModel().getSelectedItem().equals("")) {
+            Popups.giveInfoAlert("file rename error",
+                    "no genre selected",
+                    "please select genre and try again");
+            return false;
+        }
+
+        boolean mkdResult = new File(Paths.get(newFileLoc).getParent().toString()).mkdirs();
+        if (!mkdResult) {
+            logger.debug("creating folder failed:" + newFileLoc);
         }
         File newFile = new File(newFileLoc);
         if (!oldFile.getAbsolutePath().equals(newFile.getAbsolutePath())) {
@@ -919,10 +931,59 @@ public class SongController {
     }
 
     public void checkArtistField() {
-        if (MyStringUtils.compareStrings(SongGlobal.getCurrentSong().getArtist(), textArtist.getText())) {
-            textArtist.setStyle("-fx-background-color: #" + defaultBackgroundColor);
-        } else {
+        if (textArtist.getText().contains("%") || textArtist.getText().contains("?")) {
             textArtist.setStyle("-fx-background-color: #" + changedBackgroundColor);
+        } else {
+            textArtist.setStyle("-fx-background-color: #" + defaultBackgroundColor);
+        }
+    }
+
+    public void checkComposerField() {
+        if (textComposer.getText().contains("%") || textComposer.getText().contains("?")) {
+            textComposer.setStyle("-fx-background-color: #" + changedBackgroundColor);
+        } else {
+            textComposer.setStyle("-fx-background-color: #" + defaultBackgroundColor);
+        }
+    }
+
+    public void checkTitleField() {
+        if (textTitle.getText().contains("%") || textTitle.getText().contains("?")) {
+            textTitle.setStyle("-fx-background-color: #" + changedBackgroundColor);
+        } else {
+            textTitle.setStyle("-fx-background-color: #" + defaultBackgroundColor);
+        }
+    }
+
+    public void checkFields() {
+        if (textComposer.getText() != null) checkComposerField();
+        if (textArtist.getText() != null) checkArtistField();
+        if (textTitle.getText() != null) checkTitleField();
+        if (textYear.getText() != null) checkYearField();
+
+        checkFilename();
+    }
+
+    private void checkFilename() {
+        //logger.debug("checking name goes here");
+        String newFileLoc = generateNewFilename(new File(currentFileLoc).getParent(),true);
+        boolean found = new File(newFileLoc).exists();
+        if (!currentFileLoc.equalsIgnoreCase(newFileLoc)) {
+            logger.debug("names do not match!, checking file: "+newFileLoc);
+            String output = found ? "exist" : "NOT exist";
+            logger.debug("This file does "+output);
+
+            //if the song exists, update is disabled... that should work for now but maybe requires rethink...
+            updateSongs.setDisable(found && checkDone.isSelected());
+
+            if (found) {
+                updateSongs.setStyle("-fx-background-color: #" + changedBackgroundColor);
+            } else {
+                updateSongs.setStyle("-fx-background-color: #" + defaultBackgroundColor);
+                logger.debug("set colour back");
+            }
+        } else {
+            updateSongs.setStyle("-fx-background-color: #" + defaultBackgroundColor);
+            logger.debug("set colour back");
         }
     }
 
