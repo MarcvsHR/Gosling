@@ -1,7 +1,6 @@
 package prodo.marc.gosling.controllers;
 
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -19,13 +18,12 @@ public class RegexWindowController {
     public Button addRegexMethod;
     public ListView<String> regexList;
     public Song song = SongGlobal.getCurrentSong();
-    List<String> regex = new ArrayList<>();
-
     public Label mp3Filename;
     public Label labelArtist;
     public Label labelTitle;
     public Label labelISRC;
     public Label labelPublisher;
+    List<String> regex = new ArrayList<>();
 
     private List<String> getRegexStuff() {
         regex.add("Artist - Title");
@@ -41,6 +39,8 @@ public class RegexWindowController {
         regex.add("Artist-Title-CROREC-ISRC");
         regex.add("Artist - Title - ISRC");
         regex.add("ISRC - Artist - Title - Publisher");
+        regex.add("Artist - Title - Publisher - ISRC");
+        regex.add("Artist_Title_ISRC_Publisher");
         Collections.sort(regex);
         return new ArrayList<>(regex);
     }
@@ -119,9 +119,28 @@ public class RegexWindowController {
                 isSet = true;
                 break;
             }
-            case  "Artist-Title-CROREC-ISRC": {
+            case "Artist-Title-CROREC-ISRC": {
                 String[] output = mp3Filename.getText().split("-CROATIA-RECORDS-");
-                song.setArtist(output[0].replace("-"," "));
+                String[] splitWords = output[0].split("-");
+                //fine the first word in splitWords that isn't all upper case
+                //put all the words before that in the artist field with spaces in between
+                //put everything else in the title field with spaces in between
+                StringBuilder artist = new StringBuilder();
+                StringBuilder title = new StringBuilder();
+                boolean putInArtist = true;
+                for (String word : splitWords) {
+                    if (!word.equals(word.toUpperCase()))
+                        putInArtist = false;
+
+                    if (putInArtist)
+                        artist.append(word).append(" ");
+                    else
+                        title.append(word).append(" ");
+                }
+                song.setArtist(artist.toString().trim());
+                song.setTitle(title.toString().trim());
+
+                //song.setArtist(output[0].replace("-"," "));
                 song.setISRC(output[1]);
                 song.setPublisher("Crorec");
                 isSet = true;
@@ -144,15 +163,33 @@ public class RegexWindowController {
                 isSet = true;
                 break;
             }
+            case "Artist - Title - Publisher - ISRC": {
+                String[] output = mp3Filename.getText().split(" - ");
+                song.setArtist(output[0]);
+                song.setTitle(output[1]);
+                song.setPublisher(output[2]);
+                song.setISRC(output[3]);
+                isSet = true;
+                break;
+            }
+            case "Artist_Title_ISRC_Publisher": {
+                String[] output = mp3Filename.getText().split("_");
+                song.setArtist(output[0]);
+                song.setTitle(output[1]);
+                song.setISRC(output[2]);
+                song.setPublisher(output[3]);
+                isSet = true;
+                break;
+            }
         }
         if (isSet) {
             if (song.getTitle() != null)
-                song.setTitle(song.getTitle().replace("[Clean]",""));
+                song.setTitle(song.getTitle().replace("[Clean]", ""));
 
             labelArtist.setText("Artist: " + song.getArtist());
             labelTitle.setText("Title: " + song.getTitle());
-            labelPublisher.setText("Publisher: "+song.getPublisher());
-            labelISRC.setText("ISRC: "+song.getISRC());
+            labelPublisher.setText("Publisher: " + song.getPublisher());
+            labelISRC.setText("ISRC: " + song.getISRC());
         }
     }
 

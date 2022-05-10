@@ -49,6 +49,7 @@ import java.time.Year;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -97,6 +98,7 @@ public class SongController {
     MyID3 copiedID3 = new MyID3();
     String changedBackgroundColor = "bb3333";
     String defaultBackgroundColor = "555555";
+    String averageBackgroundColor = "dd9999";
     String defaultTextColor = "FFFFFF";
     ObservableList<String> publisherList = FXCollections.observableArrayList();
     private boolean updateCheck = true;
@@ -104,7 +106,8 @@ public class SongController {
     private Path tempDir;
     private String editorName;
     private boolean tableMin = false;
-    private boolean publishersBound = false;
+    //disabled dropdown for now
+    private boolean publishersBound = true;
     private boolean acceleratorsInstalled = false;
 
 
@@ -438,7 +441,9 @@ public class SongController {
         //logger.debug("----- Executing updateTextFields");
 
         //show file name
-        mp3Label.setText(new File(fileLoc).getName().replaceAll("(?i).mp3", ""));
+        String fileLabel = new File(fileLoc).getName();
+        fileLabel = SongGlobal.getFileExists().isBlank() ? fileLabel : SongGlobal.getFileExists();
+        mp3Label.setText(fileLabel.replaceAll("(?i).mp3", ""));
         currentFileLoc = fileLoc;
 
         //load id3 data into text fields
@@ -708,13 +713,14 @@ public class SongController {
         //logger.debug("----- Executing openMediaFile");
         String tempMp3 = tempDir + "\\temp";
 
+        Path filePath = Path.of(fileLoc);
         try {
-            Files.copy(Paths.get(fileLoc), Paths.get(tempMp3 + ".mp3"), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(filePath, Paths.get(tempMp3 + ".mp3"), StandardCopyOption.REPLACE_EXISTING);
             tempMp3 = tempMp3 + ".mp3";
         } catch (Exception ex) {
             logger.error("could not create temp mp3 file: ", ex);
             try {
-                Files.copy(Paths.get(fileLoc), Paths.get(tempMp3 + "1.mp3"), StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(filePath, Paths.get(tempMp3 + "1.mp3"), StandardCopyOption.REPLACE_EXISTING);
                 tempMp3 = tempMp3 + "1.mp3";
             } catch (Exception ex1) {
                 logger.error("could not create secondary temp mp3 file either: ", ex1);
@@ -855,18 +861,17 @@ public class SongController {
         textComposer.setText(MyStringUtils.replaceCroChars(textComposer.getText(), id3Header.COMPOSER));
     }
 
-    private String generateNewFilename(String oldFile, boolean checkNew) {
-        String newFileLoc =  textArtist.getText() + " - " + textTitle.getText() + ".mp3";
+    private String generateNewFilename(String oldFile, boolean checkNew, String year, String genre) {
+        String newFileLoc = textArtist.getText() + " - " + textTitle.getText() + ".mp3";
         if (!checkDone.isSelected() && !checkNew) {
-            newFileLoc = oldFile +"\\"+  newFileLoc;
+            newFileLoc = oldFile + "\\" + newFileLoc;
         } else {
-            String genre = dropGenre.getSelectionModel().getSelectedItem().toLowerCase();
             if (genre.equals("pop")) {
                 genre = "";
             } else if (genre.equals("domoljubne")) {
                 genre = "cro\\" + genre;
             }
-            String year = textYear.getText() + "\\";
+            year = year + "\\";
 
             List<String> foldersWithNoYear = Arrays.asList(
                     "religiozne", "oldies", "x-mas", "cro\\domoljubne", "country"
@@ -885,16 +890,17 @@ public class SongController {
     public boolean renameFile() {
         //logger.debug("----- Executing renameFile");
         File oldFile = new File(currentFileLoc);
-        String newFileLoc = generateNewFilename(oldFile.getParent(), false);
+        String newFileLoc = generateNewFilename(oldFile.getParent(), false, textYear.getText(), dropGenre.getSelectionModel().getSelectedItem().toLowerCase());
 
-        if (dropGenre.getSelectionModel().getSelectedItem().equals("")) {
+        if (dropGenre.getSelectionModel().getSelectedItem().equals("") && checkDone.isSelected()) {
             Popups.giveInfoAlert("file rename error",
                     "no genre selected",
                     "please select genre and try again");
             return false;
         }
 
-        boolean mkdResult = new File(Paths.get(newFileLoc).getParent().toString()).mkdirs();
+        Path filePath = Path.of(newFileLoc);
+        boolean mkdResult = new File(filePath.getParent().toString()).mkdirs();
         if (!mkdResult) {
             logger.debug("creating folder failed:" + newFileLoc);
         }
@@ -906,7 +912,7 @@ public class SongController {
                         newFile.getAbsolutePath() + " already exists or is in use.");
 
                 if (SongRepository.getIDofFile(newFileLoc) == null) {
-                    FileUtils.addMP3(Path.of(newFileLoc), editorName);
+                    FileUtils.addMP3(filePath, editorName);
                 }
                 updateTable();
 
@@ -914,7 +920,9 @@ public class SongController {
             }
         }
         currentFileLoc = newFile.getAbsolutePath();
-        mp3Label.setText(newFile.getName().replaceAll("(?i).mp3", ""));
+        String fileLabel = newFile.getName();
+        fileLabel = SongGlobal.getFileExists().isBlank() ? fileLabel : SongGlobal.getFileExists();
+        mp3Label.setText(fileLabel.replaceAll("(?i).mp3", ""));
         //logger.debug("----- ending renameFile");
 
         return true;
@@ -931,7 +939,7 @@ public class SongController {
     }
 
     public void checkArtistField() {
-        if (textArtist.getText().contains("%") || textArtist.getText().contains("?")) {
+        if (checkValidChars(textArtist.getText(),"artist")) {
             textArtist.setStyle("-fx-background-color: #" + changedBackgroundColor);
         } else {
             textArtist.setStyle("-fx-background-color: #" + defaultBackgroundColor);
@@ -939,7 +947,7 @@ public class SongController {
     }
 
     public void checkComposerField() {
-        if (textComposer.getText().contains("%") || textComposer.getText().contains("?")) {
+        if (checkValidChars(textComposer.getText(),"composer")) {
             textComposer.setStyle("-fx-background-color: #" + changedBackgroundColor);
         } else {
             textComposer.setStyle("-fx-background-color: #" + defaultBackgroundColor);
@@ -947,11 +955,19 @@ public class SongController {
     }
 
     public void checkTitleField() {
-        if (textTitle.getText().contains("%") || textTitle.getText().contains("?")) {
+        if (checkValidChars(textTitle.getText(),"tile")) {
             textTitle.setStyle("-fx-background-color: #" + changedBackgroundColor);
         } else {
             textTitle.setStyle("-fx-background-color: #" + defaultBackgroundColor);
         }
+    }
+
+    public boolean checkValidChars(String text, String fieldName) {
+        if (text.contains("%") || text.contains("?")) {
+            return true;
+        }
+        else return text.contains("/") && !fieldName.equals("composer");
+
     }
 
     public void checkFields() {
@@ -965,12 +981,10 @@ public class SongController {
 
     private void checkFilename() {
         //logger.debug("checking name goes here");
-        String newFileLoc = generateNewFilename(new File(currentFileLoc).getParent(),true);
+        String newFileLoc = generateNewFilename(new File(currentFileLoc).getParent(), true, textYear.getText(), dropGenre.getSelectionModel().getSelectedItem().toLowerCase());
         boolean found = new File(newFileLoc).exists();
         if (!currentFileLoc.equalsIgnoreCase(newFileLoc)) {
-            logger.debug("names do not match!, checking file: "+newFileLoc);
-            String output = found ? "exist" : "NOT exist";
-            logger.debug("This file does "+output);
+            //logger.debug("names do not match!, checking file: " + newFileLoc);
 
             //if the song exists, update is disabled... that should work for now but maybe requires rethink...
             updateSongs.setDisable(found && checkDone.isSelected());
@@ -978,24 +992,50 @@ public class SongController {
             if (found) {
                 updateSongs.setStyle("-fx-background-color: #" + changedBackgroundColor);
             } else {
-                updateSongs.setStyle("-fx-background-color: #" + defaultBackgroundColor);
-                logger.debug("set colour back");
+                AtomicReference<String> foundAlt = new AtomicReference<>("");
+                dropGenre.getItems().forEach(genre -> {
+                    int year  = Integer.parseInt(textYear.getText()==null ? "0" : textYear.getText());
+                    if (year!=0) {
+                        for (int testingYear = year-2; testingYear <= year+1; testingYear++) {
+                            logger.debug("testing year: " + testingYear);
+                            String newFileLocAlt = generateNewFilename(new File(currentFileLoc).getParent(), true,testingYear+"", genre);
+                            if (new File(newFileLocAlt).exists()) {
+                                foundAlt.set(newFileLocAlt.replaceAll("Z:\\\\Songs\\\\", "").replaceAll("\\\\", " - "));
+                            }
+                        }
+                    }
+                }
+                );
+                if (!foundAlt.get().isEmpty()) {
+                    updateSongs.setStyle("-fx-background-color: #" + averageBackgroundColor);
+                    SongGlobal.setFileExists(foundAlt.get());
+                    mp3Label.setText(foundAlt.get().replaceAll("(?i)\\.mp3", ""));
+                } else {
+                    updateSongs.setStyle("-fx-background-color: #" + defaultBackgroundColor);
+                    SongGlobal.setFileExists("");
+                    mp3Label.setText(new File(currentFileLoc).getName().replaceAll("(?i).mp3", ""));
+                }
+                //logger.debug("set colour back");
             }
         } else {
             updateSongs.setStyle("-fx-background-color: #" + defaultBackgroundColor);
-            logger.debug("set colour back");
+            SongGlobal.setFileExists("");
+            mp3Label.setText(new File(currentFileLoc).getName().replaceAll("(?i).mp3", ""));
+            //logger.debug("set colour back");
         }
+
     }
 
     public void checkYearField() {
         int pos = textYear.getCaretPosition();
         int len = textYear.getLength();
         if (textYear.getText() != null) {
-            textYear.setText(textYear.getText().replaceAll("[^\\d]", ""));
+            textYear.setText(textYear.getText().replaceAll("\\D", ""));
         }
         pos = textYear.getLength() - len + pos;
         textYear.positionCaret(pos);
-        if (MyStringUtils.compareStrings(String.valueOf(SongGlobal.getCurrentSong().getYear()), textYear.getText())) {
+        String tempYear = SongGlobal.getCurrentSong() == null ? "" : String.valueOf(SongGlobal.getCurrentSong().getYear());
+        if (MyStringUtils.compareStrings(tempYear, textYear.getText())) {
             textYear.setStyle("-fx-background-color: #" + defaultBackgroundColor);
             textYear.setStyle("-fx-text-color: #" + defaultTextColor);
         } else {
@@ -1122,6 +1162,8 @@ public class SongController {
 
     public void spotSong() {
         String uri = textArtist.getText() + " " + textTitle.getText();
+        uri = uri.replace(" ft ", " ");
+        uri = uri.replace(" & ", " ");
         uri = "https://open.spotify.com/search/" + uri;
         openURL(uri, "%20");
     }
@@ -1200,7 +1242,9 @@ public class SongController {
                         list.toString());
             }
 
-            if (zipCounter > 0) logger.debug("mp3s found in zips: " + zipCounter);
+            if (zipCounter > 0) Popups.giveInfoAlert("Zip file(s) detected",
+                    "MP3 files in zip file(s) detected: ",
+                    zipCounter + "");
         }
     }
 

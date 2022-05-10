@@ -25,6 +25,16 @@ public class SongGlobal {
     private static int truncatedFilter = 0;
     private static String folderFilter = "";
     private static String userFilter = "Any user";
+    private static String fileExists = "";
+
+
+    public static String getFileExists() {
+        return fileExists;
+    }
+
+    public static void setFileExists(String fileExists) {
+        SongGlobal.fileExists = fileExists;
+    }
 
     public static int getDoneFilter() {
         return doneFilter;

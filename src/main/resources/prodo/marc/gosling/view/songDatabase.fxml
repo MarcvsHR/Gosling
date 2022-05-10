@@ -210,7 +210,7 @@
                     <Button fx:id="updateSongs" focusTraversable="false" mnemonicParsing="false" onAction="#updateMP3" text="Update">
 
                         <tooltip>
-                            <Tooltip showDelay="500ms" text="Save changes to file/database (CTRL+S)" />
+                            <Tooltip showDelay="500ms" text="Save changes to file/database (CTRL+S)&#xD;If red, file already exists" />
                         </tooltip>
                     </Button>
                     <padding>
