@@ -5,7 +5,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import prodo.marc.gosling.HelloApplication;
 
 import java.io.IOException;
@@ -20,7 +22,6 @@ public class SceneController {
     public static void openScene(ActionEvent event, String window) throws IOException {
         FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(HelloApplication.class.getResource(window)));
         root = loader.load();
-//        JMetro jMetro = new JMetro(root, Style.DARK);
 
         Stage stage = (Stage) ((Node) event.getTarget()).getScene().getWindow();
         scene = new Scene(root);
@@ -28,14 +29,17 @@ public class SceneController {
         stage.show();
     }
 
-    public static void openWindow(ActionEvent event, String window) throws IOException {
+    public static void openWindow(ActionEvent event, String window, boolean block) throws IOException {
         FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(window));
         root = loader.load();
-//        JMetro jMetro = new JMetro(root, Style.DARK);
 
         Stage stage1 = new Stage();
         scene = new Scene(root);
         stage1.setScene(scene);
+        if (block) {
+            stage1.initModality(Modality.APPLICATION_MODAL);
+            stage1.initStyle(StageStyle.UTILITY);
+        }
         stage1.show();
     }
 

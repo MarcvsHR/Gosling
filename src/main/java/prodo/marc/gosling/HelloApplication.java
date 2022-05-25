@@ -14,7 +14,7 @@ public class HelloApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
 
-        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("view/songDatabase.fxml")));
+        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("view/hello-view.fxml")));
         //JMetro jMetro = new JMetro(root, Style.DARK);
         Scene scene = new Scene(root);
         stage.setTitle("main");

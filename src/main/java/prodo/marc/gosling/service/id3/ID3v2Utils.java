@@ -67,9 +67,8 @@ public class ID3v2Utils {
 
         int counter = 0;
 
-//        logger.debug("first header: "+header);
-        //String headerString = new String(Arrays.copyOfRange(mp3Data,counter,counter+3));
-        //this part was handling multiple id3s, not needed for now
+//        String headerString = new String(Arrays.copyOfRange(mp3Data,counter,counter+3));
+//        //this part was handling multiple id3s, not needed for now
 //        if (headerString.equals("ID3")) {
 //            logger.debug("-----------------------2 id3s found! panic!-----------------------");
 //            logger.debug("file: "+fileLoc);
@@ -88,7 +87,7 @@ public class ID3v2Utils {
 //            System.arraycopy(id3DataBytes, 0, outputFileData, 0, id3DataBytes.length);
 //            System.arraycopy(mp3Data, 0, outputFileData, id3DataBytes.length, mp3Data.length);
 //
-////        File outputFile = new File("c:\\test\\testing.mp3");
+//           //File outputFile = new File("c:\\test\\testing.mp3");
 //            File outputFile = new File(fileLoc);
 //            try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
 //                outputStream.write(outputFileData);

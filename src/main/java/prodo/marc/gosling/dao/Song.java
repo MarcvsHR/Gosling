@@ -14,7 +14,6 @@ import java.time.Year;
 import java.util.Objects;
 
 @Setter
-@Getter
 @Entity
 @ToString
 @NoArgsConstructor
@@ -25,11 +24,11 @@ public class Song {
     private int id;
 
     @Truncated
-    private String artist = "";
+    private String artist;
     @Truncated
-    private String title = "";
+    private String title;
     @Truncated
-    private String album = "";
+    private String album;
     @Truncated
     private String publisher;
     @Truncated
@@ -77,6 +76,56 @@ public class Song {
         output = String.format("%.0f:", minutes) + output;
         if (duration / 1000 < 600) output = "0"+output;
         return output;
+    }
+
+    public String getTitle() {
+        return Objects.requireNonNullElse(title, "");
+    }
+
+    public String getPublisher() {
+        return Objects.requireNonNullElse(publisher, "");
+    }
+
+    public String getISRC() { return Objects.requireNonNullElse(ISRC, ""); }
+
+    public String getAlbum() {
+        return Objects.requireNonNullElse(album, "");
+    }
+
+    public String getGenre() {
+        return Objects.requireNonNullElse(genre, "");
+    }
+
+    public String getComposer() {
+        return composer;
+    }
+
+    public String getFileLoc() {
+        return fileLoc;
+    }
+
+    public String getEditor() {
+        return editor;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public Year getYear() {
+        return year;
+    }
+
+    public String getArtist() {
+        return Objects.requireNonNullElse(artist, "");
+    }
+
+    public boolean getDone() {
+        return done;
+    }
+
+    public Integer getDuration() {
+        return duration;
     }
 
     @Converter(autoApply = true)

@@ -1,10 +1,12 @@
 package prodo.marc.gosling.controllers;
 
 import javafx.event.ActionEvent;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.Stage;
 import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.service.SongGlobal;
 
@@ -14,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class RegexWindowController {
+public class RegexWindowController extends SongController {
     public Button addRegexMethod;
     public ListView<String> regexList;
     public Song song = SongGlobal.getCurrentSong();
@@ -183,8 +185,7 @@ public class RegexWindowController {
             }
         }
         if (isSet) {
-            if (song.getTitle() != null)
-                song.setTitle(song.getTitle().replace("[Clean]", ""));
+            song.setTitle(song.getTitle().replace("[Clean]", ""));
 
             labelArtist.setText("Artist: " + song.getArtist());
             labelTitle.setText("Title: " + song.getTitle());
@@ -197,16 +198,24 @@ public class RegexWindowController {
 
         regexList.getItems().addAll(getRegexStuff());
 
-        String fileLoc = song.getFileLoc();
-        mp3Filename.setText(new File(fileLoc).getName().replaceAll("(?i).mp3", ""));
+        mp3Filename.setText(new File(song.getFileLoc()).getName().replaceAll("(?i).mp3", ""));
 
     }
 
-    public void closeAndSave(ActionEvent event) throws IOException {
+    public void closeAndSave(ActionEvent event) {
 
         SongGlobal.setCurrentSong(song);
-        SongGlobal.setFilenameParsed(true);
-        SceneController.openScene(event, "view/songDatabase.fxml");
+
+        //send data to another stage
+        publicTextArtist.setText(song.getArtist());
+        publicTextTitle.setText(song.getTitle());
+        publicTextISRC.setText(song.getISRC());
+        publicTextPublisher.setText(song.getPublisher());
+
+        //close window
+        Node source = (Node) event.getSource();
+        Stage stage = (Stage) source.getScene().getWindow();
+        stage.close();
     }
 
 
