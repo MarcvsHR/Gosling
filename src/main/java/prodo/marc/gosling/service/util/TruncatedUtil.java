@@ -8,22 +8,22 @@ public class TruncatedUtil {
      * Check if all attributes in given Data Object which are marked as truncated are filled correctly
      */
     public static boolean isTruncated(Object input) throws IllegalAccessException {
-        for (Field f : input.getClass().getDeclaredFields()) {
-            if (f.isAnnotationPresent(Truncated.class)) {
-                f.setAccessible(true);
+        for (Field field : input.getClass().getDeclaredFields()) {
+            if (field.isAnnotationPresent(Truncated.class)) {
+                field.setAccessible(true);
 
-                if (f.get(input) == null) {
+                if (field.get(input) == null) {
                     return true;
                 }
 
-                if (f.get(input) instanceof String) {
-                    if (f.get(input).equals("")) {
+                if (field.get(input) instanceof String) {
+                    if (field.get(input).toString().isEmpty()) {
                         return true;
                     }
                 }
 
-                if (f.get(input) instanceof Year) {
-                    if (((Year) f.get(input)).compareTo(Year.of(0)) == 0) {
+                if (field.get(input) instanceof Year) {
+                    if (((Year) field.get(input)).compareTo(Year.of(0)) == 0) {
                         return true;
                     }
                 }

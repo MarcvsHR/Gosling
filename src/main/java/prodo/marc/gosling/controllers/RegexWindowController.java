@@ -11,7 +11,6 @@ import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.service.SongGlobal;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

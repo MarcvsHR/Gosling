@@ -22,7 +22,7 @@ public class HelloController {
     @FXML
     //switch to database window
     protected void showSongWindow(ActionEvent event) throws IOException  {
-        SceneController.openScene(event, "view/songDatabase.fxml");
+        SceneController.openScene(event,"Song editor", "view/songDatabase.fxml");
     }
 
 }

@@ -53,7 +53,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-
 public class SongController {
 
     private static final Logger logger = LogManager.getLogger(SongController.class);
@@ -266,7 +265,7 @@ public class SongController {
     protected void backToMain(ActionEvent event) throws IOException {
         //logger.debug("----- Executing backToMain");
         closeMediaStream();
-        SceneController.openScene(event, "view/hello-view.fxml");
+        SceneController.openScene(event, "main","view/hello-view.fxml");
         //logger.debug("----- ending backToMain");
     }
 
@@ -406,7 +405,7 @@ public class SongController {
             currentSong.setEditor(EDITOR_NAME);
         }
 
-        if (!currentSong.equals(globalSong) && currentSong.getFileLoc() != null) {
+        if (!currentSong.isTheSame(globalSong) && currentSong.getFileLoc() != null) {
 
             boolean result = Popups.giveConfirmAlert("Unsaved changes",
                     "You are switching to another file with possible unsaved changes",
@@ -620,6 +619,14 @@ public class SongController {
         installAccelerators();
 
         changeCRO();
+
+        //check if title field has parenthesis that start with "ft " and if so, move the string to the artist field
+        if (textTitle.getText().contains("(ft ")) {
+            String titleString = textTitle.getText();
+            int startOfFTString = titleString.indexOf("(ft ");
+            textArtist.setText(textArtist.getText() + " ft " + titleString.substring(startOfFTString + 4, titleString.indexOf(")")));
+            textTitle.setText(titleString.substring(0, startOfFTString));
+        }
 
         MyID3 id3 = ID3Reader.getTag(new File(CURRENT_FILE_LOC));
 //        logger.debug("made new id3 with size: "+id3.totalFrameSize());
@@ -888,7 +895,7 @@ public class SongController {
         File oldFile = new File(CURRENT_FILE_LOC);
         String newFileLoc = generateNewFilename(oldFile.getParent(), false, textYear.getText(), dropGenre.getSelectionModel().getSelectedItem().toLowerCase());
 
-        if (dropGenre.getSelectionModel().getSelectedItem().equals("") && checkDone.isSelected()) {
+        if (dropGenre.getSelectionModel().getSelectedItem().isEmpty() && checkDone.isSelected()) {
             Popups.giveInfoAlert("file rename error",
                     "no genre selected",
                     "please select genre and try again");
@@ -1124,7 +1131,7 @@ public class SongController {
                     }
                 }
             }
-            if (!minString.equals("")) {
+            if (!minString.isEmpty()) {
                 list.append("\n").append(minString).append(" --- ").append(minSearch).append(" char difference");
             }
             logger.debug("min found: " + minSearch);

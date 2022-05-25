@@ -1,7 +1,5 @@
 package prodo.marc.gosling.dao;
 
-import javafx.util.Duration;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
@@ -46,25 +44,22 @@ public class Song {
     //private char truncated = 'Y';
 
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Song that = (Song) o;
-        return MyStringUtils.compareStrings(artist, that.artist) &&
-                MyStringUtils.compareStrings(title, that.title) &&
-                MyStringUtils.compareStrings(album, that.album) &&
-                MyStringUtils.compareStrings(publisher, that.publisher) &&
-                MyStringUtils.compareStrings(composer, that.composer) &&
-                MyStringUtils.compareStrings(genre, that.genre) &&
-                MyStringUtils.compareStrings(fileLoc, that.fileLoc) &&
-                MyStringUtils.compareStrings(ISRC, that.ISRC) &&
-                Objects.equals(year, that.year) &&
-                //Objects.equals(duration, that.duration) &&
+    public boolean isTheSame(Song compareSong) {
+        if (this == compareSong) return true;
+        if (compareSong == null || getClass() != compareSong.getClass()) return false;
+        return MyStringUtils.compareStrings(artist, compareSong.artist) &&
+                MyStringUtils.compareStrings(title, compareSong.title) &&
+                MyStringUtils.compareStrings(album, compareSong.album) &&
+                MyStringUtils.compareStrings(publisher, compareSong.publisher) &&
+                MyStringUtils.compareStrings(composer, compareSong.composer) &&
+                MyStringUtils.compareStrings(genre, compareSong.genre) &&
+                MyStringUtils.compareStrings(fileLoc, compareSong.fileLoc) &&
+                MyStringUtils.compareStrings(ISRC, compareSong.ISRC) &&
+                Objects.equals(year, compareSong.year) &&
+                Objects.equals(done, compareSong.done);
+        //Objects.equals(duration, that.duration) &&
+        //MyStringUtils.compareStrings(ISRC, that.ISRC);
 
-                Objects.equals(done, that.done);
-
-        //         MyStringUtils.compareStrings(ISRC, that.ISRC);
     }
 
     public String getDurationString() {

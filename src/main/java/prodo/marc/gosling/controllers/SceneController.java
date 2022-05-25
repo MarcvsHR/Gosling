@@ -19,11 +19,12 @@ public class SceneController {
     private static Parent root;
 
 
-    public static void openScene(ActionEvent event, String window) throws IOException {
+    public static void openScene(ActionEvent event,String windowName, String window) throws IOException {
         FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(HelloApplication.class.getResource(window)));
         root = loader.load();
 
         Stage stage = (Stage) ((Node) event.getTarget()).getScene().getWindow();
+        stage.setTitle(windowName);
         scene = new Scene(root);
         stage.setScene(scene);
         stage.show();

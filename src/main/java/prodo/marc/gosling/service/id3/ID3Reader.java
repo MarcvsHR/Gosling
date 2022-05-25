@@ -5,7 +5,6 @@ import org.apache.log4j.Logger;
 import prodo.marc.gosling.dao.ID3Frame;
 import prodo.marc.gosling.dao.MyID3;
 import prodo.marc.gosling.dao.id3Header;
-import prodo.marc.gosling.service.Popups;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -114,9 +113,9 @@ public class ID3Reader {
     private static ID3Frame getFrame(byte[] fileContent, int start, boolean calculateSize) {
         ID3Frame frame = new ID3Frame();
         frame.setFrameID(new String(Arrays.copyOfRange(fileContent, start, start + 4)));
-        String test = String.valueOf((char) 0);
-        test += test;
-        test += test;
+        String paddingString = String.valueOf((char) 0);
+        paddingString += paddingString;
+        paddingString += paddingString;
         int uneditedSongs = 0;
 
         start += 4;
@@ -126,13 +125,13 @@ public class ID3Reader {
         frame.setFlag2(fileContent[start + 1]);
         frame.setEncoding(fileContent[start + 2]);
         start += 3;
-        if (frame.getFrameID().equals(test)) {
+        if (frame.getFrameID().equals(paddingString)) {
             frame.setFrameID("XXXX");
             //logger.debug("found id3 padding!");
         } else {
             //logger.debug("header: "+frame.getFrameID());
 
-            byte[] tempArr = Arrays.copyOfRange(fileContent, start, start + frame.getSize() - 1);
+            byte[] frameByteArray = Arrays.copyOfRange(fileContent, start, start + frame.getSize() - 1);
             if (frame.getSize() == 1) {
                 frame.setContent(new byte[0]);
             } else if (frame.getEncoding() > 0 && frame.getEncoding() < 4) {
@@ -142,13 +141,13 @@ public class ID3Reader {
                 Charset utf16Charset = StandardCharsets.UTF_16;
                 Charset utf16beCharset = StandardCharsets.UTF_16BE;
                 Charset iso88591charset = StandardCharsets.ISO_8859_1;
-                if (tempArr[0] != 0 && encoding == 1 && tempArr[0] != (byte) 255) {
-                    byte[] newArr = new byte[tempArr.length];
+                if (frameByteArray[0] != 0 && encoding == 1 && frameByteArray[0] != (byte) 255) {
+                    byte[] newArr = new byte[frameByteArray.length];
                     newArr[0] = (byte) (0);
-                    System.arraycopy(tempArr, 0, newArr, 1, tempArr.length - 1);
-                    tempArr = newArr;
+                    System.arraycopy(frameByteArray, 0, newArr, 1, frameByteArray.length - 1);
+                    frameByteArray = newArr;
                 }
-                ByteBuffer inputBuffer = ByteBuffer.wrap(tempArr);
+                ByteBuffer inputBuffer = ByteBuffer.wrap(frameByteArray);
                 CharBuffer data = null;
 //                System.out.println(Arrays.toString(inputBuffer.array()));
                 if (encoding == 3) data = utf8charset.decode(inputBuffer);
@@ -158,20 +157,20 @@ public class ID3Reader {
                 ByteBuffer outputBuffer = iso88591charset.encode(data);
 //                System.out.println(new String(outputBuffer.array()));
 //                System.out.println(Arrays.toString(outputBuffer.array()));
-                //logger.debug("old data: " + Arrays.toString(tempArr));
-                tempArr = outputBuffer.array();
-//                if (tempArr[0] == 63) tempArr = Arrays.copyOfRange(tempArr,1,tempArr.length);
-//                if (tempArr[0] == 63) tempArr = Arrays.copyOfRange(tempArr,1,tempArr.length);
-                if (tempArr[tempArr.length - 1] == 0)
-                    tempArr = Arrays.copyOf(tempArr, tempArr.length - 1);
-                frame.setContent(tempArr);
-                //logger.debug("new data: " + Arrays.toString(tempArr));
+                //logger.debug("old data: " + Arrays.toString(frameByteArray));
+                frameByteArray = outputBuffer.array();
+//                if (frameByteArray[0] == 63) frameByteArray = Arrays.copyOfRange(frameByteArray,1,frameByteArray.length);
+//                if (frameByteArray[0] == 63) frameByteArray = Arrays.copyOfRange(frameByteArray,1,frameByteArray.length);
+                if (frameByteArray[frameByteArray.length - 1] == 0)
+                    frameByteArray = Arrays.copyOf(frameByteArray, frameByteArray.length - 1);
+                frame.setContent(frameByteArray);
+                //logger.debug("new data: " + Arrays.toString(frameByteArray));
                 frame.setEncoding((byte) 0);
             } else {
-                if (tempArr[tempArr.length - 1] == 0 && !frame.getFrameID().equals(id3Header.ALBUM_ART)) {
-                    frame.setContent((Arrays.copyOf(tempArr, tempArr.length - 1)));
+                if (frameByteArray[frameByteArray.length - 1] == 0 && !frame.getFrameID().equals(id3Header.ALBUM_ART)) {
+                    frame.setContent((Arrays.copyOf(frameByteArray, frameByteArray.length - 1)));
                 } else {
-                    frame.setContent((tempArr));
+                    frame.setContent((frameByteArray));
                 }
             }
         }

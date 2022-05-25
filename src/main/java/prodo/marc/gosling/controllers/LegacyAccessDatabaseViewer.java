@@ -104,9 +104,6 @@ public class LegacyAccessDatabaseViewer implements   Initializable {
                 }
 
                 logger.debug("Column done!");
-                /********************************
-                 * Data added to ObservableList *
-                 ********************************/
 
                 while(rs.next()){
                     //Iterate Row
