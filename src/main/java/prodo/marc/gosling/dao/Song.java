@@ -15,7 +15,6 @@ import java.util.Objects;
 @Entity
 @ToString
 @NoArgsConstructor
-//TODO: need to handle nulls better so there isn't a shitload of null checks all over the place
 public class Song {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,8 +40,22 @@ public class Song {
     private Boolean done;
     private String editor;
     private Integer duration;
-    //private char truncated = 'Y';
 
+    public Song(Song song) {
+        this.id = song.getId();
+        this.artist = song.getArtist();
+        this.title = song.getTitle();
+        this.album = song.getAlbum();
+        this.publisher = song.getPublisher();
+        this.composer = song.getComposer();
+        this.year = song.getYear();
+        this.genre = song.getGenre();
+        this.ISRC = song.getISRC();
+        this.fileLoc = song.getFileLoc();
+        this.done = song.getDone();
+        this.editor = song.getEditor();
+        this.duration = song.getDuration();
+    }
 
     public boolean isTheSame(Song compareSong) {
         if (this == compareSong) return true;
@@ -57,8 +70,6 @@ public class Song {
                 MyStringUtils.compareStrings(ISRC, compareSong.ISRC) &&
                 Objects.equals(year, compareSong.year) &&
                 Objects.equals(done, compareSong.done);
-        //Objects.equals(duration, that.duration) &&
-        //MyStringUtils.compareStrings(ISRC, that.ISRC);
 
     }
 
@@ -91,6 +102,10 @@ public class Song {
         return Objects.requireNonNullElse(genre, "");
     }
 
+    public boolean getDone() {
+        return Objects.requireNonNullElse(done, false);
+    }
+
     public String getComposer() {
         return composer;
     }
@@ -113,10 +128,6 @@ public class Song {
 
     public String getArtist() {
         return Objects.requireNonNullElse(artist, "");
-    }
-
-    public boolean getDone() {
-        return done;
     }
 
     public Integer getDuration() {

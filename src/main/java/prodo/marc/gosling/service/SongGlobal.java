@@ -20,7 +20,6 @@ public class SongGlobal {
     private static String fileFolder;
     private static final String propertiesFile = System.getProperty("user.home") + "\\properties.txt";
     private static List<Path> mp3List;
-    private static boolean filenameParsed = false;
     private static int doneFilter = 0;
     private static int truncatedFilter = 0;
     private static String folderFilter = "";
@@ -60,14 +59,6 @@ public class SongGlobal {
         SongGlobal.folderFilter = folderFilter;
     }
 
-    public static boolean isFilenameParsed() {
-        return filenameParsed;
-    }
-
-    public static void setFilenameParsed(boolean filenameParsed) {
-        SongGlobal.filenameParsed = filenameParsed;
-    }
-
 
     public static Song getCurrentSong() {
         return currentSong;
@@ -75,7 +66,6 @@ public class SongGlobal {
 
     public static void setCurrentSong(Song song) {
         currentSong = song;
-        //logger.debug(currentSong);
     }
 
     public static String getCurrentFolder() {

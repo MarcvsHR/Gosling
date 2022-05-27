@@ -14,13 +14,15 @@ public final class id3Header {
     public static final String ISRC = "TSRC";
     public static final String LENGTH = "TLEN";
     public static final String KEY = "TKEY";
-    public static final String ALBUM_ARTIST = "TPE2";
     public static final String ALBUM_ART = "APIC";
     public static final String COMMENT = "COMM"; //can have multiple, implemented
+    public static final String USER_DATA = "TXXX"; //can have multiple, implemented
+    public static final String CD_ID = "MCDI";
+    public static final String GENERAL_OBJECT = "GEOB"; //can have multiple, implemented
+    public static final String ALBUM_ARTIST = "TPE2";
     public static final String DISC_NUMBER = "TPOS";
     public static final String RELEASE_DATE = "TDRL";
     public static final String TRACK = "TRCK";
-    public static final String USER_DATA = "TXXX"; //can have multiple, implemented
     public static final String BPM = "TBPM";
     public static final String RECORDING_DATE = "TDRC";
     public static final String TIME = "TIME";
@@ -28,13 +30,11 @@ public final class id3Header {
     public static final String SOFTWARE = "TSSE";
     public static final String ENCODER = "TENC";
     public static final String UNSYNCED_LYRICS = "USLT";
-    public static final String CD_ID = "MCDI";
     public static final String PRIVATE = "PRIV";
     public static final String DATE = "TDAT";
     public static final String COPYRIGHT_MSG = "TCOP";
     public static final String TEXT_WRITER = "TEXT";
     public static final String REMIXED_BY = "TPE4";
-    public static final String GENERAL_OBJECT = "GEOB"; //can have multiple, implemented
     public static final String LANGUAGE = "TLAN";
     public static final String CONTENT_GROUP = "TIT1";
     public static final String SUBTITLE_INFO = "TIT3";
@@ -59,6 +59,7 @@ public final class id3Header {
     public static final String TABLE_OF_CONTENT = "CTOC";
     public static final String CHAPTER = "CHAP";
     public static final String COMPOSER_SORT = "TSOC";
+    public static final String ITUNES_COMPILATION = "TCMP";
 
     public static final String DELETE = "XXXX";
 
@@ -70,7 +71,7 @@ public final class id3Header {
             "TPE4", "GEOB", "TLAN", "TIT3", "WXXX", "TOPE", "TMED",
             "TIT1", "UFID", "POPM", "TDTG", "TOAL", "TPE3", "WCOP",
             "TOLY", "TRSN", "TDEN", "TMOO", "TMCL", "TIPL", "TCOM",
-            "TFLT", "IPLS", "TRDA", "CTOC", "CHAP", "TSOC",
+            "TFLT", "IPLS", "TRDA", "CTOC", "CHAP", "TSOC", "TCMP",
             "XXXX"
     );
 

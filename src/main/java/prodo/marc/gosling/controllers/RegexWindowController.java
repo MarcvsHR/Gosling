@@ -5,8 +5,8 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.StringUtils;
 import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.service.SongGlobal;
 
@@ -18,42 +18,68 @@ import java.util.List;
 public class RegexWindowController extends SongController {
     public Button addRegexMethod;
     public ListView<String> regexList;
-    public Song song = SongGlobal.getCurrentSong();
+    Song song = new Song(SongGlobal.getCurrentSong());
     public Label mp3Filename;
     public Label labelArtist;
     public Label labelTitle;
     public Label labelISRC;
     public Label labelPublisher;
-    List<String> regex = new ArrayList<>();
+
 
     private List<String> getRegexStuff() {
-        regex.add("Artist - Title");
-        regex.add("Title - Artist");
-        regex.add("Track_Title_Artist");
-        regex.add("Title-Artist");
-        regex.add("ISRC_Title_Artist_Publisher");
-        regex.add("Title");
-        regex.add("Track - Artist - Title");
-        regex.add("Artist - Track - Title");
-        regex.add("Artist-Title");
-        regex.add("Track. Artist - Title_ISRC");
-        regex.add("Artist-Title-CROREC-ISRC");
-        regex.add("Artist - Title - ISRC");
-        regex.add("ISRC - Artist - Title - Publisher");
-        regex.add("Artist - Title - Publisher - ISRC");
-        regex.add("Artist_Title_ISRC_Publisher");
+        System.out.println("hello!");
+        System.out.println(mp3Filename.getText());
+
+        List<String> regex = new ArrayList<>();
+        if (StringUtils.countMatches(mp3Filename.getText(), "_") == 2) {
+            regex.add("[Track_Title_Artist]"); }
+        if (StringUtils.countMatches(mp3Filename.getText(), "_") == 3) {
+            regex.add("[ISRC_Title_Artist_Publisher]");
+            regex.add("[Artist_Title_ISRC_Publisher]"); }
+        if (StringUtils.countMatches(mp3Filename.getText(), " - ") == 1) {
+            regex.add("[Artist - Title]");
+            regex.add("[Title - Artist]");
+            regex.add("[Track Artist - Title]");
+            regex.add("[Track Title - Artist]");
+            regex.add("[Artist - Title ISRC]"); }
+        if (StringUtils.countMatches(mp3Filename.getText(), " - ") == 2) {
+            regex.add("[Track - Artist - Title]");
+            regex.add("[Artist - Track - Title]");
+            regex.add("[Artist - Title - ISRC]"); }
+        if (StringUtils.countMatches(mp3Filename.getText(), " - ") == 3) {
+            regex.add("[ISRC - Artist - Title - Publisher]");
+            regex.add("[Artist - Title - Publisher - ISRC]"); }
+        if (StringUtils.countMatches(mp3Filename.getText(), "-") == 1 &&
+                StringUtils.countMatches(mp3Filename.getText(), " - ") == 0) {
+            regex.add("[Title-Artist]");
+            regex.add("[Artist-Title]"); }
+        if (StringUtils.countMatches(mp3Filename.getText(), "-") > 2 &&
+                StringUtils.countMatches(mp3Filename.getText(), " - ") == 0) {
+            regex.add("[Artist-Title-CROREC-ISRC]"); }
+
+        if (StringUtils.countMatches(mp3Filename.getText(), " - ") == 1 &&
+                StringUtils.countMatches(mp3Filename.getText(),"_") == 1 &&
+                StringUtils.countMatches(mp3Filename.getText(),".") == 1) { regex.add("[Track. Artist - Title_ISRC]"); }
+
+        regex.add("[Title]]");
+
         Collections.sort(regex);
         return new ArrayList<>(regex);
     }
 
-    public void changeSelectedRegex(MouseEvent mouseEvent) {
+    public void changeSelectedRegex() {
         String selection = regexList.getSelectionModel().getSelectedItem();
+        if (selection == null) selection = "";
+        if (!selection.isEmpty()) selection = selection.substring(selection.indexOf("[")+1, selection.indexOf("]"));
         boolean isSet = false;
         switch (selection) {
             case "Artist - Title": {
                 String[] output = mp3Filename.getText().split(" - ");
                 song.setArtist(output[0]);
                 song.setTitle(output[1]);
+                song.setPublisher(SongGlobal.getCurrentSong().getPublisher());
+                song.setISRC(SongGlobal.getCurrentSong().getISRC());
+
                 isSet = true;
                 break;
             }
@@ -61,6 +87,9 @@ public class RegexWindowController extends SongController {
                 String[] output = mp3Filename.getText().split(" - ");
                 song.setArtist(output[1]);
                 song.setTitle(output[0]);
+                song.setPublisher(SongGlobal.getCurrentSong().getPublisher());
+                song.setISRC(SongGlobal.getCurrentSong().getISRC());
+
                 isSet = true;
                 break;
             }
@@ -68,6 +97,9 @@ public class RegexWindowController extends SongController {
                 String[] output = mp3Filename.getText().split("_");
                 song.setArtist(output[2]);
                 song.setTitle(output[1]);
+                song.setPublisher(SongGlobal.getCurrentSong().getPublisher());
+                song.setISRC(SongGlobal.getCurrentSong().getISRC());
+
                 isSet = true;
                 break;
             }
@@ -75,6 +107,9 @@ public class RegexWindowController extends SongController {
                 String[] output = mp3Filename.getText().split("-");
                 song.setArtist(output[1]);
                 song.setTitle(output[0]);
+                song.setPublisher(SongGlobal.getCurrentSong().getPublisher());
+                song.setISRC(SongGlobal.getCurrentSong().getISRC());
+
                 isSet = true;
                 break;
             }
@@ -83,11 +118,17 @@ public class RegexWindowController extends SongController {
                 song.setArtist(output[2]);
                 song.setTitle(output[1]);
                 song.setPublisher(output[3]);
+                song.setISRC(SongGlobal.getCurrentSong().getISRC());
+
                 isSet = true;
                 break;
             }
             case "Title": {
                 song.setTitle(mp3Filename.getText().trim());
+                song.setArtist(SongGlobal.getCurrentSong().getArtist());
+                song.setPublisher(SongGlobal.getCurrentSong().getPublisher());
+                song.setISRC(SongGlobal.getCurrentSong().getISRC());
+
                 isSet = true;
                 break;
             }
@@ -95,6 +136,9 @@ public class RegexWindowController extends SongController {
                 String[] output = mp3Filename.getText().split(" - ");
                 song.setArtist(output[1]);
                 song.setTitle(output[2]);
+                song.setPublisher(SongGlobal.getCurrentSong().getPublisher());
+                song.setISRC(SongGlobal.getCurrentSong().getISRC());
+
                 isSet = true;
                 break;
             }
@@ -102,6 +146,9 @@ public class RegexWindowController extends SongController {
                 String[] output = mp3Filename.getText().split(" - ");
                 song.setArtist(output[0]);
                 song.setTitle(output[2]);
+                song.setPublisher(SongGlobal.getCurrentSong().getPublisher());
+                song.setISRC(SongGlobal.getCurrentSong().getISRC());
+
                 isSet = true;
                 break;
             }
@@ -109,6 +156,9 @@ public class RegexWindowController extends SongController {
                 String[] output = mp3Filename.getText().split("-");
                 song.setArtist(output[0]);
                 song.setTitle(output[1]);
+                song.setPublisher(SongGlobal.getCurrentSong().getPublisher());
+                song.setISRC(SongGlobal.getCurrentSong().getISRC());
+
                 isSet = true;
                 break;
             }
@@ -117,6 +167,8 @@ public class RegexWindowController extends SongController {
                 song.setArtist(output[1]);
                 song.setTitle(output[2]);
                 song.setISRC(output[3]);
+                song.setPublisher(SongGlobal.getCurrentSong().getPublisher());
+
                 isSet = true;
                 break;
             }
@@ -140,10 +192,9 @@ public class RegexWindowController extends SongController {
                 }
                 song.setArtist(artist.toString().trim());
                 song.setTitle(title.toString().trim());
-
-                //song.setArtist(output[0].replace("-"," "));
                 song.setISRC(output[1]);
                 song.setPublisher("Crorec");
+
                 isSet = true;
                 break;
             }
@@ -152,6 +203,8 @@ public class RegexWindowController extends SongController {
                 song.setArtist(output[0]);
                 song.setTitle(output[1]);
                 song.setISRC(output[2]);
+                song.setPublisher(SongGlobal.getCurrentSong().getPublisher());
+
                 isSet = true;
                 break;
             }
@@ -161,6 +214,7 @@ public class RegexWindowController extends SongController {
                 song.setTitle(output[2]);
                 song.setISRC(output[0]);
                 song.setPublisher(output[3]);
+
                 isSet = true;
                 break;
             }
@@ -170,6 +224,7 @@ public class RegexWindowController extends SongController {
                 song.setTitle(output[1]);
                 song.setPublisher(output[2]);
                 song.setISRC(output[3]);
+
                 isSet = true;
                 break;
             }
@@ -179,6 +234,41 @@ public class RegexWindowController extends SongController {
                 song.setTitle(output[1]);
                 song.setISRC(output[2]);
                 song.setPublisher(output[3]);
+
+                isSet = true;
+                break;
+            }
+            case "Track Artist - Title": {
+                String[] output = mp3Filename.getText().split(" - ");
+                String[] splitWords = output[0].split(" ",2);
+                song.setArtist(splitWords[1]);
+                song.setTitle(output[1]);
+                song.setISRC(SongGlobal.getCurrentSong().getISRC());
+                song.setPublisher(SongGlobal.getCurrentSong().getPublisher());
+
+                isSet = true;
+                break;
+            }
+            case "Track Title - Artist": {
+                String[] output = mp3Filename.getText().split(" - ");
+                String[] splitWords = output[0].split(" ",2);
+                song.setTitle(splitWords[1]);
+                song.setArtist(output[1]);
+                song.setISRC(SongGlobal.getCurrentSong().getISRC());
+                song.setPublisher(SongGlobal.getCurrentSong().getPublisher());
+
+                isSet = true;
+                break;
+            }
+            case "Artist - Title ISRC": {
+                String[] output = mp3Filename.getText().split(" - ");
+                String[] splitWords = output[1].split(" ");
+                String isrc = splitWords[splitWords.length-1];
+                song.setArtist(output[0]);
+                song.setISRC(isrc);
+                song.setTitle(output[1].replace(" "+isrc,""));
+                song.setPublisher(SongGlobal.getCurrentSong().getPublisher());
+
                 isSet = true;
                 break;
             }
@@ -195,9 +285,8 @@ public class RegexWindowController extends SongController {
 
     public void initialize() {
 
-        regexList.getItems().addAll(getRegexStuff());
-
         mp3Filename.setText(new File(song.getFileLoc()).getName().replaceAll("(?i).mp3", ""));
+        regexList.getItems().addAll(getRegexStuff());
 
     }
 

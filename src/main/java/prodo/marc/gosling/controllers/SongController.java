@@ -9,6 +9,7 @@ import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -104,7 +105,9 @@ public class SongController {
     private Path TEMP_DIR;
     private String EDITOR_NAME;
     private boolean TABLE_MIN = false;
+
     //disabled dropdown for now
+    //set to false to reenable auto-complete
     private boolean PUBLISHERS_BOUND = true;
     private boolean ACCELERATORS_INSTALLED = false;
 
@@ -115,7 +118,8 @@ public class SongController {
                 "Ministry of Sound Recordings", "Polydor", "Promo", "Rca", "Scardona", "Sony", "Spona",
                 "Melody", "Dancing Bear", "Heksagon", "Arista", "Geffen", "Intek", "Sedma Sekunda",
                 "Bonton", "Hamar", "Rubikon", "Rtl", "Only Records", "Zvuci Mediterana", "Abudublin",
-                "Campus", "Atlantic", "Parlophone", "Interscope", "Def Jam", "Republic", "Tonika", "Decca"};
+                "Campus", "Atlantic", "Parlophone", "Interscope", "Def Jam", "Republic", "Tonika", "Decca",
+                "Warner", "Domino Recording Co"};
         Arrays.sort(array);
         publisherList.addAll(Arrays.asList(array));
     }
@@ -123,7 +127,7 @@ public class SongController {
     private String[] getGenres() {
         String[] returnArr = {"", "Cro", "Cro Zabavne", "Instrumental", "Klape", "Kuruza",
                 "Pop", "xxx", "Italian", "Susjedi", "Religiozne", "Oldies", "X-Mas", "Domoljubne",
-                "Country", "World Music"};
+                "Country", "World Music", "Dance"};
         Arrays.sort(returnArr);
         return returnArr;
     }
@@ -206,32 +210,33 @@ public class SongController {
     }
 
     public void installAccelerators() {
+        Scene scene = buttonPlay.getScene();
         if (!ACCELERATORS_INSTALLED) {
             KeyCombination kc = new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN);
             Runnable rn = this::updateMP3;
-            updateSongs.getScene().getAccelerators().put(kc, rn);
+            scene.getAccelerators().put(kc, rn);
 
             KeyCombination kc1 = new KeyCodeCombination(KeyCode.F, KeyCombination.SHORTCUT_DOWN);
             Runnable rn1 = () -> textFilterFolder.requestFocus();
-            updateSongs.getScene().getAccelerators().put(kc1, rn1);
+            scene.getAccelerators().put(kc1, rn1);
 
             KeyCombination kc2 = new KeyCodeCombination(KeyCode.UP, KeyCombination.SHORTCUT_DOWN);
             Runnable rn2 = () -> {
                 songDatabaseTable.getSelectionModel().select(songDatabaseTable.getSelectionModel().getSelectedIndex() - 1);
                 openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
             };
-            updateSongs.getScene().getAccelerators().put(kc2, rn2);
+            scene.getAccelerators().put(kc2, rn2);
 
             KeyCombination kc3 = new KeyCodeCombination(KeyCode.DOWN, KeyCombination.SHORTCUT_DOWN);
             Runnable rn3 = () -> {
                 songDatabaseTable.getSelectionModel().select(songDatabaseTable.getSelectionModel().getSelectedIndex() + 1);
                 openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
             };
-            updateSongs.getScene().getAccelerators().put(kc3, rn3);
+            scene.getAccelerators().put(kc3, rn3);
 
             KeyCombination kc4 = new KeyCodeCombination(KeyCode.D, KeyCombination.SHORTCUT_DOWN);
             Runnable rn4 = () -> checkDone.setSelected(!checkDone.isSelected());
-            updateSongs.getScene().getAccelerators().put(kc4, rn4);
+            scene.getAccelerators().put(kc4, rn4);
 
             KeyCombination kc5 = new KeyCodeCombination(KeyCode.PAGE_DOWN, KeyCombination.SHORTCUT_DOWN);
             Runnable rn5 = () -> {
@@ -239,7 +244,7 @@ public class SongController {
                 songDatabaseTable.scrollTo(songList.size());
                 openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
             };
-            updateSongs.getScene().getAccelerators().put(kc5, rn5);
+            scene.getAccelerators().put(kc5, rn5);
 
             KeyCombination kc6 = new KeyCodeCombination(KeyCode.PAGE_UP, KeyCombination.SHORTCUT_DOWN);
             Runnable rn6 = () -> {
@@ -247,9 +252,7 @@ public class SongController {
                 songDatabaseTable.scrollTo(0);
                 openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
             };
-            updateSongs.getScene().getAccelerators().put(kc6, rn6);
-
-            refreshTableButton.setStyle("");
+            scene.getAccelerators().put(kc6, rn6);
 
             if (textFilterFolder.getText().isEmpty()) {
                 textFilterFolder.setText("download");
@@ -265,16 +268,15 @@ public class SongController {
     protected void backToMain(ActionEvent event) throws IOException {
         //logger.debug("----- Executing backToMain");
         closeMediaStream();
-        SceneController.openScene(event, "main","view/hello-view.fxml");
+        SceneController.openScene(event, "main", "view/hello-view.fxml");
         //logger.debug("----- ending backToMain");
     }
 
     @FXML
     protected void clickedParseButton(ActionEvent event) throws IOException {
         //logger.debug("----- Executing clickedParseButton");
-        Song song = SongGlobal.getCurrentSong();
         closeMediaStream();
-        if (song == null) {
+        if (SongGlobal.getCurrentSong() == null) {
             Popups.giveInfoAlert("Open parse window error",
                     "Couldn't open the filename parse window",
                     "no file selected, file location=null");
@@ -325,6 +327,7 @@ public class SongController {
         String fxmlLocation = "/prodo/marc/gosling/view/progress.fxml";
         try {
             SceneController.openWindow(null, fxmlLocation, true);
+            refreshTableButton.setStyle("-fx-background-color: #" + CHANGED_BACKGROUND_COLOR);
         } catch (IOException e) {
             logger.error("couldn't open import window", e);
         }
@@ -346,6 +349,8 @@ public class SongController {
         songList.addAll(songList1);
         filterTable();
         selectFileFromTable(CURRENT_FILE_LOC);
+
+        refreshTableButton.setStyle("");
 
         //logger.debug("----- ending updateTable");
     }
@@ -376,7 +381,6 @@ public class SongController {
         //logger.debug("----- Executing openMP3");
 
         Song currentSong = new Song();
-        Song globalSong = SongGlobal.getCurrentSong();
 
         //TODO: this will need to change read mode to database... also needs to be at a different place
         boolean localFile;
@@ -384,10 +388,8 @@ public class SongController {
                 !songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc().contains("Z:\\")) {
             logger.debug("error!!!!!");
             localFile = false;
-            updateSongs.setDisable(true);
         } else {
             localFile = true;
-            updateSongs.setDisable(false);
         }
 
         if (!CURRENT_FILE_LOC.equals("") && new File(CURRENT_FILE_LOC).exists()) {
@@ -405,7 +407,7 @@ public class SongController {
             currentSong.setEditor(EDITOR_NAME);
         }
 
-        if (!currentSong.isTheSame(globalSong) && currentSong.getFileLoc() != null) {
+        if (!currentSong.isTheSame(SongGlobal.getCurrentSong()) && currentSong.getFileLoc() != null) {
 
             boolean result = Popups.giveConfirmAlert("Unsaved changes",
                     "You are switching to another file with possible unsaved changes",
@@ -657,23 +659,17 @@ public class SongController {
         id3.setFrame(id3Header.GENRE, dropGenre.getSelectionModel().getSelectedItem());
         id3.setFrame(id3Header.ISRC, textISRC.getText());
 
-        checkFields();
-
-//        logger.debug("updated id3 to size: "+id3.totalFrameSize());
-
-        if (renameFile()) {
-            updateSongEntry(id3, SongGlobal.getCurrentSong().getId(), CURRENT_FILE_LOC);
-            makeTextFieldsWhite();
-            SongGlobal.setCurrentSong(ID3v2Utils.songDataFromID3(id3, CURRENT_FILE_LOC, EDITOR_NAME));
-            writeToMP3(id3, CURRENT_FILE_LOC);
-            selectFileFromTable(CURRENT_FILE_LOC);
+        if (!updateSongs.isDisable()) {
+            if (renameFile()) {
+                updateSongEntry(id3, SongGlobal.getCurrentSong().getId(), CURRENT_FILE_LOC);
+                SongGlobal.setCurrentSong(ID3v2Utils.songDataFromID3(id3, CURRENT_FILE_LOC, EDITOR_NAME));
+                writeToMP3(id3, CURRENT_FILE_LOC);
+                selectFileFromTable(CURRENT_FILE_LOC);
+            }
         }
-        //logger.debug("----- ending updateMP3");
-    }
 
-    private void makeTextFieldsWhite() {
-        textArtist.setStyle("-fx-background-color: #" + DEFAULT_BACKGROUND_COLOR);
-        textYear.setStyle("-fx-background-color: #" + DEFAULT_BACKGROUND_COLOR);
+        checkFields();
+        //logger.debug("----- ending updateMP3");
     }
 
     private void writeToMP3(MyID3 song, String fileLoc) {
@@ -776,7 +772,7 @@ public class SongController {
 
         if (result) {
             updateTextFields(CURRENT_FILE_LOC);
-            makeTextFieldsWhite();
+            checkFields();
         }
 
         //logger.debug("----- ending revertID3");
@@ -866,10 +862,11 @@ public class SongController {
 
     private String generateNewFilename(String oldFile, boolean checkNew, String year, String genre) {
         String newFileLoc = textArtist.getText() + " - " + textTitle.getText() + ".mp3";
+
         if (!checkDone.isSelected() && !checkNew) {
-            newFileLoc = oldFile + "\\" + newFileLoc;
+            newFileLoc = Paths.get(oldFile).getParent() + "\\" + newFileLoc;
         } else {
-            if (genre.equals("pop")) {
+            if (genre.equals("pop") || genre.equals("dance")) {
                 genre = "";
             } else if (genre.equals("domoljubne")) {
                 genre = "cro\\" + genre;
@@ -889,11 +886,10 @@ public class SongController {
         return newFileLoc;
     }
 
-    //TODO: this part needs to check if all the fields are there so it needs to be handled earlier, prolly in updateMP3()
+    //TODO: this part needs to check if all the fields are there so it needs to be handled earlier, probably in updateMP3()
     public boolean renameFile() {
         //logger.debug("----- Executing renameFile");
-        File oldFile = new File(CURRENT_FILE_LOC);
-        String newFileLoc = generateNewFilename(oldFile.getParent(), false, textYear.getText(), dropGenre.getSelectionModel().getSelectedItem().toLowerCase());
+        String newFileLoc = generateNewFilename(CURRENT_FILE_LOC, false, textYear.getText(), dropGenre.getSelectionModel().getSelectedItem().toLowerCase());
 
         if (dropGenre.getSelectionModel().getSelectedItem().isEmpty() && checkDone.isSelected()) {
             Popups.giveInfoAlert("file rename error",
@@ -907,6 +903,8 @@ public class SongController {
         if (!mkdResult) {
             logger.debug("creating folder failed:" + newFileLoc);
         }
+
+        File oldFile = new File(CURRENT_FILE_LOC);
         File newFile = new File(newFileLoc);
         if (!oldFile.getAbsolutePath().equals(newFile.getAbsolutePath())) {
             if (!oldFile.renameTo(newFile)) {
@@ -941,31 +939,40 @@ public class SongController {
         //logger.debug("----- ending updateSongEntry");
     }
 
-    public void checkArtistField() {
-        if (checkValidChars(textArtist.getText(), "artist")) {
+    public boolean checkArtistField(String artist) {
+        if (checkInvalidChars(artist, "artist")) {
             textArtist.setStyle("-fx-background-color: #" + CHANGED_BACKGROUND_COLOR);
+            return true;
         } else {
             textArtist.setStyle("-fx-background-color: #" + DEFAULT_BACKGROUND_COLOR);
+            return false;
         }
     }
 
-    public void checkComposerField() {
-        if (checkValidChars(textComposer.getText(), "composer")) {
+    public boolean checkComposerField(String composer) {
+        if (checkInvalidChars(composer, "composer")) {
             textComposer.setStyle("-fx-background-color: #" + CHANGED_BACKGROUND_COLOR);
+            return true;
         } else {
             textComposer.setStyle("-fx-background-color: #" + DEFAULT_BACKGROUND_COLOR);
+            return false;
         }
     }
 
-    public void checkTitleField() {
-        if (checkValidChars(textTitle.getText(), "tile")) {
+    public boolean checkTitleField(String title) {
+        if (checkInvalidChars(title, "title")) {
             textTitle.setStyle("-fx-background-color: #" + CHANGED_BACKGROUND_COLOR);
+            return true;
         } else {
             textTitle.setStyle("-fx-background-color: #" + DEFAULT_BACKGROUND_COLOR);
+            return false;
         }
     }
 
-    public boolean checkValidChars(String text, String fieldName) {
+    public boolean checkInvalidChars(String text, String fieldName) {
+        if (text == null) {
+            text = "";
+        }
         if (text.contains("%") || text.contains("?")) {
             return true;
         } else return text.contains("/") && !fieldName.equals("composer");
@@ -973,37 +980,46 @@ public class SongController {
     }
 
     public void checkFields() {
-        if (textComposer.getText() != null) checkComposerField();
-        if (textArtist.getText() != null) checkArtistField();
-        if (textTitle.getText() != null) checkTitleField();
-        if (textYear.getText() != null) checkYearField();
 
-        checkFilename();
+        String artist = textArtist.getText() == null ? "" : textArtist.getText();
+        boolean artistCheck = checkArtistField(artist);
+
+        String composer = textComposer.getText() == null ? "" : textComposer.getText();
+        boolean composerCheck = checkComposerField(composer);
+
+        String title = textTitle.getText() == null ? "" : textTitle.getText();
+        boolean titleCheck = checkTitleField(title);
+
+        //if (textYear.getText() != null) checkYearField();
+
+        boolean disableUpdateButton = artistCheck || composerCheck || titleCheck;
+        checkFilename(disableUpdateButton);
+
+
     }
 
-    private void checkFilename() {
+    private void checkFilename(boolean disableUpdateButton) {
         //logger.debug("checking name goes here");
-        String newFileLoc = generateNewFilename(new File(CURRENT_FILE_LOC).getParent(), true, textYear.getText(), dropGenre.getSelectionModel().getSelectedItem().toLowerCase());
+        String newFileLoc = generateNewFilename((CURRENT_FILE_LOC), true, textYear.getText(), dropGenre.getSelectionModel().getSelectedItem().toLowerCase());
         boolean found = new File(newFileLoc).exists();
+        updateSongs.setDisable(disableUpdateButton);
         if (!CURRENT_FILE_LOC.equalsIgnoreCase(newFileLoc)) {
             //logger.debug("names do not match!, checking file: " + newFileLoc);
 
             //if the song exists, update is disabled... that should work for now but maybe requires rethink...
-            updateSongs.setDisable(found && checkDone.isSelected());
+            updateSongs.setDisable((found && checkDone.isSelected()) || disableUpdateButton);
 
             if (found) {
                 updateSongs.setStyle("-fx-background-color: #" + CHANGED_BACKGROUND_COLOR);
             } else {
                 AtomicReference<String> foundAlt = new AtomicReference<>("");
                 dropGenre.getItems().forEach(genre -> {
-                            int year = Integer.parseInt(textYear.getText() == null ? "0" : textYear.getText());
-                            if (year != 0) {
-                                for (int testingYear = year - 2; testingYear <= year + 1; testingYear++) {
-                                    //logger.debug("testing year: " + testingYear);
-                                    String newFileLocAlt = generateNewFilename(new File(CURRENT_FILE_LOC).getParent(), true, testingYear + "", genre);
-                                    if (new File(newFileLocAlt).exists()) {
-                                        foundAlt.set(newFileLocAlt.replaceAll("Z:\\\\Songs\\\\", "").replaceAll("\\\\", " - "));
-                                    }
+                            int year = Integer.parseInt(textYear.getText() == null ? Year.now().toString() : textYear.getText());
+                            for (int testingYear = year - 2; testingYear <= year + 1; testingYear++) {
+                                //logger.debug("testing year: " + testingYear);
+                                String newFileLocAlt = generateNewFilename((CURRENT_FILE_LOC), true, testingYear + "", genre);
+                                if (new File(newFileLocAlt).exists()) {
+                                    foundAlt.set(newFileLocAlt.replaceAll("Z:\\\\Songs\\\\", "").replaceAll("\\\\", " - "));
                                 }
                             }
                         }
@@ -1285,4 +1301,30 @@ public class SongController {
     }
 
 
+    public void filterChange() {
+        textFilterFolder.setText(songDatabaseTable.getSelectionModel().getSelectedItem().getArtist() + "|" +
+                songDatabaseTable.getSelectionModel().getSelectedItem().getTitle());
+
+        selectFileFromTable(CURRENT_FILE_LOC);
+
+        filterTable();
+    }
+
+    public void autofillPublisher(KeyEvent keyEvent) {
+        byte[] chars = keyEvent.getCharacter().getBytes();
+        boolean special = chars[0] < 31 || keyEvent.isShortcutDown();
+        String searchTerm = textPublisher.getText().toUpperCase();
+
+        if (!special && textPublisher.getCaretPosition() == textPublisher.getLength()) {
+            for (String publisher : publisherList) {
+                if (publisher.toUpperCase().startsWith(searchTerm)) {
+                    textPublisher.deselect();
+                    textPublisher.setText(publisher);
+                    textPublisher.positionCaret(searchTerm.length());
+                    textPublisher.selectEnd();
+                    break;
+                }
+            }
+        }
+    }
 }
