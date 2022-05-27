@@ -176,7 +176,7 @@
                     <Label text="Album">
 
                     </Label>
-                    <TextField fx:id="textAlbum" prefWidth="250.0" />
+                    <TextField fx:id="textAlbum" onKeyTyped="#checkFields" prefWidth="250.0" />
                     <padding>
                         <Insets bottom="4.0" top="5.0" />
                     </padding>

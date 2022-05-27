@@ -100,6 +100,7 @@ public class SongController {
     MyID3 COPIED_ID3 = new MyID3();
     String CHANGED_BACKGROUND_COLOR = "bb3333";
     String DEFAULT_BACKGROUND_COLOR = "555555";
+    String AVERAGE_BACKGROUND_COLOR = "dd9999";
     private boolean UPDATE_CHECK = true;
     private String CURRENT_FILE_LOC = "";
     private Path TEMP_DIR;
@@ -940,7 +941,10 @@ public class SongController {
     }
 
     public boolean checkArtistField(String artist) {
-        if (checkInvalidChars(artist, "artist")) {
+        if (artist.isEmpty()) {
+            textArtist.setStyle("-fx-background-color: #" + AVERAGE_BACKGROUND_COLOR);
+            return false;
+        } else if (checkInvalidChars(artist, "artist")) {
             textArtist.setStyle("-fx-background-color: #" + CHANGED_BACKGROUND_COLOR);
             return true;
         } else {
@@ -950,7 +954,10 @@ public class SongController {
     }
 
     public boolean checkComposerField(String composer) {
-        if (checkInvalidChars(composer, "composer")) {
+        if (composer.isEmpty()) {
+            textComposer.setStyle("-fx-background-color: #" + AVERAGE_BACKGROUND_COLOR);
+            return false;
+        } else if (checkInvalidChars(composer, "composer")) {
             textComposer.setStyle("-fx-background-color: #" + CHANGED_BACKGROUND_COLOR);
             return true;
         } else {
@@ -960,7 +967,10 @@ public class SongController {
     }
 
     public boolean checkTitleField(String title) {
-        if (checkInvalidChars(title, "title")) {
+        if (title.isEmpty()) {
+            textTitle.setStyle("-fx-background-color: #" + AVERAGE_BACKGROUND_COLOR);
+            return false;
+        } else if (checkInvalidChars(title, "title")) {
             textTitle.setStyle("-fx-background-color: #" + CHANGED_BACKGROUND_COLOR);
             return true;
         } else {
@@ -981,20 +991,43 @@ public class SongController {
 
     public void checkFields() {
 
-        String artist = textArtist.getText() == null ? "" : textArtist.getText();
-        boolean artistCheck = checkArtistField(artist);
+        if (songDatabaseTable.getSelectionModel().getSelectedItem() != null) {
+            String artist = textArtist.getText() == null ? "" : textArtist.getText();
+            boolean artistCheck = checkArtistField(artist);
 
-        String composer = textComposer.getText() == null ? "" : textComposer.getText();
-        boolean composerCheck = checkComposerField(composer);
+            String composer = textComposer.getText() == null ? "" : textComposer.getText();
+            boolean composerCheck = checkComposerField(composer);
 
-        String title = textTitle.getText() == null ? "" : textTitle.getText();
-        boolean titleCheck = checkTitleField(title);
+            String title = textTitle.getText() == null ? "" : textTitle.getText();
+            boolean titleCheck = checkTitleField(title);
 
-        //if (textYear.getText() != null) checkYearField();
+            if (textYear.getText() != null && !textYear.getText().isEmpty()) {
+                textYear.setStyle("-fx-background-color: #" + DEFAULT_BACKGROUND_COLOR);
+            } else {
+                textYear.setStyle("-fx-background-color: #" + AVERAGE_BACKGROUND_COLOR);
+            }
 
-        boolean disableUpdateButton = artistCheck || composerCheck || titleCheck;
-        checkFilename(disableUpdateButton);
+            if (textAlbum.getText() != null && !textAlbum.getText().isEmpty()) {
+                textAlbum.setStyle("-fx-background-color: #" + DEFAULT_BACKGROUND_COLOR);
+            } else {
+                textAlbum.setStyle("-fx-background-color: #" + AVERAGE_BACKGROUND_COLOR);
+            }
 
+            if (textPublisher.getText() != null && !textPublisher.getText().isEmpty()) {
+                textPublisher.setStyle("-fx-background-color: #" + DEFAULT_BACKGROUND_COLOR);
+            } else {
+                textPublisher.setStyle("-fx-background-color: #" + AVERAGE_BACKGROUND_COLOR);
+            }
+
+            if (dropGenre.getValue() != null && !dropGenre.getValue().isEmpty()) {
+                dropGenre.setStyle("-fx-background-color: #" + DEFAULT_BACKGROUND_COLOR);
+            } else {
+                dropGenre.setStyle("-fx-background-color: #" + AVERAGE_BACKGROUND_COLOR);
+            }
+
+            boolean disableUpdateButton = artistCheck || composerCheck || titleCheck;
+            checkFilename(disableUpdateButton);
+        }
 
     }
 
@@ -1014,7 +1047,15 @@ public class SongController {
             } else {
                 AtomicReference<String> foundAlt = new AtomicReference<>("");
                 dropGenre.getItems().forEach(genre -> {
-                            int year = Integer.parseInt(textYear.getText() == null ? Year.now().toString() : textYear.getText());
+                            String getYear = textYear.getText();
+                            if (getYear != null) {
+                                getYear = getYear.replaceAll("[^\\d]", "");
+                            }
+                            if (getYear == null || getYear.isEmpty()) {
+                                getYear = Year.now().toString();
+                            }
+                            logger.debug("getYear:-" + getYear + "-");
+                            int year = Integer.parseInt(getYear);
                             for (int testingYear = year - 2; testingYear <= year + 1; testingYear++) {
                                 //logger.debug("testing year: " + testingYear);
                                 String newFileLocAlt = generateNewFilename((CURRENT_FILE_LOC), true, testingYear + "", genre);
@@ -1025,7 +1066,7 @@ public class SongController {
                         }
                 );
                 if (!foundAlt.get().isEmpty()) {
-                    updateSongs.setStyle("-fx-background-color: #dd9999");
+                    updateSongs.setStyle("-fx-background-color: #+" + AVERAGE_BACKGROUND_COLOR);
                     SongGlobal.setFileExists(foundAlt.get());
                     mp3Label.setText(foundAlt.get().replaceAll("(?i)\\.mp3", ""));
                 } else {
@@ -1042,23 +1083,6 @@ public class SongController {
             //logger.debug("set colour back");
         }
 
-    }
-
-    public void checkYearField() {
-        int pos = textYear.getCaretPosition();
-        int len = textYear.getLength();
-        if (textYear.getText() != null) {
-            textYear.setText(textYear.getText().replaceAll("\\D", ""));
-        }
-        pos = textYear.getLength() - len + pos;
-        textYear.positionCaret(pos);
-        String tempYear = SongGlobal.getCurrentSong() == null ? "" : String.valueOf(SongGlobal.getCurrentSong().getYear());
-        if (MyStringUtils.compareStrings(tempYear, textYear.getText())) {
-            textYear.setStyle("-fx-background-color: #" + DEFAULT_BACKGROUND_COLOR);
-            textYear.setStyle("-fx-text-color: #FFFFFF");
-        } else {
-            textYear.setStyle("-fx-background-color: #" + CHANGED_BACKGROUND_COLOR);
-        }
     }
 
     @FXML
@@ -1312,7 +1336,7 @@ public class SongController {
 
     public void autofillPublisher(KeyEvent keyEvent) {
         byte[] chars = keyEvent.getCharacter().getBytes();
-        boolean special = chars[0] < 31 || keyEvent.isShortcutDown();
+        boolean special = chars[0] < 31 || keyEvent.isShortcutDown() || chars[0] > 126;
         String searchTerm = textPublisher.getText().toUpperCase();
 
         if (!special && textPublisher.getCaretPosition() == textPublisher.getLength()) {
@@ -1326,5 +1350,6 @@ public class SongController {
                 }
             }
         }
+        checkFields();
     }
 }
