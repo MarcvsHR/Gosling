@@ -64,44 +64,12 @@ public class ID3v2Utils {
 
         byte[] mp3Data = Arrays.copyOfRange(fileContent, size, fileContent.length - size);
         double frameLen;
-
         int counter = 0;
-
-//        String headerString = new String(Arrays.copyOfRange(mp3Data,counter,counter+3));
-//        //this part was handling multiple id3s, not needed for now
-//        if (headerString.equals("ID3")) {
-//            logger.debug("-----------------------2 id3s found! panic!-----------------------");
-//            logger.debug("file: "+fileLoc);
-//            MyID3 id3Data = new MyID3();
-//            logger.debug(ByteBuffer.wrap(Arrays.copyOfRange(mp3Data,6,10)).getInt());
-//            id3Data.setSize(ByteBuffer.wrap(Arrays.copyOfRange(mp3Data, 6, 10)).getInt(), true);
-//            logger.debug("delete size should be: "+id3Data.getSize());
-//            counter += id3Data.getSize()+10;
-//            header = Integer.toBinaryString(ByteBuffer.wrap(Arrays.copyOfRange(mp3Data, counter, counter+4)).getInt());
-//            logger.debug("retrying second header at "+(counter+size)+": "+header);
-//            mp3Data = Arrays.copyOfRange(fileContent, size+counter, fileContent.length - size+counter);
-//            counter = 0;
-//            byte[] id3DataBytes = Arrays.copyOfRange(fileContent, 0, size);
-//
-//            byte[] outputFileData = new byte[mp3Data.length + id3DataBytes.length];
-//            System.arraycopy(id3DataBytes, 0, outputFileData, 0, id3DataBytes.length);
-//            System.arraycopy(mp3Data, 0, outputFileData, id3DataBytes.length, mp3Data.length);
-//
-//           //File outputFile = new File("c:\\test\\testing.mp3");
-//            File outputFile = new File(fileLoc);
-//            try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
-//                outputStream.write(outputFileData);
-//            } catch (Exception e) {
-//                logger.error("could not write to output file: ", e);
-//            }
-//        }
-
-
         double estDur = 0;
         while (counter < mp3Data.length) {
-            BigInteger HBI = BigInteger.valueOf(ByteBuffer.wrap(Arrays.copyOfRange(mp3Data, counter, counter + 4)).getInt());
-            MP3Frame frame = new MP3Frame(HBI);
-            //error checking, not needed atm
+            BigInteger bigIntHeader = BigInteger.valueOf(ByteBuffer.wrap(Arrays.copyOfRange(mp3Data, counter, counter + 4)).getInt());
+            MP3Frame frame = new MP3Frame(bigIntHeader);
+
             if (counter < 0) {
                 logger.debug(size + counter);
                 logger.debug(frame.getAllData());

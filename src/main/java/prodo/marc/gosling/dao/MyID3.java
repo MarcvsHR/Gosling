@@ -109,10 +109,10 @@ public class MyID3 extends ID3Size {
         int pos = 10;
 
         for (ID3Frame frame : frames.values()) {
-            if (frame.getFrameID().startsWith("TXXX")) {
-                tempArr = "TXXX".getBytes();
-            } else if (frame.getFrameID().startsWith("COMM")) {
-                tempArr = "COMM".getBytes();
+            if (frame.getFrameID().startsWith(id3Header.USER_DATA)) {
+                tempArr = id3Header.USER_DATA.getBytes();
+            } else if (frame.getFrameID().startsWith(id3Header.COMMENT)) {
+                tempArr = id3Header.COMMENT.getBytes();
             } else {
                 tempArr = frame.getFrameID().getBytes();
             }
@@ -136,7 +136,7 @@ public class MyID3 extends ID3Size {
             System.arraycopy(tempArr, 0, output, pos, tempArr.length);
             pos += tempArr.length;
 
-//            if (!frame.getFrameID().equals("APIC")) System.out.println(new String(frame.getContent()));
+//            if (!frame.getFrameID().equals(ideHeader.ALBUM_ART)) System.out.println(new String(frame.getContent()));
 //            System.out.println(frame.getSize());
 //            System.out.println(pos);
 //            System.out.println("");

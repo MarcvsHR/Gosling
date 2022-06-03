@@ -14,10 +14,10 @@ public class MP3Frame {
     int samplesPerFrame;
     boolean valid = true;
 
-    public MP3Frame(BigInteger hbi) {
+    public MP3Frame(BigInteger bigIntHeader) {
 
         for (int i = 0; i<13;i++) {
-            if (!hbi.testBit(20+i)) {
+            if (!bigIntHeader.testBit(20+i)) {
                 System.out.println("error at bit: " + (19 + i));
                 valid = false;
                 break;
@@ -26,20 +26,20 @@ public class MP3Frame {
 
         if (valid)
         {
-            layer = 4 - ((hbi.testBit(17) ? 1 : 0) + (hbi.testBit(18) ? 2 : 0));
+            layer = 4 - ((bigIntHeader.testBit(17) ? 1 : 0) + (bigIntHeader.testBit(18) ? 2 : 0));
             if (layer == 1) samplesPerFrame = 384;
             else samplesPerFrame = 1152;
 
-            padding = hbi.testBit(9);
+            padding = bigIntHeader.testBit(9);
 
-            if (hbi.testBit(10)) frequency = 48000;
-            else if (hbi.testBit(11)) frequency = 32000;
+            if (bigIntHeader.testBit(10)) frequency = 48000;
+            else if (bigIntHeader.testBit(11)) frequency = 32000;
             else frequency = 44100;
 
-            int tempBitrate = (hbi.testBit(12) ? 1 : 0) +
-                    (hbi.testBit(13) ? 2 : 0) +
-                    (hbi.testBit(14) ? 4 : 0) +
-                    (hbi.testBit(15) ? 8 : 0);
+            int tempBitrate = (bigIntHeader.testBit(12) ? 1 : 0) +
+                    (bigIntHeader.testBit(13) ? 2 : 0) +
+                    (bigIntHeader.testBit(14) ? 4 : 0) +
+                    (bigIntHeader.testBit(15) ? 8 : 0);
             bitrate = checkBitrate(tempBitrate, layer);
         }
 

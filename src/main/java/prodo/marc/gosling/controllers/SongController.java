@@ -114,15 +114,10 @@ public class SongController {
 
 
     private void publisherAutocomplete() {
-        String[] array = {"Aquarius", "Black Butter", "Capitol", "Columbia", "Crorec", "Dallas", "Emi",
-                "Epic", "Hit Records", "Insanity Records", "Menart", "Mikrofon Records", "Masterworks",
-                "Ministry of Sound Recordings", "Polydor", "Promo", "Rca", "Scardona", "Sony", "Spona",
-                "Melody", "Dancing Bear", "Heksagon", "Arista", "Geffen", "Intek", "Sedma Sekunda",
-                "Bonton", "Hamar", "Rubikon", "Rtl", "Only Records", "Zvuci Mediterana", "Abudublin",
-                "Campus", "Atlantic", "Parlophone", "Interscope", "Def Jam", "Republic", "Tonika", "Decca",
-                "Warner", "Domino Recording Co"};
-        Arrays.sort(array);
-        publisherList.addAll(Arrays.asList(array));
+        //this neeeds to be a separate database eventually
+        List<String> publishers = SongRepository.getPublishers();
+        //logger.debug("publishers: " + publishers);
+        publisherList.addAll(publishers);
     }
 
     private String[] getGenres() {
@@ -1054,7 +1049,7 @@ public class SongController {
                             if (getYear == null || getYear.isEmpty()) {
                                 getYear = Year.now().toString();
                             }
-                            logger.debug("getYear:-" + getYear + "-");
+                            //logger.debug("getYear:-" + getYear + "-");
                             int year = Integer.parseInt(getYear);
                             for (int testingYear = year - 2; testingYear <= year + 1; testingYear++) {
                                 //logger.debug("testing year: " + testingYear);
@@ -1066,7 +1061,7 @@ public class SongController {
                         }
                 );
                 if (!foundAlt.get().isEmpty()) {
-                    updateSongs.setStyle("-fx-background-color: #+" + AVERAGE_BACKGROUND_COLOR);
+                    updateSongs.setStyle("-fx-background-color: #" + AVERAGE_BACKGROUND_COLOR);
                     SongGlobal.setFileExists(foundAlt.get());
                     mp3Label.setText(foundAlt.get().replaceAll("(?i)\\.mp3", ""));
                 } else {
@@ -1142,47 +1137,6 @@ public class SongController {
 
     }
 
-
-    public void dupeCheck() {
-
-        StringBuilder list = new StringBuilder();
-        String selectedSong = songDatabaseTable.getSelectionModel().getSelectedItem().getArtist() + "-" +
-                songDatabaseTable.getSelectionModel().getSelectedItem().getTitle();
-        int minSearch = selectedSong.length();
-        String minString = "";
-        if (minSearch > 3) {
-            for (Song song : songList) {
-                String artist = song.getArtist();
-                String title = song.getTitle();
-                if (!Objects.equals(song.getId(), songDatabaseTable.getSelectionModel().getSelectedItem().getId()) &&
-                        (artist.length() > 0 && title.length() > 0)) {
-                    String currentSearch = artist + "-" + title;
-                    int distance = MyStringUtils.calculateSimilarity(currentSearch, selectedSong);
-                    if (distance > 0 && distance < minSearch) minSearch = distance;
-                    int sizeDif = distance - Math.abs(currentSearch.length() - selectedSong.length());
-                    if (distance <= minSearch || sizeDif == 0) {
-                        if (!currentSearch.equals(selectedSong)) {
-                            minString = currentSearch;
-                        }
-                        if (distance < 10 || sizeDif == 0) {
-                            list.append("\n").append(currentSearch).append(" --- ").append(distance).append(" char difference");
-                            minString = "";
-                        }
-                    }
-                }
-            }
-            if (!minString.isEmpty()) {
-                list.append("\n").append(minString).append(" --- ").append(minSearch).append(" char difference");
-            }
-            logger.debug("min found: " + minSearch);
-            Popups.giveInfoAlert("Similar songs",
-                    "Found these songs that are similar to:\n" + selectedSong,
-                    list.toString());
-        }
-
-        selectFileFromTable(CURRENT_FILE_LOC);
-
-    }
 
     public void googleSong() {
         String uri = textArtist.getText() + " " + textTitle.getText();
@@ -1351,5 +1305,17 @@ public class SongController {
             }
         }
         checkFields();
+    }
+
+    public void openFolder(ActionEvent actionEvent) {
+        String fileLoc = new File (songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc()).getParent();
+        String file = new File (songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc()).getName();
+        try {
+            Runtime.getRuntime().exec("explorer.exe /select," + fileLoc + "\\" + file);
+        }   catch (IOException e) {
+            logger.error("Error opening folder", e);
+        }
+
+        selectFileFromTable(CURRENT_FILE_LOC);
     }
 }

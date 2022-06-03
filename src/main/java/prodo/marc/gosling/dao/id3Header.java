@@ -1,6 +1,5 @@
 package prodo.marc.gosling.dao;
 
-
 import java.util.Set;
 
 public final class id3Header {
@@ -60,6 +59,7 @@ public final class id3Header {
     public static final String CHAPTER = "CHAP";
     public static final String COMPOSER_SORT = "TSOC";
     public static final String ITUNES_COMPILATION = "TCMP";
+    public static final String FILE_URL = "WOAF";
 
     public static final String DELETE = "XXXX";
 
@@ -72,6 +72,7 @@ public final class id3Header {
             "TIT1", "UFID", "POPM", "TDTG", "TOAL", "TPE3", "WCOP",
             "TOLY", "TRSN", "TDEN", "TMOO", "TMCL", "TIPL", "TCOM",
             "TFLT", "IPLS", "TRDA", "CTOC", "CHAP", "TSOC", "TCMP",
+            "WOAF",
             "XXXX"
     );
 

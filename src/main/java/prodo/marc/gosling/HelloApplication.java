@@ -19,27 +19,27 @@ public class HelloApplication extends Application {
         //JMetro jMetro = new JMetro(root, Style.DARK);
         Scene scene = new Scene(root);
         Image icon = new Image(String.valueOf(getClass().getResource("images/small_icon.png")));
-       stage.getIcons().add(icon);
+
+        stage.getIcons().add(icon);
         stage.setTitle("main");
         stage.setScene(scene);
         stage.setX(150); stage.setY(100);
         stage.setMinWidth(1100);
         stage.setMinHeight(490);
-        //stage.initStyle(StageStyle.TRANSPARENT);
         stage.show();
 
     }
 
     public static void main(String[] args) {
-
         launch();
     }
 
 
     @Override
     public void stop(){
-        System.exit(0);
         // Save file
+
+        System.exit(0);
     }
 
 }

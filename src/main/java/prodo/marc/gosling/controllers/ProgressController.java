@@ -24,25 +24,25 @@ public class ProgressController {
     public Label statusLabel;
 
     public void initialize() {
-        AtomicInteger i = new AtomicInteger();
+        AtomicInteger filesParsed = new AtomicInteger();
         List<Path> mp3List = SongGlobal.getMP3List();
         int max = mp3List.size();
         List<String> dupeFiles = new ArrayList<>();
 
-        progressLabel.setText(i+"/"+max);
+        progressLabel.setText(filesParsed+"/"+max);
 
         Thread folderImportTask = new Thread(() -> {
             Instant start = Instant.now();
             mp3List.forEach(file -> {
-                i.getAndIncrement();
+                filesParsed.getAndIncrement();
                 logger.debug("processing file: "+ file);
-                logger.debug(i+" out of "+mp3List.size());
+                logger.debug(filesParsed+" out of "+mp3List.size());
 
                 String getFile = FileUtils.addMP3(file, SongGlobal.getCurrentSong().getEditor());
                 if (getFile != null) {dupeFiles.add(getFile);}
                 Platform.runLater(() -> {
-                    updateProgressBar(i+"/"+max,i.doubleValue()/max);
-                    if (i.get() == max) {
+                    updateProgressBar(filesParsed+"/"+max,filesParsed.doubleValue()/max);
+                    if (filesParsed.get() == max) {
                         statusLabel.setText("Import done. Please close window and refresh table.");
                     }
                 });
