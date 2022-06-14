@@ -12,19 +12,19 @@ public class MP3Frame {
      */
     int bitrate;
     int samplesPerFrame;
-    boolean valid = true;
+    int valid = 0;
 
     public MP3Frame(BigInteger bigIntHeader) {
 
         for (int i = 0; i<13;i++) {
             if (!bigIntHeader.testBit(20+i)) {
-                System.out.println("error at bit: " + (19 + i));
-                valid = false;
+                valid = 19+i;
                 break;
             }
+            valid = 0;
         }
 
-        if (valid)
+        if (valid == 0)
         {
             layer = 4 - ((bigIntHeader.testBit(17) ? 1 : 0) + (bigIntHeader.testBit(18) ? 2 : 0));
             if (layer == 1) samplesPerFrame = 384;
@@ -90,7 +90,7 @@ public class MP3Frame {
                 ", valid: "+this.valid;
     }
 
-    public boolean isValid() {
-        return valid;
+    public String isValid() {
+        if (valid == 0) return ""; else return "error at bit: "+valid;
     }
 }

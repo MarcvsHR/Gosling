@@ -21,7 +21,6 @@ import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.controlsfx.control.textfield.TextFields;
 import prodo.marc.gosling.dao.MyID3;
 import prodo.marc.gosling.dao.Song;
 import prodo.marc.gosling.dao.id3Header;
@@ -49,7 +48,6 @@ import java.text.DecimalFormat;
 import java.time.Year;
 import java.util.List;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -85,14 +83,14 @@ public class SongController {
     @FXML
     TableColumn<Song, Boolean> tableDone;
     @FXML
-    TextField textAlbum, textArtist, textTitle, textPublisher, textComposer, textYear, textISRC,
-            textFilterFolder;
-    public static TextField publicTextArtist, publicTextTitle, publicTextISRC, publicTextPublisher;
-    @FXML
     Slider mp3Slider, volumeSlider;
     @FXML
     CheckBox checkDone;
+    @FXML
+    TextField textAlbum, textArtist, textTitle, textPublisher, textComposer, textYear, textISRC, textFilterFolder;
 
+    //public text fiels for getting data from regex
+    public static TextField publicTextArtist, publicTextTitle, publicTextISRC, publicTextPublisher;
     ObservableList<Song> songList = FXCollections.observableArrayList();
     ObservableList<String> publisherList = FXCollections.observableArrayList();
     FilteredList<Song> filteredSongs = new FilteredList<>(songList);
@@ -103,23 +101,23 @@ public class SongController {
     String AVERAGE_BACKGROUND_COLOR = "dd9999";
     private boolean UPDATE_CHECK = true;
     private String CURRENT_FILE_LOC = "";
-    private Path TEMP_DIR;
     private String EDITOR_NAME;
-    private boolean TABLE_MIN = false;
 
-    //disabled dropdown for now
-    //set to false to reenable auto-complete
-    private boolean PUBLISHERS_BOUND = true;
-    private boolean ACCELERATORS_INSTALLED = false;
-
-
+    /**
+     * Loads the publisher list from the database
+     */
     private void publisherAutocomplete() {
         //this neeeds to be a separate database eventually
         List<String> publishers = SongRepository.getPublishers();
-        //logger.debug("publishers: " + publishers);
+        publishers.remove(null);
+        publishers.remove("");
         publisherList.addAll(publishers);
     }
 
+    /**
+     * Loads the list of genres, hard coded for now
+     * @return sorted list of genres
+     */
     private String[] getGenres() {
         String[] returnArr = {"", "Cro", "Cro Zabavne", "Instrumental", "Klape", "Kuruza",
                 "Pop", "xxx", "Italian", "Susjedi", "Religiozne", "Oldies", "X-Mas", "Domoljubne",
@@ -132,11 +130,13 @@ public class SongController {
 
         //logger.debug("----- Executing initialize");
 
+        //declarations so regex can send data to song controller
         publicTextArtist = textArtist;
         publicTextTitle = textTitle;
         publicTextISRC = textISRC;
         publicTextPublisher = textPublisher;
 
+        //drag and drop
         songDatabaseTable.setOnDragOver(dragEvent -> {
             dragEvent.acceptTransferModes(TransferMode.LINK);
             dragEvent.consume();
@@ -146,12 +146,7 @@ public class SongController {
             dragEvent.consume();
         });
 
-        try {
-            TEMP_DIR = Files.createTempDirectory("tmp");
-        } catch (IOException ex) {
-            logger.error("Couldn't create temp dir", ex);
-        }
-
+        //getting editor name from system hostname
         try {
             EDITOR_NAME = InetAddress.getLocalHost().getHostName();
             logger.debug("Editor name: " + EDITOR_NAME);
@@ -159,18 +154,21 @@ public class SongController {
             logger.error("Unknown host:", ex);
         }
 
-        refreshTableButton.setStyle("-fx-background-color: #" + CHANGED_BACKGROUND_COLOR);
-
+        //initializing dropdowns
         dropGenre.getItems().addAll(getGenres());
         doneFilter.getItems().addAll("Ignore done", "Done", "Not Done");
         truncatedFilter.getItems().addAll("Ignore truncated", "Truncated");
         userFilter.getItems().addAll("Any user", "Direktor", "Glazba", "ONAIR");
+
+        //selecting items in dropdowns
         doneFilter.getSelectionModel().select(SongGlobal.getDoneFilter());
         truncatedFilter.getSelectionModel().select(SongGlobal.getTruncatedFilter());
         textFilterFolder.setText(SongGlobal.getFolderFilter());
         userFilter.getSelectionModel().select(SongGlobal.getUserFilter());
 
+        publisherAutocomplete();
 
+        //initializing table
         tableYear.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getYear()));
         tableID.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getId()));
         tableArtist.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getArtist()));
@@ -189,74 +187,96 @@ public class SongController {
 
         sortedSongs.comparatorProperty().bind(songDatabaseTable.comparatorProperty());
 
-        //updateTable();
-
+        //setting voulume slider to initial value
         volumeSlider.setValue(INITIAL_VOLUME_SO_MY_EARS_DONT_EXPLODE);
         changeVolume();
 
+        //loading songs from database
+        updateTable();
+
+        //load short table
+        switchTable();
+
+        //install accelerators
+        Platform.runLater(this::installAccelerators);
+
+        //if something is selected, load it into the text fields
+        //this is mainy for when the window is reloaded
         if (!songDatabaseTable.getSelectionModel().isEmpty()) {
             updateTextFields(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
         }
 
-        publisherAutocomplete();
-
-        switchTable();
-
         //logger.debug("----- ending initialize");
     }
 
+    /**
+     * Installs Accelerators, so that the user can use the keyboard as conviniently as possible.
+     * <p> Called on initialization.
+     */
     public void installAccelerators() {
         Scene scene = buttonPlay.getScene();
-        if (!ACCELERATORS_INSTALLED) {
-            KeyCombination kc = new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN);
-            Runnable rn = this::updateMP3;
-            scene.getAccelerators().put(kc, rn);
 
-            KeyCombination kc1 = new KeyCodeCombination(KeyCode.F, KeyCombination.SHORTCUT_DOWN);
-            Runnable rn1 = () -> textFilterFolder.requestFocus();
-            scene.getAccelerators().put(kc1, rn1);
+        // shortcut ctrl+s to save
+        KeyCombination keyCombinationSave = new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN);
+        Runnable runSave = this::updateMP3;
+        scene.getAccelerators().put(keyCombinationSave, runSave);
 
-            KeyCombination kc2 = new KeyCodeCombination(KeyCode.UP, KeyCombination.SHORTCUT_DOWN);
-            Runnable rn2 = () -> {
-                songDatabaseTable.getSelectionModel().select(songDatabaseTable.getSelectionModel().getSelectedIndex() - 1);
-                openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
-            };
-            scene.getAccelerators().put(kc2, rn2);
+        //shortcut ctrl+f to select the filter text field
+        KeyCombination keyCombinationFind = new KeyCodeCombination(KeyCode.F, KeyCombination.SHORTCUT_DOWN);
+        Runnable runFind = () -> textFilterFolder.requestFocus();
+        scene.getAccelerators().put(keyCombinationFind, runFind);
 
-            KeyCombination kc3 = new KeyCodeCombination(KeyCode.DOWN, KeyCombination.SHORTCUT_DOWN);
-            Runnable rn3 = () -> {
-                songDatabaseTable.getSelectionModel().select(songDatabaseTable.getSelectionModel().getSelectedIndex() + 1);
-                openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
-            };
-            scene.getAccelerators().put(kc3, rn3);
+        //shortcut ctrl+d to select done
+        KeyCombination keyCombinationDone = new KeyCodeCombination(KeyCode.D, KeyCombination.SHORTCUT_DOWN);
+        Runnable runDone = () -> checkDone.setSelected(!checkDone.isSelected());
+        scene.getAccelerators().put(keyCombinationDone, runDone);
 
-            KeyCombination kc4 = new KeyCodeCombination(KeyCode.D, KeyCombination.SHORTCUT_DOWN);
-            Runnable rn4 = () -> checkDone.setSelected(!checkDone.isSelected());
-            scene.getAccelerators().put(kc4, rn4);
+        //shortcut ctrl+down to select previous song in table
+        KeyCombination keyCombinationPrevious = new KeyCodeCombination(KeyCode.UP, KeyCombination.SHORTCUT_DOWN);
+        Runnable runPrevious = () -> {
+            songDatabaseTable.getSelectionModel().selectPrevious();
+            //songDatabaseTable.getSelectionModel().select(songDatabaseTable.getSelectionModel().getSelectedIndex() - 1);
+            openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
+        };
+        scene.getAccelerators().put(keyCombinationPrevious, runPrevious);
 
-            KeyCombination kc5 = new KeyCodeCombination(KeyCode.PAGE_DOWN, KeyCombination.SHORTCUT_DOWN);
-            Runnable rn5 = () -> {
-                songDatabaseTable.getSelectionModel().select(songList.size() - 1);
-                songDatabaseTable.scrollTo(songList.size());
-                openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
-            };
-            scene.getAccelerators().put(kc5, rn5);
+        //shortcut ctrl+up to select next song in table
+        KeyCombination keyCombinationNext = new KeyCodeCombination(KeyCode.DOWN, KeyCombination.SHORTCUT_DOWN);
+        Runnable runNext = () -> {
+            songDatabaseTable.getSelectionModel().selectNext();
+            //songDatabaseTable.getSelectionModel().select(songDatabaseTable.getSelectionModel().getSelectedIndex() + 1);
+            openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
+        };
+        scene.getAccelerators().put(keyCombinationNext, runNext);
 
-            KeyCombination kc6 = new KeyCodeCombination(KeyCode.PAGE_UP, KeyCombination.SHORTCUT_DOWN);
-            Runnable rn6 = () -> {
-                songDatabaseTable.getSelectionModel().select(0);
-                songDatabaseTable.scrollTo(0);
-                openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
-            };
-            scene.getAccelerators().put(kc6, rn6);
+        //shortcut ctrl+page_down to select last song in table
+        KeyCombination keyCombinationLast = new KeyCodeCombination(KeyCode.PAGE_DOWN, KeyCombination.SHORTCUT_DOWN);
+        Runnable runLast = () -> {
+            //songDatabaseTable.getSelectionModel().select(songList.size() - 1);
+            songDatabaseTable.getSelectionModel().selectLast();
+            songDatabaseTable.scrollTo(songList.size() - 1);
+            openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
+        };
+        scene.getAccelerators().put(keyCombinationLast, runLast);
 
-            if (textFilterFolder.getText().isEmpty()) {
-                textFilterFolder.setText("download");
-            }
+        //shortcut ctrl+page_up to select first song in table
+        KeyCombination keyCombinationFirst = new KeyCodeCombination(KeyCode.PAGE_UP, KeyCombination.SHORTCUT_DOWN);
+        Runnable runFirts = () -> {
+            //songDatabaseTable.getSelectionModel().select(0);
+            songDatabaseTable.getSelectionModel().selectFirst();
+            songDatabaseTable.scrollTo(0);
+            openMP3(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
+        };
+        scene.getAccelerators().put(keyCombinationFirst, runFirts);
 
-            ACCELERATORS_INSTALLED = true;
+        //shortcut ctrl+space to set filter text to "download" and update table
+        KeyCombination keyCombinationDownload = new KeyCodeCombination(KeyCode.SPACE, KeyCombination.SHORTCUT_DOWN);
+        Runnable runDownload = () -> {
+            textFilterFolder.setText("download");
+            updateTable();
+        };
+        scene.getAccelerators().put(keyCombinationDownload, runDownload);
 
-        }
     }
 
 
@@ -331,12 +351,13 @@ public class SongController {
     }
 
 
+    /**
+     * Clear the table and get the new list of songs from the database
+     */
     @FXML
     private void updateTable() {
 
         //logger.debug("----- Executing updateTable");
-
-        installAccelerators();
 
         SongRepository songRepo = new SongRepository();
         List<Song> songList1 = songRepo.getSongs();
@@ -429,10 +450,6 @@ public class SongController {
     private void changeSong(String fileLoc, boolean localFile) {
         if (localFile) {
             updateTextFields(fileLoc);
-            if (!PUBLISHERS_BOUND) {
-                TextFields.bindAutoCompletion(textPublisher, publisherList).setMaxWidth(170);
-                PUBLISHERS_BOUND = true;
-            }
         }
     }
 
@@ -498,14 +515,18 @@ public class SongController {
         //logger.debug("----- ending updateTextFields");
     }
 
+    /**
+     * This method selects the current song from the table
+     *
+     * @param currentFileLoc the file location of the song
+     */
     private void selectFileFromTable(String currentFileLoc) {
-        AtomicInteger i = new AtomicInteger();
-        songDatabaseTable.getItems().forEach(song -> {
+        for (Song song : songDatabaseTable.getItems()) {
             if (song.getFileLoc().equals(currentFileLoc)) {
-                songDatabaseTable.getSelectionModel().select(i.get());
+                songDatabaseTable.getSelectionModel().select(song);
+                break;
             }
-            i.getAndIncrement();
-        });
+        }
     }
 
     @FXML
@@ -614,8 +635,6 @@ public class SongController {
 
         //logger.debug("----- Executing updateMP3");
 
-        installAccelerators();
-
         changeCRO();
 
         //check if title field has parenthesis that start with "ft " and if so, move the string to the artist field
@@ -706,30 +725,36 @@ public class SongController {
 
     private void openMediaFile(String fileLoc) {
         //logger.debug("----- Executing openMediaFile");
-        String tempMp3 = TEMP_DIR + "\\temp";
-
-        Path filePath = Path.of(fileLoc);
         try {
-            Files.copy(filePath, Paths.get(tempMp3 + ".mp3"), StandardCopyOption.REPLACE_EXISTING);
-            tempMp3 = tempMp3 + ".mp3";
-        } catch (Exception ex) {
-            logger.error("could not create temp mp3 file: ", ex);
+            //open a temporaty folder to store the mp3 file
+            Path TEMP_DIR = Files.createTempDirectory("tmp");
+            String tempMp3 = TEMP_DIR + "\\temp";
+            Path filePath = Path.of(fileLoc);
+            //copy the mp3 file to the temp folder
             try {
-                Files.copy(filePath, Paths.get(tempMp3 + "1.mp3"), StandardCopyOption.REPLACE_EXISTING);
-                tempMp3 = tempMp3 + "1.mp3";
-            } catch (Exception ex1) {
-                logger.error("could not create secondary temp mp3 file either: ", ex1);
+                Files.copy(filePath, Paths.get(tempMp3 + ".mp3"), StandardCopyOption.REPLACE_EXISTING);
+                tempMp3 = tempMp3 + ".mp3";
+            } catch (Exception ex) {
+                logger.error("could not create temp mp3 file: ", ex);
+                try {
+                    Files.copy(filePath, Paths.get(tempMp3 + "1.mp3"), StandardCopyOption.REPLACE_EXISTING);
+                    tempMp3 = tempMp3 + "1.mp3";
+                } catch (Exception ex1) {
+                    logger.error("could not create secondary temp mp3 file either: ", ex1);
+                }
             }
+
+            File mp3File = new File(tempMp3);
+            mp3File.deleteOnExit();
+            String mp3Path = mp3File.toURI().toASCIIString();
+            closeMediaStream();
+
+            //TODO: check why javafx.scene.media.Media is not releasing files, that is what is causing the save bug
+            Media mp3Media = new Media(mp3Path);
+            mplayer = new MediaPlayer(mp3Media);
+        } catch (IOException ex) {
+            logger.error("Couldn't create temp dir", ex);
         }
-
-        File mp3File = new File(tempMp3);
-        mp3File.deleteOnExit();
-        String mp3Path = mp3File.toURI().toASCIIString();
-        closeMediaStream();
-
-        //TODO: check why javafx.scene.media.Media is not releasing files, that is what is causing the save bug
-        Media mp3Media = new Media(mp3Path);
-        mplayer = new MediaPlayer(mp3Media);
 
         //set slider
         try {
@@ -925,6 +950,13 @@ public class SongController {
         return true;
     }
 
+    /**
+     * Updates the song entry in the database with the new data
+     *
+     * @param id3        the new id3 data
+     * @param databaseID the id of the song in the database
+     * @param fileLoc    the file location of the song
+     */
     public void updateSongEntry(MyID3 id3, Integer databaseID, String fileLoc) {
         //logger.debug("----- Executing updateSongEntry");
         Song song = ID3v2Utils.songDataFromID3(id3, fileLoc, EDITOR_NAME);
@@ -975,13 +1007,12 @@ public class SongController {
     }
 
     public boolean checkInvalidChars(String text, String fieldName) {
-        if (text == null) {
-            text = "";
-        }
-        if (text.contains("%") || text.contains("?")) {
+        if (text == null)
+            return false;
+        if (text.contains("%") || text.contains("?"))
             return true;
-        } else return text.contains("/") && !fieldName.equals("composer");
 
+        return !fieldName.equals("composer") && text.contains("/");
     }
 
     public void checkFields() {
@@ -1044,7 +1075,7 @@ public class SongController {
                 dropGenre.getItems().forEach(genre -> {
                             String getYear = textYear.getText();
                             if (getYear != null) {
-                                getYear = getYear.replaceAll("[^\\d]", "");
+                                getYear = getYear.replaceAll("\\D", "");
                             }
                             if (getYear == null || getYear.isEmpty()) {
                                 getYear = Year.now().toString();
@@ -1232,8 +1263,12 @@ public class SongController {
         }
     }
 
+    /**
+     * Switches the table from short to long and vice versa
+     */
     public void switchTable() {
-        if (TABLE_MIN) {
+        if (!tableEditor.isVisible()) {
+            tableID.setVisible(true);
             tableComposer.setVisible(true);
             tableEditor.setVisible(true);
             //tableFileLoc.setVisible(true);
@@ -1241,8 +1276,8 @@ public class SongController {
             tableDone.setVisible(true);
             tableToggleButton.setText("-");
             songDatabaseTable.setMaxWidth(getTableWidth());
-            TABLE_MIN = false;
         } else {
+            tableID.setVisible(false);
             tableComposer.setVisible(false);
             tableEditor.setVisible(false);
             //tableFileLoc.setVisible(false);
@@ -1250,7 +1285,6 @@ public class SongController {
             tableDone.setVisible(false);
             tableToggleButton.setText("+");
             songDatabaseTable.setMaxWidth(getTableWidth());
-            TABLE_MIN = true;
         }
     }
 
@@ -1274,7 +1308,7 @@ public class SongController {
     public void listTag() {
         String id3File = songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc();
         MyID3 tempID3 = ID3Reader.getTag(new File(id3File));
-        //logger.debug(tempID3.listFrames());
+        logger.debug(tempID3.listFrames());
         Popups.giveInfoAlert("ID3 tag content for: ", id3File, tempID3.listFrames() + "   ---" + tempID3.getSize() + "bytes");
     }
 
@@ -1308,11 +1342,11 @@ public class SongController {
     }
 
     public void openFolder(ActionEvent actionEvent) {
-        String fileLoc = new File (songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc()).getParent();
-        String file = new File (songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc()).getName();
+        String fileLoc = new File(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc()).getParent();
+        String file = new File(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc()).getName();
         try {
             Runtime.getRuntime().exec("explorer.exe /select," + fileLoc + "\\" + file);
-        }   catch (IOException e) {
+        } catch (IOException e) {
             logger.error("Error opening folder", e);
         }
 

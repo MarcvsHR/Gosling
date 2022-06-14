@@ -243,7 +243,7 @@
                     </Label>
                     <TextField fx:id="textFilterFolder" onKeyTyped="#filterTable" prefWidth="150.0">
                         <tooltip>
-                            <Tooltip showDelay="300ms" text="Search artist/title/album&#13;Use | for multiple terms" />
+                            <Tooltip showDelay="300ms" text="Search artist/title/album&#13;Use | for multiple terms&#13;Ctrl+Space to set it to 'download'" />
                         </tooltip>
                     </TextField>
                     <ComboBox fx:id="doneFilter" focusTraversable="false" onAction="#filterTable" prefWidth="110.0" promptText="Either" />
@@ -262,7 +262,7 @@
         </VBox>
         <TableView fx:id="songDatabaseTable" focusTraversable="false" onMouseClicked="#clickTable" onMouseDragged="#clickTable" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" GridPane.vgrow="ALWAYS">
             <columns>
-                <TableColumn fx:id="tableID" prefWidth="30.0" text="ID" visible="false" />
+                <TableColumn fx:id="tableID" prefWidth="40.0" text="ID" visible="false" />
                 <TableColumn fx:id="tableArtist" prefWidth="230.0" text="Artist" />
                 <TableColumn fx:id="tableTitle" prefWidth="200.0" text="Title" />
                 <TableColumn fx:id="tableAlbum" prefWidth="100.0" text="Album" />

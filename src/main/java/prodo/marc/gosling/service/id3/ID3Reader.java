@@ -35,18 +35,19 @@ public class ID3Reader {
 
         if (fileContent != null) {
             String header = new String(Arrays.copyOfRange(fileContent, 0, 3));
-//            logger.debug("first 3 characters: " + header);
+            //logger.debug("first 3 characters: " + header);
             if (header.equals("ID3")) {
                 id3Data.setVersion((byte) 2, fileContent[3], fileContent[4]);
-//                logger.debug("id3 version: " + id3Data.getVersionString());
+                //logger.debug("id3 version: " + id3Data.getVersionString());
             }
             if (id3Data.getVersionString().equals("2.4.0") ||
                     id3Data.getVersionString().equals("2.3.0") ||
                     id3Data.getVersionString().equals("2.2.0")) {
                 id3Data.setFlags(fileContent[5]);
                 if (id3Data.getFlags() > 0) logger.debug("Flags detected!!!!   " + id3Data.getFlags());
+
                 id3Data.setSize(ByteBuffer.wrap(Arrays.copyOfRange(fileContent, 6, 10)).getInt(), true);
-                int tempSize = id3Data.getSize();
+                //logger.debug("id3 size: " + id3Data.getSize());
 
                 if (!id3Data.getVersionString().equals("2.2.0")) {
                     int startFrames = 10;
@@ -74,25 +75,46 @@ public class ID3Reader {
                             if (id3Header.LIST_NOT_CONTAINS(tempHeader))
                                 startFrames++;
                         }
-                        if (!frame.getFrameID().equals(id3Header.CD_ID))
+                        if (!frame.getFrameID().equals(id3Header.CD_ID)) {
                             id3Data.addFrame(frame);
+                            //logger.debug("Frame added: " + frame.getFrameID());
+                        }
                     }
                 } else {
                     id3Data.setVersion((byte) 2, (byte) 4, (byte) 0);
                 }
 
-                if (!id3Data.exists(id3Header.LENGTH) || id3Data.getData(id3Header.LENGTH).equals("0"))
-                    id3Data.addFrame(id3Header.LENGTH, String.valueOf(ID3v2Utils.getDuration(fileContent, id3Data.getSize())));
+                String duration = String.valueOf(ID3v2Utils.getDuration(fileContent, id3Data.getSize(), file.getName()));
 
-                logger.debug("duration: " + ID3v2Utils.getDuration(fileContent, tempSize));
+                if (!id3Data.exists(id3Header.LENGTH) || id3Data.getData(id3Header.LENGTH).equals("0"))
+                    id3Data.addFrame(id3Header.LENGTH, duration);
+                else if (!id3Data.getData(id3Header.LENGTH).equals(duration)) {
+
+                    //TODO: eventually need to go through the database and change the duration of all songs in the database and in the file
+
+                    int difference = Integer.parseInt(id3Data.getData(id3Header.LENGTH)) - Integer.parseInt(duration);
+                    if (difference > 1000) {
+                        logger.debug("Duration changed from originally " + id3Data.getData(id3Header.LENGTH) + " to " + duration + ", " +
+                                " this is longer by " + difference + " ms");
+                    }
+                    id3Data.setFrame(id3Header.LENGTH, duration);
+                }
+//                else
+//                    logger.debug("duration: " + Integer.parseInt(id3Data.getData(id3Header.LENGTH)) / 1000 + " seconds");
+
+//                if (id3Data.exists(id3Header.ALBUM_ART)) {
+//                    logger.debug("--Album art found--");
+//                }
 
                 id3Data.setSize(id3Data.totalFrameSize(), false);
 
             }
         }
 
-        if (id3Data.getVersionString().equals("2.5.0"))
-            id3Data = new MyID3(String.valueOf(ID3v2Utils.getDuration(fileContent, 0)));
+        if (id3Data.getVersionString().equals("2.5.0")) {
+            logger.debug("ID3 v2.5.0... how?");
+            id3Data = new MyID3(String.valueOf(ID3v2Utils.getDuration(fileContent, 0, file.getName())));
+        }
 
         return id3Data;
     }

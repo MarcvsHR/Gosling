@@ -20,6 +20,7 @@ public class SceneController {
 
 
     public static void openScene(ActionEvent event,String windowName, String window) throws IOException {
+        System.out.println("Opening scene: " + window);
         FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(HelloApplication.class.getResource(window)));
         root = loader.load();
 

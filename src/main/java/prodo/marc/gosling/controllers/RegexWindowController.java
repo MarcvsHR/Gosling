@@ -42,6 +42,7 @@ public class RegexWindowController extends SongController {
             regex.add("[Track Artist - Title]");
             regex.add("[Track Title - Artist]");
             regex.add("[Artist - Title ISRC]");
+            regex.add("[Track Artist - Title ISRC]");
         }
         if (StringUtils.countMatches(mp3Filename.getText(), " - ") == 2) {
             regex.add("[Track - Artist - Title]");
@@ -244,6 +245,17 @@ public class RegexWindowController extends SongController {
                 String isrc = splitWords[splitWords.length - 1];
 
                 setSongData(output[0], output[1].replace(" " + isrc, ""), SongGlobal.getCurrentSong().getPublisher(), isrc);
+
+                isSet = true;
+                break;
+            }
+            case "Track Artist - Title ISRC": {
+                String[] output = mp3Filename.getText().split(" - ");
+                String[] splitWords1 = output[0].split(" ", 2);
+                String[] splitWords2 = output[1].split(" ");
+                String isrc = splitWords2[splitWords2.length - 1];
+
+                setSongData(splitWords1[1], output[1].replace(" " + isrc, ""), SongGlobal.getCurrentSong().getPublisher(), isrc);
 
                 isSet = true;
                 break;

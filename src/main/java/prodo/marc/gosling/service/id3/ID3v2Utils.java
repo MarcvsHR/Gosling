@@ -8,9 +8,12 @@ import prodo.marc.gosling.dao.id3Header;
 import prodo.marc.gosling.dao.MP3Frame;
 import prodo.marc.gosling.hibernate.repository.SongRepository;
 import prodo.marc.gosling.service.MyStringUtils;
+import prodo.marc.gosling.service.SongGlobal;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 
@@ -57,12 +60,12 @@ public class ID3v2Utils {
         return testSong;
     }
 
-    public static long getDuration(byte[] fileContent, int size) {
+    public static long getDuration(byte[] fileContent, int size, String fileName) {
 
         //logger.debug("----- Executing getDuration");
         if (size != 0) size += 10;
 
-        byte[] mp3Data = Arrays.copyOfRange(fileContent, size, fileContent.length - size);
+        byte[] mp3Data = Arrays.copyOfRange(fileContent, size, fileContent.length);
         double frameLen;
         int counter = 0;
         double estDur = 0;
@@ -75,12 +78,44 @@ public class ID3v2Utils {
                 logger.debug(frame.getAllData());
             }
 
-            if (!frame.isValid()) {
+            if (!frame.isValid().isEmpty()) {
                 int distance = mp3Data.length - counter;
                 String headerString = new String(Arrays.copyOfRange(mp3Data, counter, counter + 3));
+                logger.debug("");
+                logger.debug("Song name: " + fileName);
+
+                if (headerString.equals("TAG")) {
+                    logger.debug("Found V1 ID3 tag at " + (counter + size) + " with " + distance + " bytes left");
+                    break;
+                }
+
+                if (headerString.equals("ID3")) {
+                    logger.debug("Found V2 ID3 tag at " + (counter + size) + " with " + distance + " bytes left");
+                    logger.debug("If you see this message, please report it to the developers");
+                    logger.debug(frame.isValid());
+                    break;
+                }
+
+                if (headerString.equals("\u0000\u0000\u0000")) {
+                    logger.debug("Found NULL tag at " + (counter + size) + " with " + distance + " bytes left");
+                    break;
+                }
+
+                if (headerString.equals("APE")) {
+                    logger.debug("Found APE tag at " + (counter + size) + " with " + distance + " bytes left");
+                    logger.debug("Wny... just... why...");
+                    break;
+                }
+
+                logger.debug(frame.isValid());
                 logger.debug(headerString);
-                logger.debug(Arrays.toString(Arrays.copyOfRange(mp3Data, counter, counter + 3)));
-                logger.debug("weird header found at " + (distance) + " before the end");
+                StringBuilder bytes = new StringBuilder();
+                for (byte b : Arrays.copyOfRange(mp3Data, counter, counter + 30)) {
+                    bytes.append(Integer.toHexString(b & 0xff)).append(" ");
+                }
+                //convert bytes string to upper case
+                logger.debug("Byte values: " + bytes.toString().toUpperCase());
+                logger.debug("weird header found at " + (counter + size) + " with " + distance + " bytes left");
                 logger.debug(size + counter);
                 break;
             }
@@ -89,13 +124,20 @@ public class ID3v2Utils {
 //            logger.debug("frame length: "+frameLen);
             counter += frameLen;
             estDur += frame.getFrameTimeInMS();
-            //logger.debug(estDur);
-            //logger.debug(frame.getAllData());
+//            logger.debug(estDur);
+//            logger.debug(frame.getAllData());
+//            logger.debug("frame number: " + counter/frameLen);
+//            logger.debug("bytes left: " + (mp3Data.length - counter));
+//            logger.debug("mp3 length: " + mp3Data.length);
+//            logger.debug("header size: " + size);
+//            logger.debug("total size: " + (mp3Data.length + size));
+//            logger.debug("file size: " + fileContent.length);
+//            logger.debug("estimated left predicted: " + (fileContent.length - size));
 
             //TODO: this needs to raise an error instead of just returning the duration
             //if this is 0, that means there's somehow a bad frame in the data
             if (frame.getFrameSizeInBytes() == 0) {
-                logger.debug("error at byte: "+(counter+size));
+                logger.debug("error at byte: " + (counter + size));
                 return (long) estDur;
             }
         }

@@ -10,7 +10,7 @@
 
 <VBox alignment="CENTER" prefHeight="493.0" prefWidth="770.0" spacing="20.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="prodo.marc.gosling.controllers.HelloController">
 
-    <Label fx:id="welcomeText" prefHeight="17.0" prefWidth="23.0" />
+    <Label fx:id="welcomeText" prefHeight="20.0" prefWidth="230.0" />
     <HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0" spacing="20.0">
         <padding>
             <Insets left="20.0" right="20.0" top="10.0"/>
@@ -20,13 +20,12 @@
         </VBox.margin>
         <Button fx:id="songViewButton" alignment="TOP_LEFT" mnemonicParsing="false" onAction="#showSongWindow"
                 text="Open song editing"/>
-        <Button alignment="TOP_RIGHT" onAction="#onHelloButtonClick" text="Hello!"/>
     </HBox>
 
 
-    <Label text="My Image">
+    <Label text="My Image" fx:id="imageLabel">
         <graphic>
-            <ImageView fitWidth="150" preserveRatio="true">
+            <ImageView fitWidth="150" preserveRatio="true" fx:id="gooseImage">
                 <Image url="@../images/GoosNLings.jpg"/>
             </ImageView>
         </graphic>
