@@ -121,7 +121,7 @@ public class SongController {
     private String[] getGenres() {
         String[] returnArr = {"", "Cro", "Cro Zabavne", "Instrumental", "Klape", "Kuruza",
                 "Pop", "xxx", "Italian", "Susjedi", "Religiozne", "Oldies", "X-Mas", "Domoljubne",
-                "Country", "World Music", "Dance"};
+                "Country", "World Music", "Dance", "Slow"};
         Arrays.sort(returnArr);
         return returnArr;
     }
@@ -216,10 +216,15 @@ public class SongController {
     public void installAccelerators() {
         Scene scene = buttonPlay.getScene();
 
-        // shortcut ctrl+s to save
+        //shortcut ctrl+s to save
         KeyCombination keyCombinationSave = new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN);
         Runnable runSave = this::updateMP3;
         scene.getAccelerators().put(keyCombinationSave, runSave);
+
+        //shortcut F5 to update table
+        KeyCombination keyCombinationUpdate = new KeyCodeCombination(KeyCode.F5);
+        Runnable runUpdate = this::updateTable;
+        scene.getAccelerators().put(keyCombinationUpdate, runUpdate);
 
         //shortcut ctrl+f to select the filter text field
         KeyCombination keyCombinationFind = new KeyCodeCombination(KeyCode.F, KeyCombination.SHORTCUT_DOWN);
@@ -424,11 +429,12 @@ public class SongController {
             currentSong.setEditor(EDITOR_NAME);
         }
 
-        if (!currentSong.isTheSame(SongGlobal.getCurrentSong()) && currentSong.getFileLoc() != null) {
+        String checkSong = currentSong.isTheSame(SongGlobal.getCurrentSong());
+        if (!checkSong.isEmpty() && currentSong.getFileLoc() != null) {
 
             boolean result = Popups.giveConfirmAlert("Unsaved changes",
                     "You are switching to another file with possible unsaved changes",
-                    "Do you want to save the ID3 changes you have made?\nChanges: " + currentSong + "\nFile data: " + SongGlobal.getCurrentSong());
+                    "Do you want to save the ID3 changes you have made?\nChanges: " + checkSong);
 
             if (result) {
                 updateMP3();
@@ -474,7 +480,12 @@ public class SongController {
             textAlbum.setText(id3Data.getData(id3Header.ALBUM));
             textPublisher.setText(id3Data.getData(id3Header.PUBLISHER));
             textComposer.setText(id3Data.getData(id3Header.COMPOSER));
-            textYear.setText(id3Data.getData(id3Header.YEAR));
+            if (id3Data.exists(id3Header.YEAR)) {
+                textYear.setText(id3Data.getData(id3Header.YEAR));
+            } else if (id3Data.exists(id3Header.RECORDING_DATE)) {
+                textYear.setText(id3Data.getData(id3Header.RECORDING_DATE));
+                id3Data.setFrame(id3Header.YEAR, id3Data.getData(id3Header.RECORDING_DATE));
+            }
             if (id3Data.getData(id3Header.KEY) != null) {
                 checkDone.setSelected(id3Data.getData(id3Header.KEY).equals("true"));
             } else {
@@ -895,7 +906,7 @@ public class SongController {
             year = year + "\\";
 
             List<String> foldersWithNoYear = Arrays.asList(
-                    "religiozne", "oldies", "x-mas", "cro\\domoljubne", "country"
+                    "religiozne", "oldies", "x-mas", "cro\\domoljubne", "country", "slow"
             );
             if (foldersWithNoYear.contains(genre)) {
                 year = "";

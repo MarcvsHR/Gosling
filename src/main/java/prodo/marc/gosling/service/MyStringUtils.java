@@ -27,8 +27,9 @@ public class MyStringUtils {
 
     //TODO: this should be an in-app thing where you pick a filter for renaming stuff
     public static String replaceCroChars(String text, String field) {
-        if (text != null) {
-
+        if (text == null) {
+            text = "";
+        } else {
             if (field.equals(id3Header.COMPOSER)) {
                 text = text.replaceAll("(\\p{Ll})(\\p{Lu})", "$1,$2");
             }
@@ -45,29 +46,41 @@ public class MyStringUtils {
             text = capitalizeAfter("(", text);
             text = capitalizeAfter("-", text);
 
-
             text = text.replace("ć", "c");
-            text = text.replace("č", "c");
-            text = text.replace("š", "s");
-            text = text.replace("đ", "dj");
-            text = text.replace("ž", "z");
-
             text = text.replace("Ć", "C");
+            text = text.replace("č", "c");
             text = text.replace("Č", "C");
+            text = text.replace("š", "s");
             text = text.replace("Š", "S");
+            text = text.replace("đ", "dj");
             text = text.replace("Đ", "Dj");
+            text = text.replace("ž", "z");
             text = text.replace("Ž", "Z");
 
+            text = text.replace("ñ", "n");
+            text = text.replace("Ñ", "N");
+            text = text.replace("é", "e");
+            text = text.replace("É", "E");
+            text = text.replace("í", "i");
+            text = text.replace("Í", "I");
+            text = text.replace("ó", "o");
+            text = text.replace("Ó", "O");
+            text = text.replace("ú", "u");
+            text = text.replace("Ú", "U");
+            text = text.replace("á", "a");
+            text = text.replace("Á", "A");
+            text = text.replace("Ø", "O");
+            text = text.replace("ø", "o");
+
+            String testing = text.replaceAll("[\\x00-\\x7F]", "");
+            if (!testing.isEmpty()) System.out.println("---Weird Chars Found--- "+testing);
             text = text.replaceAll("[^\\x00-\\x7F]", "%%");
 
             text = text.replace("Feat", "Ft");
             text = text.replace("Ft.", "Ft");
             text = text.replace("Ft", "ft");
-
-            return text;
-        } else {
-            return "";
         }
+        return text;
     }
 
     private static String capitalizeAfter(String s, String text) {

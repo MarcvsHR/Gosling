@@ -18,12 +18,12 @@ public final class id3Header {
     public static final String USER_DATA = "TXXX"; //can have multiple, implemented
     public static final String CD_ID = "MCDI";
     public static final String GENERAL_OBJECT = "GEOB"; //can have multiple, implemented
+    public static final String RECORDING_DATE = "TDRC";
     public static final String ALBUM_ARTIST = "TPE2";
     public static final String DISC_NUMBER = "TPOS";
     public static final String RELEASE_DATE = "TDRL";
     public static final String TRACK = "TRCK";
     public static final String BPM = "TBPM";
-    public static final String RECORDING_DATE = "TDRC";
     public static final String TIME = "TIME";
     public static final String DONE = "DONE";
     public static final String SOFTWARE = "TSSE";

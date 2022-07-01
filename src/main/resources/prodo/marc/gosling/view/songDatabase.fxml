@@ -67,7 +67,7 @@
                                 </ImageView>
                             </graphic>
                             <tooltip>
-                                <Tooltip showDelay="150ms" text="Refresh data in table" />
+                                <Tooltip showDelay="150ms" text="Refresh data in table (F5))" />
                             </tooltip>
                         </Button>
                         <padding>
