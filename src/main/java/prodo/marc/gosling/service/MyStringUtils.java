@@ -5,6 +5,8 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import prodo.marc.gosling.dao.id3Header;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.time.Year;
 import java.util.regex.Pattern;
 
@@ -36,44 +38,41 @@ public class MyStringUtils {
             text = text.replace(" ,", ",");
             text = text.replace(",", ", ");
             text = text.trim().replaceAll(" +", " ");
-            text = text.replace("Mc, ", "Mc");
             text = text.replace(" .", ".");
             text = text.toLowerCase();
             text = text.trim();
+
+            text = text.replace("ć", "c");
+            text = text.replace("č", "c");
+            text = text.replace("đ", "dj");
+            text = text.replace("š", "s");
+            text = text.replace("ž", "z");
+
+            text = text.replace("ñ", "n");
+            text = text.replace("á", "a");
+            text = text.replace("é", "e");
+            text = text.replace("ó", "o");
+            text = text.replace("í", "i");
+            text = text.replace("ú", "u");
+            text = text.replace("ø", "o");
+            text = text.replace("ä", "a");
+            text = text.replace("ö", "o");
+            text = text.replace("ü", "u");
+            text = text.replace("ß", "ss");
+            text = text.replace("æ", "ae");
+
+
             text = capitalizeAfter(" ", text);
             text = capitalizeAfter(".", text);
             text = capitalizeAfter("/", text);
             text = capitalizeAfter("(", text);
             text = capitalizeAfter("-", text);
+            text = text.replace("Mc, ", "Mc");
 
-            text = text.replace("ć", "c");
-            text = text.replace("Ć", "C");
-            text = text.replace("č", "c");
-            text = text.replace("Č", "C");
-            text = text.replace("š", "s");
-            text = text.replace("Š", "S");
-            text = text.replace("đ", "dj");
-            text = text.replace("Đ", "Dj");
-            text = text.replace("ž", "z");
-            text = text.replace("Ž", "Z");
 
-            text = text.replace("ñ", "n");
-            text = text.replace("Ñ", "N");
-            text = text.replace("é", "e");
-            text = text.replace("É", "E");
-            text = text.replace("í", "i");
-            text = text.replace("Í", "I");
-            text = text.replace("ó", "o");
-            text = text.replace("Ó", "O");
-            text = text.replace("ú", "u");
-            text = text.replace("Ú", "U");
-            text = text.replace("á", "a");
-            text = text.replace("Á", "A");
-            text = text.replace("Ø", "O");
-            text = text.replace("ø", "o");
-
-            String testing = text.replaceAll("[\\x00-\\x7F]", "");
-            if (!testing.isEmpty()) System.out.println("---Weird Chars Found--- "+testing);
+            for (char c : text.toCharArray())
+                if (c > 127)
+                    System.out.println("---Weird Char Found--- " + c + ", ASCII: " + (int) c);
             text = text.replaceAll("[^\\x00-\\x7F]", "%%");
 
             text = text.replace("Feat", "Ft");

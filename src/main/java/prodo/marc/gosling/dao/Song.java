@@ -62,25 +62,25 @@ public class Song {
         if (compareSong == null || getClass() != compareSong.getClass()) return "one of the songs is empty";
         String returnString = "";
         if (!MyStringUtils.compareStrings(artist,compareSong.artist))
-            returnString += "Artist: "+artist + " - " + compareSong.artist + ";\r\n";
+            returnString += "Artist: "+artist + " --- " + compareSong.artist + ";\r\n";
         if (!MyStringUtils.compareStrings(title,compareSong.title))
-            returnString += "Title: "+title + " - " + compareSong.title + ";\r\n";
+            returnString += "Title: "+title + " --- " + compareSong.title + ";\r\n";
         if (!MyStringUtils.compareStrings(album,compareSong.album))
-            returnString += "Album:"+album + " - " + compareSong.album + ";\r\n";
+            returnString += "Album: "+album + " --- " + compareSong.album + ";\r\n";
         if (!MyStringUtils.compareStrings(publisher,compareSong.publisher))
-            returnString += "Publisher:"+publisher + " - " + compareSong.publisher + ";\r\n";
+            returnString += "Publisher: "+publisher + " --- " + compareSong.publisher + ";\r\n";
         if (!MyStringUtils.compareStrings(composer,compareSong.composer))
-            returnString += "Composer:"+composer + " - " + compareSong.composer + ";\r\n";
+            returnString += "Composer: "+composer + " --- " + compareSong.composer + ";\r\n";
         if (!MyStringUtils.compareStrings(genre,compareSong.genre))
-            returnString += "Genre:"+genre + " - " + compareSong.genre + ";\r\n";
+            returnString += "Genre: "+genre + " --- " + compareSong.genre + ";\r\n";
         if (!MyStringUtils.compareStrings(ISRC,compareSong.ISRC))
-            returnString += "ISRC:"+ISRC + " - " + compareSong.ISRC + ";\r\n";
+            returnString += "ISRC: "+ISRC + " --- " + compareSong.ISRC + ";\r\n";
         if (!MyStringUtils.compareStrings(fileLoc,compareSong.fileLoc))
-            returnString += "File loc:"+fileLoc + " - " + compareSong.fileLoc + ";\r\n";
+            returnString += "File loc: "+fileLoc + " --- " + compareSong.fileLoc + ";\r\n";
         if (done != compareSong.done)
-            returnString += "Done:"+done + " - " + compareSong.done + ";\r\n";
+            returnString += "Done: "+done + " --- " + compareSong.done + ";\r\n";
         if (!Objects.equals(year, compareSong.year))
-            returnString += "Year:"+year + " - " + compareSong.year + ";\r\n";
+            returnString += "Year: "+year + " --- " + compareSong.year + ";\r\n";
         return returnString;
     }
 

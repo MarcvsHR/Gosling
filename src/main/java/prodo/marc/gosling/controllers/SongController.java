@@ -68,7 +68,7 @@ public class SongController {
     Button songBackButton, addSongButton, addFolderButton, parseFilenameButton, googleSongButton,
             openLegacyDataButton, updateSongs, buttonPlay, buttonPause, skipBack, skipForward, skipForwardSmall,
             skipBackSmall, buttonRevert, spotSongButton, zampSongButton, refreshTableButton, tableToggleButton,
-            discogsSongButton;
+            discogsSongButton, buttonNext;
     @FXML
     Label mp3Time, labelVolume, labelSongNumber, mp3Label;
     @FXML
@@ -432,9 +432,9 @@ public class SongController {
         String checkSong = currentSong.isTheSame(SongGlobal.getCurrentSong());
         if (!checkSong.isEmpty() && currentSong.getFileLoc() != null) {
 
-            boolean result = Popups.giveConfirmAlert("Unsaved changes",
+            boolean result = Popups.giveConfirmAlert("Unsaved changes: " + SongGlobal.getCurrentSong().getFileLoc(),
                     "You are switching to another file with possible unsaved changes",
-                    "Do you want to save the ID3 changes you have made?\nChanges: " + checkSong);
+                    "Do you want to save the ID3 changes you have made?\n " + checkSong);
 
             if (result) {
                 updateMP3();
@@ -485,6 +485,8 @@ public class SongController {
             } else if (id3Data.exists(id3Header.RECORDING_DATE)) {
                 textYear.setText(id3Data.getData(id3Header.RECORDING_DATE));
                 id3Data.setFrame(id3Header.YEAR, id3Data.getData(id3Header.RECORDING_DATE));
+            } else {
+                textYear.setText(null);
             }
             if (id3Data.getData(id3Header.KEY) != null) {
                 checkDone.setSelected(id3Data.getData(id3Header.KEY).equals("true"));
@@ -1225,6 +1227,7 @@ public class SongController {
             List<File> list = dragEvent.getDragboard().getFiles();
             List<Path> mp3List = new ArrayList<>();
             int zipCounter = 0;
+            boolean zipTested = true;
 
             for (File file : list) {
                 if (file.isDirectory()) {
@@ -1243,15 +1246,31 @@ public class SongController {
                     try (ZipFile zip = new ZipFile(String.valueOf(file))) {
                         files = zip.entries();
                         while (files.hasMoreElements()) {
-                            String filename = files.nextElement().getName();
+                            ZipEntry zipFile = files.nextElement();
+                            String filename = zipFile.getName();
+                            if (filename.contains("/"))
+                                filename = filename.substring(filename.lastIndexOf("/") + 1);
                             if (filename.toLowerCase().endsWith(".mp3")) {
-                                //if (filename.contains("stone")) logger.debug(filename);
                                 zipCounter++;
+                                Path extract = Paths.get(file.getParent() + "/" + filename);
+                                if (Popups.giveConfirmAlert("Extract zip",
+                                            "Found MP3 in zip file.\n" + "Do you want to extract it?",
+                                                filename)) {
+                                    Files.copy(zip.getInputStream(zipFile), extract);
+                                    zipTested = false;
+                                }
                             }
                         }
                     } catch (IOException catchError) {
                         logger.error("error handling zip file!", catchError);
                     }
+
+//                    try {
+//                        Files.delete(Path.of(file.getAbsolutePath()));
+//                    } catch (IOException e) {
+//                        throw new RuntimeException(e);
+//                    }
+
                 }
 
             }
@@ -1263,14 +1282,18 @@ public class SongController {
                 }
                 putMP3ListIntoDB();
             } else {
-                Popups.giveInfoAlert("Error importing",
-                        "There were no mp3 files to import",
-                        list.toString());
+                if (zipTested)                {
+                    Popups.giveInfoAlert("Error importing",
+                            "There were no mp3 files to import",
+                            list.toString());
+                }
             }
 
-            if (zipCounter > 0) Popups.giveInfoAlert("Zip file(s) detected",
-                    "MP3 files in zip file(s) detected: ",
-                    zipCounter + "");
+            if (zipTested) {
+                if (zipCounter > 0) Popups.giveInfoAlert("Zip file(s) detected",
+                        "MP3 files in zip file(s) detected: ",
+                        zipCounter + "");
+            }
         }
     }
 
@@ -1362,5 +1385,17 @@ public class SongController {
         }
 
         selectFileFromTable(CURRENT_FILE_LOC);
+    }
+
+    public void nextMP3(ActionEvent actionEvent) {
+        int index = songDatabaseTable.getSelectionModel().getSelectedIndex();
+        //logger.debug("index: " + index);
+        if (index < songDatabaseTable.getItems().size() - 1) {
+            index++;
+            songDatabaseTable.getSelectionModel().select(index);
+            CURRENT_FILE_LOC = songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc();
+            updateTextFields(CURRENT_FILE_LOC);
+        }
+        if (index != -1) playMP3();
     }
 }

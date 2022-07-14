@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.stage.Stage;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import prodo.marc.gosling.service.FileUtils;
@@ -44,6 +45,8 @@ public class ProgressController {
                     updateProgressBar(filesParsed+"/"+max,filesParsed.doubleValue()/max);
                     if (filesParsed.get() == max) {
                         statusLabel.setText("Import done. Please close window and refresh table.");
+                        Stage stage = (Stage) statusLabel.getScene().getWindow();
+                        stage.close();
                     }
                 });
             });

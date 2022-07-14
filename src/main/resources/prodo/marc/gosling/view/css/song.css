@@ -133,12 +133,15 @@
 
 .slider .track {
     -fx-background-color: linear-gradient(to right, lightgray, gray);
+    -fx-pref-height: 15;
 }
 
 .slider .thumb {
-    -fx-pref-width: 5;
+    -fx-pref-width: 6;
     -fx-pref-height: 20;
     -fx-background-radius: 0;
+    -fx-background-color: #ffffff;
+    -fx-outline: none;
 }
 
 .context-menu {

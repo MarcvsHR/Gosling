@@ -35,14 +35,14 @@ public class SceneController {
         FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(window));
         root = loader.load();
 
-        Stage stage1 = new Stage();
+        Stage stage = new Stage();
         scene = new Scene(root);
-        stage1.setScene(scene);
+        stage.setScene(scene);
         if (block) {
-            stage1.initModality(Modality.APPLICATION_MODAL);
-            stage1.initStyle(StageStyle.UTILITY);
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initStyle(StageStyle.UTILITY);
         }
-        stage1.show();
+        stage.show();
     }
 
 
