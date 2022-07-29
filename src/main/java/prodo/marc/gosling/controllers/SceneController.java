@@ -19,7 +19,7 @@ public class SceneController {
     private static Parent root;
 
 
-    public static void openScene(ActionEvent event,String windowName, String window) throws IOException {
+    public static void openScene(ActionEvent event,String windowName, String window, double minW, double minH) throws IOException {
         System.out.println("Opening scene: " + window);
         FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(HelloApplication.class.getResource(window)));
         root = loader.load();
@@ -28,6 +28,7 @@ public class SceneController {
         stage.setTitle(windowName);
         scene = new Scene(root);
         stage.setScene(scene);
+        stage.setMinWidth(minW); stage.setMinHeight(minH);
         stage.show();
     }
 

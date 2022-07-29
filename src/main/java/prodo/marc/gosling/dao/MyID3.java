@@ -147,7 +147,7 @@ public class MyID3 extends ID3Size {
 
     public String getData(String s) {
         if (frames.containsKey(s)) return new String(frames.get(s).getContent());
-        else return null;
+        return "";
     }
 
     public void setFrame(String header, String content) {

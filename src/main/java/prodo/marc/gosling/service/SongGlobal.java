@@ -2,6 +2,7 @@ package prodo.marc.gosling.service;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import prodo.marc.gosling.dao.MyID3;
 import prodo.marc.gosling.dao.Song;
 
 import java.io.File;
@@ -15,57 +16,29 @@ import java.util.Properties;
 public class SongGlobal {
 
     private static final Logger logger = LogManager.getLogger(SongGlobal.class);
-
-    private static Song currentSong;
+    private static List<Song> songList;
     private static String fileFolder;
     private static final String propertiesFile = System.getProperty("user.home") + "\\properties.txt";
     private static List<Path> mp3List;
-    private static int doneFilter = 0;
-    private static int truncatedFilter = 0;
-    private static String folderFilter = "";
-    private static String userFilter = "Any user";
-    private static String fileExists = "";
+    private static String editor;
+    private static MyID3 COPIED_ID3 = new MyID3();
+    private static String lastSongID;
 
 
-    public static String getFileExists() {
-        return fileExists;
+    public static String getLastSongID() {
+        return lastSongID;
     }
 
-    public static void setFileExists(String fileExists) {
-        SongGlobal.fileExists = fileExists;
-    }
-
-    public static int getDoneFilter() {
-        return doneFilter;
-    }
-
-    public static void setDoneFilter(int doneFilter) {
-        SongGlobal.doneFilter = doneFilter;
-    }
-
-    public static int getTruncatedFilter() {
-        return truncatedFilter;
-    }
-
-    public static void setTruncatedFilter(int truncatedFilter) {
-        SongGlobal.truncatedFilter = truncatedFilter;
-    }
-
-    public static String getFolderFilter() {
-        return folderFilter;
-    }
-
-    public static void setFolderFilter(String folderFilter) {
-        SongGlobal.folderFilter = folderFilter;
+    public static void setLastSongID(String lastSongID) {
+        SongGlobal.lastSongID = lastSongID;
     }
 
 
-    public static Song getCurrentSong() {
-        return currentSong;
+    public static String getEditor() {
+        return editor;
     }
-
-    public static void setCurrentSong(Song song) {
-        currentSong = song;
+    public static void setEditor(String newEditor) {
+        editor = newEditor;
     }
 
     public static String getCurrentFolder() {
@@ -114,12 +87,19 @@ public class SongGlobal {
         mp3List = inputList;
     }
 
-    public static void setUserFilter(String selectedIndex) {
-        SongGlobal.userFilter = selectedIndex;
+    public static List<Song> getSongList() {
+        return songList;
     }
 
-    public static String getUserFilter() {
-        return SongGlobal.userFilter;
+    public static void setSongList(List<Song> songList) {
+        SongGlobal.songList = songList;
+    }
+
+    public static MyID3 getCopiedID3() {
+        return COPIED_ID3;
+    }
+    public static void setCopiedID3(MyID3 copiedID3) {
+        COPIED_ID3 = copiedID3;
     }
 
 }

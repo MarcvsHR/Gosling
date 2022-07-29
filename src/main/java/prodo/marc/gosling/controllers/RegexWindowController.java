@@ -7,8 +7,14 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.StringUtils;
+import prodo.marc.gosling.dao.MyID3;
 import prodo.marc.gosling.dao.Song;
+import prodo.marc.gosling.dao.id3Header;
+import prodo.marc.gosling.hibernate.repository.SongRepository;
+import prodo.marc.gosling.service.FileUtils;
 import prodo.marc.gosling.service.SongGlobal;
+import prodo.marc.gosling.service.id3.ID3Reader;
+import prodo.marc.gosling.service.id3.ID3v2Utils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -24,7 +30,9 @@ public class RegexWindowController extends SongController {
     public Label labelISRC;
     public Label labelPublisher;
 
-    Song song = new Song(SongGlobal.getCurrentSong());
+    List<Song> songList = SongGlobal.getSongList();
+    Song song = new Song(songList.get(0));
+    Song originalSong = new Song(song);
 
 
     private List<String> getRegexStuff() {
@@ -75,7 +83,7 @@ public class RegexWindowController extends SongController {
         return new ArrayList<>(regex);
     }
 
-    public void setSongData(String artist, String title, String publisher, String isrc) {
+    public void setSongData(String artist, String title, String publisher, String isrc, Song song) {
         song.setArtist(artist);
         song.setTitle(title);
         song.setPublisher(publisher);
@@ -83,92 +91,97 @@ public class RegexWindowController extends SongController {
     }
 
     public void changeSelectedRegex() {
+        String selection = getSelection();
+        updateSong(selection, song);
+
+        song.setTitle(song.getTitle().replace("[Clean]", ""));
+
+        labelArtist.setText("Artist: " + song.getArtist());
+        labelTitle.setText("Title: " + song.getTitle());
+        labelPublisher.setText("Publisher: " + song.getPublisher());
+        labelISRC.setText("ISRC: " + song.getISRC());
+    }
+
+    private String getSelection() {
         String selection = regexList.getSelectionModel().getSelectedItem();
         if (selection == null) selection = "";
         if (!selection.isEmpty()) selection = selection.substring(selection.indexOf("[") + 1, selection.indexOf("]"));
-        boolean isSet = false;
+        return selection;
+    }
 
+    private void updateSong(String selection, Song song) {
+        String mp3Location = getFileName(song.getFileLoc());
         switch (selection) {
             case "Artist - Title": {
-                String[] output = mp3Filename.getText().split(" - ");
+                String[] output = mp3Location.split(" - ");
 
-                setSongData(output[0], output[1], SongGlobal.getCurrentSong().getPublisher(), SongGlobal.getCurrentSong().getISRC());
+                setSongData(output[0], output[1], originalSong.getPublisher(), originalSong.getISRC(), song);
 
-                isSet = true;
                 break;
             }
             case "Title - Artist": {
-                String[] output = mp3Filename.getText().split(" - ");
+                String[] output = mp3Location.split(" - ");
 
-                setSongData(output[1], output[0], SongGlobal.getCurrentSong().getPublisher(), SongGlobal.getCurrentSong().getISRC());
+                setSongData(output[1], output[0], originalSong.getPublisher(), originalSong.getISRC(), song);
 
-                isSet = true;
                 break;
             }
             case "Track_Title_Artist": {
-                String[] output = mp3Filename.getText().split("_");
+                String[] output = mp3Location.split("_");
 
-                setSongData(output[2], output[1], SongGlobal.getCurrentSong().getPublisher(), SongGlobal.getCurrentSong().getISRC());
+                setSongData(output[2], output[1], originalSong.getPublisher(), originalSong.getISRC(), song);
 
-                isSet = true;
                 break;
             }
             case "Title-Artist": {
-                String[] output = mp3Filename.getText().split("-");
+                String[] output = mp3Location.split("-");
 
-                setSongData(output[1], output[0], SongGlobal.getCurrentSong().getPublisher(), SongGlobal.getCurrentSong().getISRC());
+                setSongData(output[1], output[0], originalSong.getPublisher(), originalSong.getISRC(), song);
 
-                isSet = true;
                 break;
             }
             case "ISRC_Title_Artist_Publisher": {
-                String[] output = mp3Filename.getText().split("_");
+                String[] output = mp3Location.split("_");
 
-                setSongData(output[2], output[1], output[3], SongGlobal.getCurrentSong().getISRC());
+                setSongData(output[2], output[1], output[3], originalSong.getISRC(), song);
 
-                isSet = true;
                 break;
             }
             case "Title": {
-                setSongData(SongGlobal.getCurrentSong().getArtist(), mp3Filename.getText().trim(), SongGlobal.getCurrentSong().getPublisher(), SongGlobal.getCurrentSong().getISRC());
+                setSongData(originalSong.getArtist(), mp3Location.trim(), originalSong.getPublisher(), originalSong.getISRC(), song);
 
-                isSet = true;
                 break;
             }
             case "Track - Artist - Title": {
-                String[] output = mp3Filename.getText().split(" - ");
+                String[] output = mp3Location.split(" - ");
 
-                setSongData(output[1], output[2], SongGlobal.getCurrentSong().getPublisher(), SongGlobal.getCurrentSong().getISRC());
+                setSongData(output[1], output[2], originalSong.getPublisher(), originalSong.getISRC(), song);
 
-                isSet = true;
                 break;
             }
             case "Artist - Track - Title": {
-                String[] output = mp3Filename.getText().split(" - ");
+                String[] output = mp3Location.split(" - ");
 
-                setSongData(output[0], output[2], SongGlobal.getCurrentSong().getPublisher(), SongGlobal.getCurrentSong().getISRC());
+                setSongData(output[0], output[2], originalSong.getPublisher(), originalSong.getISRC(), song);
 
-                isSet = true;
                 break;
             }
             case "Artist-Title": {
-                String[] output = mp3Filename.getText().split("-");
+                String[] output = mp3Location.split("-");
 
-                setSongData(output[0], output[1], SongGlobal.getCurrentSong().getPublisher(), SongGlobal.getCurrentSong().getISRC());
+                setSongData(output[0], output[1], originalSong.getPublisher(), originalSong.getISRC(), song);
 
-                isSet = true;
                 break;
             }
             case "Track. Artist - Title_ISRC": {
-                String[] output = mp3Filename.getText().split("\\.| - |_");
+                String[] output = mp3Location.split("\\.| - |_");
 
-                setSongData(output[1], output[2], SongGlobal.getCurrentSong().getPublisher(), output[3]);
+                setSongData(output[1], output[2], originalSong.getPublisher(), output[3], song);
 
-                isSet = true;
                 break;
             }
             case "Artist-Title-CROREC-ISRC": {
-                String[] output = mp3Filename.getText().split("-CROATIA-RECORDS-");
+                String[] output = mp3Location.split("-CROATIA-RECORDS-");
                 String[] splitWords = output[0].split("-");
 
                 StringBuilder artist = new StringBuilder();
@@ -184,109 +197,102 @@ public class RegexWindowController extends SongController {
                         title.append(word).append(" ");
                 }
 
-                setSongData(artist.toString().trim(), title.toString().trim(), "Crorec", output[1]);
+                setSongData(artist.toString().trim(), title.toString().trim(), "Crorec", output[1], song);
 
-                isSet = true;
                 break;
             }
             case "Artist - Title - ISRC": {
-                String[] output = mp3Filename.getText().split(" - ");
+                String[] output = mp3Location.split(" - ");
 
-                setSongData(output[0], output[1], SongGlobal.getCurrentSong().getPublisher(), output[2]);
+                setSongData(output[0], output[1], originalSong.getPublisher(), output[2], song);
 
-                isSet = true;
                 break;
             }
             case "ISRC - Artist - Title - Publisher": {
-                String[] output = mp3Filename.getText().split(" - ");
+                String[] output = mp3Location.split(" - ");
 
-                setSongData(output[1], output[2], output[3], output[0]);
+                setSongData(output[1], output[2], output[3], output[0], song);
 
-                isSet = true;
                 break;
             }
             case "Artist - Title - Publisher - ISRC": {
-                String[] output = mp3Filename.getText().split(" - ");
+                String[] output = mp3Location.split(" - ");
 
-                setSongData(output[0], output[1], output[2], output[3]);
+                setSongData(output[0], output[1], output[2], output[3], song);
 
-                isSet = true;
                 break;
             }
             case "Artist_Title_ISRC_Publisher": {
-                String[] output = mp3Filename.getText().split("_");
+                String[] output = mp3Location.split("_");
 
-                setSongData(output[0], output[1], output[3], output[2]);
+                setSongData(output[0], output[1], output[3], output[2], song);
 
-                isSet = true;
                 break;
             }
             case "Track Artist - Title": {
-                String[] output = mp3Filename.getText().split(" - ");
+                String[] output = mp3Location.split(" - ");
                 String[] splitWords = output[0].split(" ", 2);
 
-                setSongData(splitWords[1], output[1], SongGlobal.getCurrentSong().getPublisher(), SongGlobal.getCurrentSong().getISRC());
+                setSongData(splitWords[1], output[1], originalSong.getPublisher(), originalSong.getISRC(), song);
 
-                isSet = true;
                 break;
             }
             case "Track Title - Artist": {
-                String[] output = mp3Filename.getText().split(" - ");
+                String[] output = mp3Location.split(" - ");
                 String[] splitWords = output[0].split(" ", 2);
 
-                setSongData(output[1], splitWords[1], SongGlobal.getCurrentSong().getPublisher(), SongGlobal.getCurrentSong().getISRC());
+                setSongData(output[1], splitWords[1], originalSong.getPublisher(), originalSong.getISRC(), song);
 
-                isSet = true;
                 break;
             }
             case "Artist - Title ISRC": {
-                String[] output = mp3Filename.getText().split(" - ");
+                String[] output = mp3Location.split(" - ");
                 String[] splitWords = output[1].split(" ");
                 String isrc = splitWords[splitWords.length - 1];
 
-                setSongData(output[0], output[1].replace(" " + isrc, ""), SongGlobal.getCurrentSong().getPublisher(), isrc);
+                setSongData(output[0], output[1].replace(" " + isrc, ""), originalSong.getPublisher(), isrc, song);
 
-                isSet = true;
                 break;
             }
             case "Track Artist - Title ISRC": {
-                String[] output = mp3Filename.getText().split(" - ");
+                String[] output = mp3Location.split(" - ");
                 String[] splitWords1 = output[0].split(" ", 2);
                 String[] splitWords2 = output[1].split(" ");
                 String isrc = splitWords2[splitWords2.length - 1];
 
-                setSongData(splitWords1[1], output[1].replace(" " + isrc, ""), SongGlobal.getCurrentSong().getPublisher(), isrc);
+                setSongData(splitWords1[1], output[1].replace(" " + isrc, ""), originalSong.getPublisher(), isrc, song);
 
-                isSet = true;
                 break;
             }
-        }
-        if (isSet) {
-            song.setTitle(song.getTitle().replace("[Clean]", ""));
-
-            labelArtist.setText("Artist: " + song.getArtist());
-            labelTitle.setText("Title: " + song.getTitle());
-            labelPublisher.setText("Publisher: " + song.getPublisher());
-            labelISRC.setText("ISRC: " + song.getISRC());
         }
     }
 
     public void initialize() {
 
-        mp3Filename.setText(new File(song.getFileLoc()).getName().replaceAll("(?i).mp3", ""));
+        mp3Filename.setText(getFileName(song.getFileLoc()));
         regexList.getItems().addAll(getRegexStuff());
 
     }
 
+    private String getFileName(String fileLoc) {
+        return new File(fileLoc).getName().replaceAll("(?i).mp3", "");
+    }
+
     public void closeAndSave(ActionEvent event) {
 
-        SongGlobal.setCurrentSong(song);
-
-        //send data to another stage
-        publicTextArtist.setText(song.getArtist());
-        publicTextTitle.setText(song.getTitle());
-        publicTextISRC.setText(song.getISRC());
-        publicTextPublisher.setText(song.getPublisher());
+        for (Song songInList : songList) {
+            String seletion = getSelection();
+            updateSong(seletion, songInList);
+            System.out.println(songInList.getId() + " - " +songInList.getArtist() + " - " + songInList.getTitle() + " - " + songInList.getPublisher() + " - " + songInList.getISRC() + " - " + songInList.getFileLoc());
+            SongRepository.addSong(songInList);
+            MyID3 id3 =  ID3Reader.getTag(new File(songInList.getFileLoc()));
+            id3.setFrame(id3Header.ARTIST, songInList.getArtist());
+            id3.setFrame(id3Header.TITLE, songInList.getTitle());
+            id3.setFrame(id3Header.PUBLISHER, songInList.getPublisher());
+            id3.setFrame(id3Header.ISRC, songInList.getISRC());
+            FileUtils.writeToMP3(id3, songInList.getFileLoc(),false);
+        }
+        publicButtonRefresh.setStyle("-fx-background-color: #bb3333");
 
         //close window
         Node source = (Node) event.getSource();

@@ -93,4 +93,39 @@ public class FileUtils {
         return null;
     }
 
+    public static void writeToMP3(MyID3 song, String fileLoc, boolean done) {
+
+        //logger.debug("----- Executing writeToMP3");
+
+        try {
+            MyID3 id3Data = ID3Reader.getTag(new File(fileLoc));
+//            logger.debug("made new id3 with size: "+id3Data.totalFrameSize());
+
+            id3Data.setFrame(id3Header.ARTIST, song.getData(id3Header.ARTIST));
+            id3Data.setFrame(id3Header.TITLE, song.getData(id3Header.TITLE));
+            id3Data.setFrame(id3Header.ALBUM, song.getData(id3Header.ALBUM));
+            id3Data.setFrame(id3Header.PUBLISHER, song.getData(id3Header.PUBLISHER));
+            id3Data.setFrame(id3Header.COMPOSER, song.getData(id3Header.COMPOSER));
+            id3Data.setFrame(id3Header.YEAR, song.getData(id3Header.YEAR));
+            if (done) {
+                id3Data.setFrame(id3Header.KEY, "true");
+            } else {
+                id3Data.setFrame(id3Header.KEY, " ");
+            }
+            if (song.getData(id3Header.GENRE) != null) {
+                id3Data.setFrame(id3Header.GENRE, song.getData(id3Header.GENRE));
+            }
+            id3Data.setFrame(id3Header.ISRC, song.getData(id3Header.ISRC));
+
+//            logger.debug("updated id3 to size: "+id3Data.totalFrameSize());
+
+            ID3Reader.writeFile(fileLoc, id3Data);
+
+        } catch (Exception e) {
+            logger.error("Error while opening file " + fileLoc, e);
+        }
+
+        //logger.debug("----- ending writeToMP3");
+    }
+
 }

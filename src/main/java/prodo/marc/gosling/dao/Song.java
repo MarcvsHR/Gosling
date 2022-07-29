@@ -77,8 +77,6 @@ public class Song {
             returnString += "ISRC: "+ISRC + " --- " + compareSong.ISRC + ";\r\n";
         if (!MyStringUtils.compareStrings(fileLoc,compareSong.fileLoc))
             returnString += "File loc: "+fileLoc + " --- " + compareSong.fileLoc + ";\r\n";
-        if (done != compareSong.done)
-            returnString += "Done: "+done + " --- " + compareSong.done + ";\r\n";
         if (!Objects.equals(year, compareSong.year))
             returnString += "Year: "+year + " --- " + compareSong.year + ";\r\n";
         return returnString;
@@ -118,7 +116,7 @@ public class Song {
     }
 
     public String getComposer() {
-        return composer;
+        return composer == null ? "" : composer;
     }
 
     public String getFileLoc() {

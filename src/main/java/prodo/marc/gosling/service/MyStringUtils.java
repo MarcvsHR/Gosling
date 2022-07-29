@@ -24,6 +24,9 @@ public class MyStringUtils {
         if (text2 == null) {
             text2 = "";
         }
+        if (text1.equals("<?>") || text2.equals("<?>")) {
+            return true;
+        }
         return text1.equalsIgnoreCase(text2);
     }
 
@@ -101,8 +104,8 @@ public class MyStringUtils {
     }
 
     public static Year parseYear(String year) {
-        Year yearOut = null;
-        if (year != null) {
+        Year yearOut = Year.now();
+        if (year != null && !year.isBlank()) {
             try {
                 yearOut = Year.parse(year.trim());
             } catch (Exception exception) {
