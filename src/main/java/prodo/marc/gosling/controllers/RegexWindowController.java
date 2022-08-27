@@ -291,6 +291,12 @@ public class RegexWindowController extends SongController {
             id3.setFrame(id3Header.PUBLISHER, songInList.getPublisher());
             id3.setFrame(id3Header.ISRC, songInList.getISRC());
             FileUtils.writeToMP3(id3, songInList.getFileLoc(),false);
+            if (songList.size() == 1) {
+                SongController.publicTextArtist.setText(songInList.getArtist());
+                SongController.publicTextTitle.setText(songInList.getTitle());
+                SongController.publicTextPublisher.setText(songInList.getPublisher());
+                SongController.publicTextISRC.setText(songInList.getISRC());
+            }
         }
         publicButtonRefresh.setStyle("-fx-background-color: #bb3333");
 

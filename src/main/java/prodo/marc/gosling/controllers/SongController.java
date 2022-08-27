@@ -91,6 +91,7 @@ public class SongController {
 
     //public text fiels for getting data from regex
     public static Button publicButtonRefresh;
+    public static TextField publicTextArtist, publicTextTitle, publicTextPublisher, publicTextISRC;
     ObservableList<Song> songList = FXCollections.observableArrayList();
     ObservableList<String> publisherList = FXCollections.observableArrayList();
     FilteredList<Song> filteredSongs = new FilteredList<>(songList);
@@ -134,6 +135,10 @@ public class SongController {
 
         //declarations so regex can send data to song controller
         publicButtonRefresh = refreshTableButton;
+        publicTextArtist = textArtist;
+        publicTextTitle = textTitle;
+        publicTextPublisher = textPublisher;
+        publicTextISRC = textISRC;
 
         //drag and drop
         songDatabaseTable.setOnDragOver(dragEvent -> {
@@ -385,6 +390,9 @@ public class SongController {
         songList.addAll(songList1);
         filterTable();
         selectFileFromTable(selectedSongList);
+        if (songDatabaseTable.getSelectionModel().getSelectedItems().size() == 1) {
+            updateTextFields(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
+        }
 
         refreshTableButton.setStyle("");
 
@@ -415,6 +423,7 @@ public class SongController {
             }
         } else {
             handleMultiSelectFields();
+            checkFields();
         }
         songDatabaseTable.setMaxWidth(getTableWidth());
 
@@ -424,7 +433,7 @@ public class SongController {
     private void handleMultiSelectFields() {
         if (songDatabaseTable.getSelectionModel().getSelectedItems().size() > 1) {
             updateTextFields(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
-            logger.debug("selected file: " + songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
+            //logger.debug("selected file: " + songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
             checkDone.setSelected(false);
             //buttonUpdateSongs.setDisable(true);
             String diffetentText = "<?>";
@@ -575,9 +584,9 @@ public class SongController {
             }
             if (dropGenre.getSelectionModel().getSelectedIndex() == -1) {
                 logger.debug("could not find genre: " + id3Data.getData(id3Header.GENRE));
-                Popups.giveInfoAlert("Unknown genre",
-                        "The song has an unknown genre",
-                        "Genre: " + id3Data.getData(id3Header.GENRE));
+//                Popups.giveInfoAlert("Unknown genre",
+//                        "The song has an unknown genre",
+//                        "Genre: " + id3Data.getData(id3Header.GENRE));
             }
 //            logger.debug("***" + id3Data.getData(id3Header.GENRE) + "***");
 
@@ -619,7 +628,6 @@ public class SongController {
     protected void playMP3() {
 
         //logger.debug("----- Executing playMP3");
-        closeMediaStream();
         openMediaFile(songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc());
 
         //none is loaded, load file first
@@ -746,6 +754,12 @@ public class SongController {
             textArtist.setText(textArtist.getText() + " ft " + titleString.substring(startOfFTString + 4, titleString.indexOf(")")));
             textTitle.setText(titleString.substring(0, startOfFTString));
         }
+        if (textTitle.getText().contains("(With ")) {
+            String titleString = textTitle.getText();
+            int startOfWithString = titleString.indexOf("(With ");
+            textArtist.setText(textArtist.getText() + ", " + titleString.substring(startOfWithString + 6, titleString.indexOf(")")));
+            textTitle.setText(titleString.substring(0, startOfWithString));
+        }
 
         if (!buttonUpdateSongs.isDisable()) {
 
@@ -820,6 +834,7 @@ public class SongController {
         try {
             //open a temporaty folder to store the mp3 file
             Path TEMP_DIR = Files.createTempDirectory("tmp");
+            logger.debug("----- Created temporary folder: " + TEMP_DIR.toString());
             String tempMp3 = TEMP_DIR + "\\temp";
             Path filePath = Path.of(fileLoc);
             //copy the mp3 file to the temp folder
@@ -861,8 +876,12 @@ public class SongController {
 
     private void closeMediaStream() {
         if (mplayer != null) {
-            mplayer.stop();
-            mplayer.dispose();
+            try {
+                mplayer.stop();
+                mplayer.dispose();
+            } catch (Exception ex) {
+                logger.error("could not close media stream: ", ex.getCause());
+            }
         }
     }
 
@@ -1103,7 +1122,7 @@ public class SongController {
     }
 
     public boolean checkInvalidChars(String text, String fieldName) {
-        if (text == null)
+        if (text == null || text.equals("<?>"))
             return false;
         if (text.contains("%") || text.contains("?"))
             return true;
@@ -1117,7 +1136,7 @@ public class SongController {
      */
     public void checkFields() {
 
-        if (songDatabaseTable.getSelectionModel().getSelectedItems().size() == 1) {
+        if (songDatabaseTable.getSelectionModel().getSelectedItems().size() > 0) {
             String artist = textArtist.getText() == null ? "" : textArtist.getText();
             boolean artistCheck = checkArtistField(artist);
 
@@ -1279,6 +1298,7 @@ public class SongController {
         String uri = song.getArtist() + " " + song.getTitle();
         uri = uri.replace(" ft ", " ");
         uri = uri.replace(" & ", " ");
+        uri = uri.replace(" x ", " ");
         uri = "https://open.spotify.com/search/" + uri;
         openURL(uri, "%20");
     }
@@ -1325,7 +1345,7 @@ public class SongController {
                     } catch (IOException e) {
                         logger.error("could not read files in folder: ", e);
                     }
-                } else if (file.toString().substring(file.toString().length() - 4).equalsIgnoreCase(".mp3")) {
+                } else if (file.toString().toLowerCase().endsWith(".mp3")) {
                     mp3List.add(Path.of(file.getAbsolutePath()));
                 }
 

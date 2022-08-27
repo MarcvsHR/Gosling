@@ -5,8 +5,6 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import prodo.marc.gosling.dao.id3Header;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.time.Year;
 import java.util.regex.Pattern;
 
@@ -63,6 +61,7 @@ public class MyStringUtils {
             text = text.replace("ü", "u");
             text = text.replace("ß", "ss");
             text = text.replace("æ", "ae");
+            text = text.replace("å", "a");
 
 
             text = capitalizeAfter(" ", text);
