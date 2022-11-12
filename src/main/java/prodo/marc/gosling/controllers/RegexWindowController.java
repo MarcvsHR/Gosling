@@ -14,7 +14,6 @@ import prodo.marc.gosling.hibernate.repository.SongRepository;
 import prodo.marc.gosling.service.FileUtils;
 import prodo.marc.gosling.service.SongGlobal;
 import prodo.marc.gosling.service.id3.ID3Reader;
-import prodo.marc.gosling.service.id3.ID3v2Utils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -29,6 +28,7 @@ public class RegexWindowController extends SongController {
     public Label labelTitle;
     public Label labelISRC;
     public Label labelPublisher;
+    public Label labelComposer;
 
     List<Song> songList = SongGlobal.getSongList();
     Song song = new Song(songList.get(0));
@@ -39,6 +39,7 @@ public class RegexWindowController extends SongController {
         List<String> regex = new ArrayList<>();
         if (StringUtils.countMatches(mp3Filename.getText(), "_") == 2) {
             regex.add("[Track_Title_Artist]");
+            regex.add("[Track_Artist_Title]");
         }
         if (StringUtils.countMatches(mp3Filename.getText(), "_") == 3) {
             regex.add("[ISRC_Title_Artist_Publisher]");
@@ -76,6 +77,11 @@ public class RegexWindowController extends SongController {
                 StringUtils.countMatches(mp3Filename.getText(), ".") == 1) {
             regex.add("[Track. Artist - Title_ISRC]");
         }
+        if (StringUtils.countMatches(mp3Filename.getText(), " - ") == 1 &&
+            StringUtils.countMatches(mp3Filename.getText(), "(") == 1 &&
+            StringUtils.countMatches(mp3Filename.getText(), ")") == 1) {
+            regex.add("[Track. Artist - Title (Composer)]");
+        }
 
         regex.add("[Title]]");
 
@@ -90,6 +96,11 @@ public class RegexWindowController extends SongController {
         song.setISRC(isrc);
     }
 
+    public void setSongData(String artist, String title, String publisher, String isrc, String composer, Song song) {
+        song.setComposer(composer);
+        setSongData(artist,title,publisher,isrc,song);
+    }
+
     public void changeSelectedRegex() {
         String selection = getSelection();
         updateSong(selection, song);
@@ -100,6 +111,7 @@ public class RegexWindowController extends SongController {
         labelTitle.setText("Title: " + song.getTitle());
         labelPublisher.setText("Publisher: " + song.getPublisher());
         labelISRC.setText("ISRC: " + song.getISRC());
+        labelComposer.setText("Composer: " + song.getComposer());
     }
 
     private String getSelection() {
@@ -112,6 +124,13 @@ public class RegexWindowController extends SongController {
     private void updateSong(String selection, Song song) {
         String mp3Location = getFileName(song.getFileLoc());
         switch (selection) {
+            case "Track_Artist_Title": {
+                String[] output = mp3Location.split("_");
+
+                setSongData(output[1], output[2], originalSong.getPublisher(), originalSong.getISRC(), song);
+
+                break;
+            }
             case "Artist - Title": {
                 String[] output = mp3Location.split(" - ");
 
@@ -264,6 +283,15 @@ public class RegexWindowController extends SongController {
 
                 break;
             }
+            case "Track. Artist - Title (Composer)": {
+                String[] output = mp3Location.split(" - ");
+                String[] splitWords1 = output[0].split(". ", 2);
+                String[] splitWords2 = output[1].split( " [(]");
+                splitWords2[1] = splitWords2[1].replace(")","");
+
+                setSongData(splitWords1[1], splitWords2[0], originalSong.getPublisher(), originalSong.getISRC(), splitWords2[1], song);
+                break;
+            }
         }
     }
 
@@ -283,19 +311,22 @@ public class RegexWindowController extends SongController {
         for (Song songInList : songList) {
             String seletion = getSelection();
             updateSong(seletion, songInList);
-            System.out.println(songInList.getId() + " - " +songInList.getArtist() + " - " + songInList.getTitle() + " - " + songInList.getPublisher() + " - " + songInList.getISRC() + " - " + songInList.getFileLoc());
+            System.out.println(songInList.getId() + " - " +songInList.getArtist() + " - " + songInList.getTitle() + " - "
+                    + songInList.getPublisher() + " - " + songInList.getISRC() + " - " + songInList.getComposer() + " - " + songInList.getFileLoc());
             SongRepository.addSong(songInList);
             MyID3 id3 =  ID3Reader.getTag(new File(songInList.getFileLoc()));
             id3.setFrame(id3Header.ARTIST, songInList.getArtist());
             id3.setFrame(id3Header.TITLE, songInList.getTitle());
             id3.setFrame(id3Header.PUBLISHER, songInList.getPublisher());
             id3.setFrame(id3Header.ISRC, songInList.getISRC());
+            id3.setFrame(id3Header.COMPOSER, songInList.getComposer());
             FileUtils.writeToMP3(id3, songInList.getFileLoc(),false);
             if (songList.size() == 1) {
                 SongController.publicTextArtist.setText(songInList.getArtist());
                 SongController.publicTextTitle.setText(songInList.getTitle());
                 SongController.publicTextPublisher.setText(songInList.getPublisher());
                 SongController.publicTextISRC.setText(songInList.getISRC());
+                SongController.publicTextComposer.setText(songInList.getComposer());
             }
         }
         publicButtonRefresh.setStyle("-fx-background-color: #bb3333");

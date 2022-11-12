@@ -54,6 +54,11 @@
                     <Font size="18.0" />
                 </font>
             </Label>
+            <Label fx:id="labelComposer" text="Composer: ">
+                <font>
+                    <Font size="18.0" />
+                </font>
+            </Label>
         </VBox>
     </GridPane>
 </AnchorPane>

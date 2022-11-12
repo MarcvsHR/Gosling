@@ -91,7 +91,7 @@ public class SongController {
 
     //public text fiels for getting data from regex
     public static Button publicButtonRefresh;
-    public static TextField publicTextArtist, publicTextTitle, publicTextPublisher, publicTextISRC;
+    public static TextField publicTextArtist, publicTextTitle, publicTextPublisher, publicTextISRC, publicTextComposer;
     ObservableList<Song> songList = FXCollections.observableArrayList();
     ObservableList<String> publisherList = FXCollections.observableArrayList();
     FilteredList<Song> filteredSongs = new FilteredList<>(songList);
@@ -124,7 +124,7 @@ public class SongController {
     private String[] getGenres() {
         String[] returnArr = {"", "Cro", "Cro Zabavne", "Instrumental", "Klape", "Kuruza",
                 "Pop", "xxx", "Italian", "Susjedi", "Religiozne", "Oldies", "X-Mas", "Domoljubne",
-                "Country", "World Music", "Dance", "Slow", "Metal"};
+                "Country", "World Music", "Dance", "Slow", "Metal", "Navijacke", "Rock", "Jazz"};
         Arrays.sort(returnArr);
         return returnArr;
     }
@@ -139,6 +139,7 @@ public class SongController {
         publicTextTitle = textTitle;
         publicTextPublisher = textPublisher;
         publicTextISRC = textISRC;
+        publicTextComposer = textComposer;
 
         //drag and drop
         songDatabaseTable.setOnDragOver(dragEvent -> {
@@ -381,7 +382,7 @@ public class SongController {
         //logger.debug("----- Executing updateTable");
 
         SongRepository songRepo = new SongRepository();
-        long timer = System.currentTimeMillis();
+        //long timer = System.currentTimeMillis();
         List<Song> songList1 = songRepo.getSongs();
         //logger.debug("time to get songs from database: " + (System.currentTimeMillis() - timer) + "ms");
 
@@ -477,7 +478,7 @@ public class SongController {
             boolean localFile;
             if (!EDITOR_NAME.equals(songDatabaseTable.getSelectionModel().getSelectedItem().getEditor()) &&
                     !songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc().contains("Z:\\")) {
-                logger.debug("error!!!!!");
+                logger.debug("Error: file not local and editor is different!");
                 localFile = false;
             } else {
                 localFile = true;
@@ -680,15 +681,6 @@ public class SongController {
 
     }
 
-    private String getFileLoc(ArrayList<Integer> fileIDs) {
-        for (Song song : songDatabaseTable.getItems()) {
-            if (Objects.equals(song.getId(), fileIDs.get(0))) {
-                return song.getFileLoc();
-            }
-        }
-        return null;
-    }
-
     @FXML
     protected void pauseMP3() {
         if (mplayer != null) {
@@ -760,6 +752,8 @@ public class SongController {
             textArtist.setText(textArtist.getText() + ", " + titleString.substring(startOfWithString + 6, titleString.indexOf(")")));
             textTitle.setText(titleString.substring(0, startOfWithString));
         }
+        if (dropGenre.getSelectionModel().getSelectedItem().equals("Instrumental") && !textTitle.getText().contains("nstrumental"))
+            textTitle.setText(textTitle.getText() + " (Instrumental)");
 
         if (!buttonUpdateSongs.isDisable()) {
 
@@ -946,8 +940,6 @@ public class SongController {
     public void deleteFile() {
         //logger.debug("----- Executing deleteFile");
 
-        String fileLoc = songDatabaseTable.getSelectionModel().getSelectedItem().getFileLoc();
-
         String[] dialogData = {"Database entry", "ID3 data", "File"};
 
         ChoiceDialog<String> dialog = new ChoiceDialog<>(dialogData[2], dialogData);
@@ -959,20 +951,21 @@ public class SongController {
             List<Song> deleteList = new ArrayList<>(songDatabaseTable.getSelectionModel().getSelectedItems());
             for (Song song : deleteList) {
                 if (result.equals("File")) {
-                    SongRepository.delete(song);
-                    updateTable();
+                    boolean deleted = true;
                     try {
-                        Files.delete(Path.of(fileLoc));
+                        Files.delete(Path.of(song.getFileLoc()));
                     } catch (IOException er) {
                         logger.error("can't delete file: ", er);
+                        deleted = false;
                     }
+                    if (deleted) SongRepository.delete(song);
                 } else if (result.equals("Database entry")) {
                     SongRepository.delete(song);
-                    updateTable();
                 } else {
                     logger.debug("code to delete id3 tag here");
                 }
             }
+            updateTable();
         }
 
         //logger.debug("----- ending deleteFile");
@@ -1000,7 +993,7 @@ public class SongController {
             year = year + "\\";
 
             List<String> foldersWithNoYear = Arrays.asList(
-                    "religiozne", "oldies", "x-mas", "cro\\domoljubne", "country", "slow", "metal"
+                    "religiozne", "oldies", "x-mas", "cro\\domoljubne", "country", "slow", "metal", "navijacke", "rock", "jazz"
             );
             if (foldersWithNoYear.contains(genre)) {
                 year = "";
@@ -1124,6 +1117,10 @@ public class SongController {
     public boolean checkInvalidChars(String text, String fieldName) {
         if (text == null || text.equals("<?>"))
             return false;
+
+        if ((fieldName.equals("title") || fieldName.equals("artist")) && text.contains(":"))
+            return true;
+
         if (text.contains("%") || text.contains("?"))
             return true;
 

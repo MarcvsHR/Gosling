@@ -8,12 +8,9 @@ import prodo.marc.gosling.dao.id3Header;
 import prodo.marc.gosling.dao.MP3Frame;
 import prodo.marc.gosling.hibernate.repository.SongRepository;
 import prodo.marc.gosling.service.MyStringUtils;
-import prodo.marc.gosling.service.SongGlobal;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 
@@ -22,7 +19,7 @@ public class ID3v2Utils {
     private static final Logger logger = LogManager.getLogger(ID3v2Utils.class);
 
     /**
-     * Extract song object for id3 tag
+     * Extract song object from id3 tag
      */
     public static Song songDataFromID3(MyID3 id3Data, String path, String editor) {
 
@@ -86,6 +83,7 @@ public class ID3v2Utils {
 
                 if (headerString.equals("TAG")) {
                     logger.debug("Found V1 ID3 tag at " + (counter + size) + " with " + distance + " bytes left");
+                    if (distance == 128) logger.debug(new String(Arrays.copyOfRange(mp3Data,counter,counter+distance)));
                     break;
                 }
 
@@ -142,7 +140,7 @@ public class ID3v2Utils {
             }
         }
         //logger.debug(counter+size);
-//        logger.debug("Estimated file duration in s: " + estDur/1000);
+        //logger.debug("Estimated file duration in s: " + estDur/1000);
         //logger.debug("----- ending getDuration");
 
         return estDur < 1000 ? 0 : (long) estDur;

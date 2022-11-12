@@ -33,6 +33,9 @@ public class MyStringUtils {
         if (text == null) {
             text = "";
         } else {
+            if (text.length() > 1 && text.charAt(0) == '\"' && text.charAt(text.length()-1) == '\"')
+                text = text.substring(1, text.length() - 1);
+
             if (field.equals(id3Header.COMPOSER)) {
                 text = text.replaceAll("(\\p{Ll})(\\p{Lu})", "$1,$2");
             }
