@@ -1,8 +1,6 @@
 package prodo.marc.gosling.dao;
 
-
 import java.nio.ByteBuffer;
-
 
 public class ID3Size {
 

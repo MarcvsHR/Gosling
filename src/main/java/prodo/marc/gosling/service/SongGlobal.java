@@ -1,5 +1,7 @@
 package prodo.marc.gosling.service;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import prodo.marc.gosling.dao.MyID3;
@@ -16,30 +18,23 @@ import java.util.Properties;
 public class SongGlobal {
 
     private static final Logger logger = LogManager.getLogger(SongGlobal.class);
+    @Getter
     private static List<Song> songList;
     private static String fileFolder;
     private static final String propertiesFile = System.getProperty("user.home") + "\\properties.txt";
     private static List<Path> mp3List;
+    @Setter
+    @Getter
     private static String editor;
     private static MyID3 COPIED_ID3 = new MyID3();
+    @Getter
     private static String lastSongID;
 
-
-    public static String getLastSongID() {
-        return lastSongID;
-    }
 
     public static void setLastSongID(String lastSongID) {
         SongGlobal.lastSongID = lastSongID;
     }
 
-
-    public static String getEditor() {
-        return editor;
-    }
-    public static void setEditor(String newEditor) {
-        editor = newEditor;
-    }
 
     public static String getCurrentFolder() {
         if (fileFolder == null) {
@@ -85,10 +80,6 @@ public class SongGlobal {
 
     public static void setMP3List(List<Path> inputList) {
         mp3List = inputList;
-    }
-
-    public static List<Song> getSongList() {
-        return songList;
     }
 
     public static void setSongList(List<Song> songList) {

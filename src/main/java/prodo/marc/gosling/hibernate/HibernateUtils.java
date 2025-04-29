@@ -12,6 +12,7 @@ public class HibernateUtils {
     private static final Logger logger = LogManager.getLogger(HibernateUtils.class);
 
     static {
+        long timer = System.currentTimeMillis();
         try {
 
             sessionFactory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory();
@@ -20,6 +21,7 @@ public class HibernateUtils {
             logger.error("######## Initial SessionFactory creation failed.", ex);
             throw new ExceptionInInitializerError("Connection to database error!");
         }
+        logger.debug("SessionFactory created in: " + (System.currentTimeMillis() - timer) + "ms");
     }
 
     public static Session openSession() {

@@ -60,6 +60,11 @@ public final class id3Header {
     public static final String COMPOSER_SORT = "TSOC";
     public static final String ITUNES_COMPILATION = "TCMP";
     public static final String FILE_URL = "WOAF";
+    public static final String ORIGINAL_RELEASE_DATE = "TDOR";
+    public static final String PUBLISHER_URL = "WPUB";
+    public static final String ARTIST_URL = "WOAR";
+    public static final String COMMERCIAL_INFORMATION = "WCOM";
+    public static final String AUDIO_SOURCE_WEBPAGE = "WOAS";
 
     public static final String DELETE = "XXXX";
 
@@ -72,7 +77,7 @@ public final class id3Header {
             "TIT1", "UFID", "POPM", "TDTG", "TOAL", "TPE3", "WCOP",
             "TOLY", "TRSN", "TDEN", "TMOO", "TMCL", "TIPL", "TCOM",
             "TFLT", "IPLS", "TRDA", "CTOC", "CHAP", "TSOC", "TCMP",
-            "WOAF",
+            "WOAF", "TDOR", "WPUB", "WOAR", "WCOM", "WOAS",
             "XXXX"
     );
 

@@ -47,7 +47,7 @@ public class ID3v2Utils {
 //        logger.debug("key: "+id3Data.getData(id3Header.KEY));
         testSong.setDone(key.equals("true"));
 
-        Integer ID = SongRepository.getIDofFile(path);
+        Integer ID = SongRepository.getFileID(path);
         if (ID != null) {
             testSong.setId(ID);
         }

@@ -57,6 +57,8 @@ public class RegexWindowController extends SongController {
             regex.add("[Track - Artist - Title]");
             regex.add("[Artist - Track - Title]");
             regex.add("[Artist - Title - ISRC]");
+            regex.add("[ISRC - Artist - Title]");
+            regex.add("[Artist - Title - Artist]");
         }
         if (StringUtils.countMatches(mp3Filename.getText(), " - ") == 3) {
             regex.add("[ISRC - Artist - Title - Publisher]");
@@ -70,6 +72,7 @@ public class RegexWindowController extends SongController {
         if (StringUtils.countMatches(mp3Filename.getText(), "-") > 2 &&
                 StringUtils.countMatches(mp3Filename.getText(), " - ") == 0) {
             regex.add("[Artist-Title-CROREC-ISRC]");
+            regex.add("[Artist-Title-ISRC]");
         }
 
         if (StringUtils.countMatches(mp3Filename.getText(), " - ") == 1 &&
@@ -123,44 +126,46 @@ public class RegexWindowController extends SongController {
 
     private void updateSong(String selection, Song song) {
         String mp3Location = getFileName(song.getFileLoc());
+        mp3Location = mp3Location.replace("–", "-");
+        String[] output;
         switch (selection) {
             case "Track_Artist_Title": {
-                String[] output = mp3Location.split("_");
+                output = mp3Location.split("_");
 
                 setSongData(output[1], output[2], originalSong.getPublisher(), originalSong.getISRC(), song);
 
                 break;
             }
             case "Artist - Title": {
-                String[] output = mp3Location.split(" - ");
+                output = mp3Location.split(" - ");
 
                 setSongData(output[0], output[1], originalSong.getPublisher(), originalSong.getISRC(), song);
 
                 break;
             }
             case "Title - Artist": {
-                String[] output = mp3Location.split(" - ");
+                output = mp3Location.split(" - ");
 
                 setSongData(output[1], output[0], originalSong.getPublisher(), originalSong.getISRC(), song);
 
                 break;
             }
             case "Track_Title_Artist": {
-                String[] output = mp3Location.split("_");
+                output = mp3Location.split("_");
 
                 setSongData(output[2], output[1], originalSong.getPublisher(), originalSong.getISRC(), song);
 
                 break;
             }
             case "Title-Artist": {
-                String[] output = mp3Location.split("-");
+                output = mp3Location.split("-");
 
                 setSongData(output[1], output[0], originalSong.getPublisher(), originalSong.getISRC(), song);
 
                 break;
             }
             case "ISRC_Title_Artist_Publisher": {
-                String[] output = mp3Location.split("_");
+                output = mp3Location.split("_");
 
                 setSongData(output[2], output[1], output[3], originalSong.getISRC(), song);
 
@@ -172,35 +177,35 @@ public class RegexWindowController extends SongController {
                 break;
             }
             case "Track - Artist - Title": {
-                String[] output = mp3Location.split(" - ");
+                output = mp3Location.split(" - ");
 
                 setSongData(output[1], output[2], originalSong.getPublisher(), originalSong.getISRC(), song);
 
                 break;
             }
             case "Artist - Track - Title": {
-                String[] output = mp3Location.split(" - ");
+                output = mp3Location.split(" - ");
 
                 setSongData(output[0], output[2], originalSong.getPublisher(), originalSong.getISRC(), song);
 
                 break;
             }
             case "Artist-Title": {
-                String[] output = mp3Location.split("-");
+                output = mp3Location.split("-");
 
                 setSongData(output[0], output[1], originalSong.getPublisher(), originalSong.getISRC(), song);
 
                 break;
             }
             case "Track. Artist - Title_ISRC": {
-                String[] output = mp3Location.split("\\.| - |_");
+                output = mp3Location.split("\\.| - |_");
 
                 setSongData(output[1], output[2], originalSong.getPublisher(), output[3], song);
 
                 break;
             }
             case "Artist-Title-CROREC-ISRC": {
-                String[] output = mp3Location.split("-CROATIA-RECORDS-");
+                output = mp3Location.split("-CROATIA-RECORDS-");
                 String[] splitWords = output[0].split("-");
 
                 StringBuilder artist = new StringBuilder();
@@ -220,36 +225,57 @@ public class RegexWindowController extends SongController {
 
                 break;
             }
+            case "Artist-Title-ISRC": {
+                String[] splitWords = mp3Location.split("-");
+
+                String artist = splitWords[0];
+                String isrc = splitWords[splitWords.length-1];
+                //remove first and last element from the splitWords array
+                StringBuilder title = new StringBuilder();
+                for (int i = 1; i < splitWords.length-1; i++) {
+                    title.append(splitWords[i]).append(" ");
+                }
+                setSongData(artist.trim(), title.toString().trim(), originalSong.getPublisher(), isrc, song);
+
+                break;
+            }
             case "Artist - Title - ISRC": {
-                String[] output = mp3Location.split(" - ");
+                output = mp3Location.split(" - ");
 
                 setSongData(output[0], output[1], originalSong.getPublisher(), output[2], song);
 
                 break;
             }
+            case "ISRC - Artist - Title": {
+                output = mp3Location.split(" - ");
+
+                setSongData(output[1], output[2], originalSong.getPublisher(), output[0], song);
+
+                break;
+            }
             case "ISRC - Artist - Title - Publisher": {
-                String[] output = mp3Location.split(" - ");
+                output = mp3Location.split(" - ");
 
                 setSongData(output[1], output[2], output[3], output[0], song);
 
                 break;
             }
             case "Artist - Title - Publisher - ISRC": {
-                String[] output = mp3Location.split(" - ");
+                output = mp3Location.split(" - ");
 
                 setSongData(output[0], output[1], output[2], output[3], song);
 
                 break;
             }
             case "Artist_Title_ISRC_Publisher": {
-                String[] output = mp3Location.split("_");
+                output = mp3Location.split("_");
 
                 setSongData(output[0], output[1], output[3], output[2], song);
 
                 break;
             }
             case "Track Artist - Title": {
-                String[] output = mp3Location.split(" - ");
+                output = mp3Location.split(" - ");
                 String[] splitWords = output[0].split(" ", 2);
 
                 setSongData(splitWords[1], output[1], originalSong.getPublisher(), originalSong.getISRC(), song);
@@ -257,7 +283,7 @@ public class RegexWindowController extends SongController {
                 break;
             }
             case "Track Title - Artist": {
-                String[] output = mp3Location.split(" - ");
+                output = mp3Location.split(" - ");
                 String[] splitWords = output[0].split(" ", 2);
 
                 setSongData(output[1], splitWords[1], originalSong.getPublisher(), originalSong.getISRC(), song);
@@ -265,7 +291,7 @@ public class RegexWindowController extends SongController {
                 break;
             }
             case "Artist - Title ISRC": {
-                String[] output = mp3Location.split(" - ");
+                output = mp3Location.split(" - ");
                 String[] splitWords = output[1].split(" ");
                 String isrc = splitWords[splitWords.length - 1];
 
@@ -274,7 +300,7 @@ public class RegexWindowController extends SongController {
                 break;
             }
             case "Track Artist - Title ISRC": {
-                String[] output = mp3Location.split(" - ");
+                output = mp3Location.split(" - ");
                 String[] splitWords1 = output[0].split(" ", 2);
                 String[] splitWords2 = output[1].split(" ");
                 String isrc = splitWords2[splitWords2.length - 1];
@@ -284,12 +310,18 @@ public class RegexWindowController extends SongController {
                 break;
             }
             case "Track. Artist - Title (Composer)": {
-                String[] output = mp3Location.split(" - ");
+                output = mp3Location.split(" - ");
                 String[] splitWords1 = output[0].split(". ", 2);
                 String[] splitWords2 = output[1].split( " [(]");
                 splitWords2[1] = splitWords2[1].replace(")","");
 
                 setSongData(splitWords1[1], splitWords2[0], originalSong.getPublisher(), originalSong.getISRC(), splitWords2[1], song);
+                break;
+            }
+            case "Artist - Title - Artist": {
+                output = mp3Location.split(" - ");
+
+                setSongData(output[0], output[1], originalSong.getPublisher(), originalSong.getISRC(), originalSong.getComposer(), song);
                 break;
             }
         }

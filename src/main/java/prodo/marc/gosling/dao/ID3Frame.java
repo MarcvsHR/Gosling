@@ -1,6 +1,11 @@
 package prodo.marc.gosling.dao;
 
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class ID3Frame extends ID3Size {
     private String frameID;
     private byte flag1;
@@ -21,47 +26,4 @@ public class ID3Frame extends ID3Size {
 
     public ID3Frame() {    }
 
-    public byte getEncoding() {
-        return encoding;
-    }
-
-    public void setEncoding(byte encoding) {
-        this.encoding = encoding;
-    }
-
-    public String getFrameID() {
-        return frameID;
-    }
-
-    public void setFrameID(String frameID) {
-        this.frameID = frameID;
-    }
-
-    public byte getFlag1() {
-        return flag1;
-    }
-
-    public void setFlag1(byte flag1) {
-        this.flag1 = flag1;
-    }
-
-    public byte getFlag2() {
-        return flag2;
-    }
-
-    public void setFlag2(byte flag2) {
-        this.flag2 = flag2;
-    }
-
-    public byte[] getContent() {
-        return (content);
-    }
-
-    public void setContent(byte[] content) {
-        this.content = content;
-    }
-
-    public void setMCDI_header(byte[] content) {this.MCDI_header = content; }
-
-    public byte[] getMCDI_header() {return MCDI_header;}
 }

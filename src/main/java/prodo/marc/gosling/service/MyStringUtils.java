@@ -29,28 +29,27 @@ public class MyStringUtils {
     }
 
     //TODO: this should be an in-app thing where you pick a filter for renaming stuff
-    public static String replaceCroChars(String text, String field) {
+    public static String replaceCroChars(String text, String field, boolean changeCase) {
         if (text == null) {
             text = "";
         } else {
             if (text.length() > 1 && text.charAt(0) == '\"' && text.charAt(text.length()-1) == '\"')
                 text = text.substring(1, text.length() - 1);
 
-            if (field.equals(id3Header.COMPOSER)) {
-                text = text.replaceAll("(\\p{Ll})(\\p{Lu})", "$1,$2");
-            }
-            text = text.replace(" ,", ",");
-            text = text.replace(",", ", ");
-            text = text.trim().replaceAll(" +", " ");
-            text = text.replace(" .", ".");
-            text = text.toLowerCase();
-            text = text.trim();
 
             text = text.replace("ć", "c");
+            text = text.replace("Ć", "C");
             text = text.replace("č", "c");
+            text = text.replace("Č", "C");
             text = text.replace("đ", "dj");
+            text = text.replace("Đ", "Dj");
+
+
             text = text.replace("š", "s");
+            text = text.replace("Š", "S");
             text = text.replace("ž", "z");
+            text = text.replace("ž", "z");
+            text = text.replace("Ž", "Z");
 
             text = text.replace("ñ", "n");
             text = text.replace("á", "a");
@@ -67,12 +66,23 @@ public class MyStringUtils {
             text = text.replace("å", "a");
 
 
-            text = capitalizeAfter(" ", text);
-            text = capitalizeAfter(".", text);
-            text = capitalizeAfter("/", text);
-            text = capitalizeAfter("(", text);
-            text = capitalizeAfter("-", text);
-            text = text.replace("Mc, ", "Mc");
+            if (field.equals(id3Header.COMPOSER)) {
+                //if string ends with "," then add ", " in between lower and upper case letters, if not just add " "
+                if (text.endsWith(",")) {
+                    text = text.replaceAll("([a-z])([A-Z])", "$1, $2");
+                    text = text.substring(0, text.length() - 1);
+                } else {
+                    text = text.replaceAll("([a-z])([A-Z])", "$1 $2");
+                }
+            }
+            text = text.replace(" ,", ",");
+            text = text.replace(",", ", ");
+            text = text.trim().replaceAll(" +", " ");
+            text = text.replace(" .", ".");
+            text = text.trim();
+
+            if (changeCase)
+                text = changeCaseOfString(text);
 
 
             for (char c : text.toCharArray())
@@ -80,10 +90,23 @@ public class MyStringUtils {
                     System.out.println("---Weird Char Found--- " + c + ", ASCII: " + (int) c);
             text = text.replaceAll("[^\\x00-\\x7F]", "%%");
 
-            text = text.replace("Feat", "Ft");
-            text = text.replace("Ft.", "Ft");
-            text = text.replace("Ft", "ft");
+            text = text.replace("Feat", "ft");
+            text = text.replace("feat", "ft");
+            text = text.replace("Ft.", "ft");
+            text = text.replace("ft.", "ft");
         }
+        return text;
+    }
+
+    public static String changeCaseOfString(String text) {
+        text = text.toLowerCase();
+        text = capitalizeAfter(" ", text);
+        text = capitalizeAfter(".", text);
+        text = capitalizeAfter("/", text);
+        text = capitalizeAfter("(", text);
+        text = capitalizeAfter("-", text);
+        text = text.replace("Mc, ", "Mc");
+        text = text.replace("Mc ", "Mc");
         return text;
     }
 

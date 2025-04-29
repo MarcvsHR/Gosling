@@ -162,16 +162,16 @@ public class ID3Reader {
                 if (encoding == 3) data = utf8charset.decode(inputBuffer);
                 if (encoding == 2) data = utf16beCharset.decode(inputBuffer);
                 if (encoding == 1) data = utf16Charset.decode(inputBuffer);
-                assert data != null;
+                if (data == null || data.equals(CharBuffer.wrap(""))) data = CharBuffer.wrap(" ");
                 ByteBuffer outputBuffer = iso88591charset.encode(data);
                 frameByteArray = outputBuffer.array();
-                if (frameByteArray[frameByteArray.length - 1] == 0)
+                if (frameByteArray[frameByteArray.length - 1] < 1)
                     frameByteArray = Arrays.copyOf(frameByteArray, frameByteArray.length - 1);
                 frame.setContent(frameByteArray);
                 //logger.debug("new data: " + Arrays.toString(frameByteArray));
                 frame.setEncoding((byte) 0);
             } else {
-                if (frameByteArray[frameByteArray.length - 1] == 0 && !frame.getFrameID().equals(id3Header.ALBUM_ART)) {
+                if (frameByteArray[frameByteArray.length - 1] < 1 && !frame.getFrameID().equals(id3Header.ALBUM_ART)) {
                     frame.setContent((Arrays.copyOf(frameByteArray, frameByteArray.length - 1)));
                 } else {
                     frame.setContent((frameByteArray));

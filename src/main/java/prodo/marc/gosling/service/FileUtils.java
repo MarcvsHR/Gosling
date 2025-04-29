@@ -77,7 +77,7 @@ public class FileUtils {
         Song song = new Song();
         song.setFileLoc(String.valueOf(path));
         song.setEditor(editor);
-        if (SongRepository.getIDofFile(song.getFileLoc()) != null) {
+        if (SongRepository.getFileID(song.getFileLoc()) != null) {
             logger.debug("---song already exists - " + song);
             return song.getFileLoc();
         } else {

@@ -31,7 +31,9 @@ public class HelloApplication extends Application {
         stage.setOnShown(event -> {
             Runnable preload = () -> {
                 try {
-                    List<String> songs = SongRepository.getPublishers();
+                    //List<String> songs = SongRepository.getPublishers();
+                    //SongRepository.getFileID("");
+                    SongRepository.testing();
                     Platform.runLater(() -> {
                         stage.setTitle("MP3 Editor");
                     });

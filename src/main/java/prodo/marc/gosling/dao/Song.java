@@ -57,40 +57,40 @@ public class Song {
         this.duration = song.getDuration();
     }
 
+    private String generateDifferenceString(String propertyName, String value1, String value2) {
+        return propertyName + ": " + value1 + " --- " + value2 + ";\r\n";
+    }
+
     public String isTheSame(Song compareSong) {
-        if (this == compareSong) return "";
-        if (compareSong == null || getClass() != compareSong.getClass()) return "one of the songs is empty";
-        String returnString = "";
-        if (!MyStringUtils.compareStrings(artist,compareSong.artist))
-            returnString += "Artist: "+artist + " --- " + compareSong.artist + ";\r\n";
-        if (!MyStringUtils.compareStrings(title,compareSong.title))
-            returnString += "Title: "+title + " --- " + compareSong.title + ";\r\n";
-        if (!MyStringUtils.compareStrings(album,compareSong.album))
-            returnString += "Album: "+album + " --- " + compareSong.album + ";\r\n";
-        if (!MyStringUtils.compareStrings(publisher,compareSong.publisher))
-            returnString += "Publisher: "+publisher + " --- " + compareSong.publisher + ";\r\n";
-        if (!MyStringUtils.compareStrings(composer,compareSong.composer))
-            returnString += "Composer: "+composer + " --- " + compareSong.composer + ";\r\n";
-        if (!MyStringUtils.compareStrings(genre,compareSong.genre))
-            returnString += "Genre: "+genre + " --- " + compareSong.genre + ";\r\n";
-        if (!MyStringUtils.compareStrings(ISRC,compareSong.ISRC))
-            returnString += "ISRC: "+ISRC + " --- " + compareSong.ISRC + ";\r\n";
-        if (!MyStringUtils.compareStrings(fileLoc,compareSong.fileLoc))
-            returnString += "File loc: "+fileLoc + " --- " + compareSong.fileLoc + ";\r\n";
+        if (this == compareSong)
+            return "";
+        if (compareSong == null || getClass() != compareSong.getClass())
+            return "one of the songs is empty";
+
+        StringBuilder returnBuilder = new StringBuilder();
+        if (!MyStringUtils.compareStrings(artist, compareSong.artist))
+            returnBuilder.append(generateDifferenceString("Artist", artist, compareSong.artist));
+        if (!MyStringUtils.compareStrings(title, compareSong.title))
+            returnBuilder.append(generateDifferenceString("Title", title, compareSong.title));
+        if (!MyStringUtils.compareStrings(album, compareSong.album))
+            returnBuilder.append(generateDifferenceString("Album", album, compareSong.album));
+        if (!MyStringUtils.compareStrings(publisher, compareSong.publisher))
+            returnBuilder.append(generateDifferenceString("Publisher", publisher, compareSong.publisher));
+        if (!MyStringUtils.compareStrings(composer, compareSong.composer))
+            returnBuilder.append(generateDifferenceString("Composer", composer, compareSong.composer));
+        if (!MyStringUtils.compareStrings(genre, compareSong.genre))
+            returnBuilder.append(generateDifferenceString("Genre", genre, compareSong.genre));
+        if (!MyStringUtils.compareStrings(ISRC, compareSong.ISRC))
+            returnBuilder.append(generateDifferenceString("ISRC", ISRC, compareSong.ISRC));
         if (!Objects.equals(year, compareSong.year))
-            returnString += "Year: "+year + " --- " + compareSong.year + ";\r\n";
-        return returnString;
+            returnBuilder.append(generateDifferenceString("Year", String.valueOf(year), String.valueOf(compareSong.year)));
+
+        return returnBuilder.toString();
     }
 
     public String getDurationString() {
-        if (duration == null) duration = 0;
-        double seconds = Math.floor(duration / 1000.0 % 60);
-        String output = String.format("%.0f", seconds);
-        if (output.length() < 2) output = "0"+output;
-        double minutes = Math.floor(duration / 1000.0/60);
-        output = String.format("%.0f:", minutes) + output;
-        if (duration / 1000 < 600) output = "0"+output;
-        return output;
+        int durInSecs = duration != null ? duration / 1000 : 0;
+        return String.format("%02d:%02d", durInSecs / 60, durInSecs % 60);
     }
 
     public String getTitle() {

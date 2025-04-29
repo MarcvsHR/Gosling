@@ -6,7 +6,6 @@
         <!-- JDBC Database connection settings -->
         <property name="connection.driver_class">org.h2.Driver</property>
         <property name="connection.url">jdbc:h2:file:z:/baza/data;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE</property>
-        <!--        <property name="connection.url">jdbc:h2:file:~/data;DB_CLOSE_DELAY=-1</property>-->
         <property name="connection.username">sa</property>
         <property name="connection.password"></property>
         <!-- JDBC connection pool settings ... using built-in test pool -->
@@ -20,11 +19,12 @@
         <!-- Drop and re-create the database schema on startup -->
         <property name="hbm2ddl.auto">update</property>
         <!-- dbcp connection pool configuration -->
-        <property name="hibernate.dbcp.initialSize">5</property>
-        <property name="hibernate.dbcp.maxTotal">20</property>
-        <property name="hibernate.dbcp.maxIdle">10</property>
-        <property name="hibernate.dbcp.minIdle">5</property>
+        <property name="hibernate.dbcp.initialSize">2</property>
+        <property name="hibernate.dbcp.maxTotal">5</property>
+        <property name="hibernate.dbcp.maxIdle">5</property>
+        <property name="hibernate.dbcp.minIdle">1</property>
         <property name="hibernate.dbcp.maxWaitMillis">-1</property>
+        <!-- Mapping objects -->
         <mapping class="prodo.marc.gosling.dao.Artist"/>
         <mapping class="prodo.marc.gosling.dao.Song"/>
     </session-factory>

@@ -10,8 +10,5 @@
         <module name="Gosling" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="Gosling" target="11" />
-    </bytecodeTargetLevel>
   </component>
 </project>
